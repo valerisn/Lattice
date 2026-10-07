@@ -16,6 +16,8 @@ Use **Duplicate** beside a template to start a separate copy. Adjust its name an
 
 Choose **Edit page** for the rich editor. Type `/` for blocks, or switch to Markdown for direct source editing. Changes save automatically; the save status tells you when they reach the server. If another session changes the page, the editor keeps your unsaved text and reports the conflict. Download it before reloading and merging.
 
+The slash menu opens when you type `/` in an empty paragraph. Slashes within text, URLs, and code stay part of your content. Press **Escape** to dismiss the block menu and keep writing.
+
 Press **Ctrl/Cmd + S** inside the editor to save immediately without closing it. **Done** saves pending changes before returning to the page.
 
 Choose **Focus** for a larger writing surface in either rich text or Markdown. Description, location, and publication controls stay hidden while you write; **Exit focus** brings them back with your changes intact. Autosave and keyboard saving continue in focus mode.

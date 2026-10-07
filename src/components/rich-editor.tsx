@@ -102,9 +102,22 @@ export function RichEditor({
         role: "textbox",
         "aria-multiline": "true",
       },
-      handleKeyDown: (_view, event) => {
-        if (event.key === "/") setSlash(true);
-        if (event.key === "Escape") setSlash(false);
+      handleKeyDown: (view, event) => {
+        const { selection, storedMarks } = view.state;
+        if (
+          event.key === "/" &&
+          !event.isComposing &&
+          !event.ctrlKey &&
+          !event.metaKey &&
+          !event.altKey &&
+          selection.empty &&
+          selection.$from.parent.type.name === "paragraph" &&
+          selection.$from.parent.content.size === 0 &&
+          !(storedMarks || selection.$from.marks()).some(
+            (mark) => mark.type.name === "code",
+          )
+        )
+          setSlash(true);
         return false;
       },
     },
@@ -354,7 +367,12 @@ export function RichEditor({
                   buttons.length
               ]?.focus();
             }
-            if (e.key === "Escape") setSlash(false);
+            if (e.key === "Escape") {
+              e.preventDefault();
+              e.stopPropagation();
+              setSlash(false);
+              editor.commands.focus();
+            }
           }}
         >
           {commands.map(([name, fn], i) => (

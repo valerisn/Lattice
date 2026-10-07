@@ -14,6 +14,7 @@ import { checkTemplateCopies } from "./template-copies";
 import { checkCreationProgress } from "./creation-progress";
 import { checkHistoryFeedback } from "./history-feedback";
 import { checkCallouts } from "./callouts";
+import { checkSlashCommands } from "./slash-commands";
 
 test("workspace lifecycle, revisions, uploads, and authorization", async ({
   page,
@@ -78,6 +79,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await checkCreationProgress(page, base, headers);
   await checkHistoryFeedback(page, base, headers);
   await checkCallouts(page, base, headers);
+  await checkSlashCommands(page, base, headers);
   await page.getByRole("button", { name: "New page", exact: true }).click();
   await page.getByLabel("Page title", { exact: true }).fill("Project notes");
   await page.getByLabel("Parent page").selectOption({ label: "Home" });
