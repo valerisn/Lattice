@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { database } from "@/server/db";
 import { requireUser } from "@/server/auth";
-import { membership } from "@/server/workspaces";
+import { membership, withWorkspaceMutation } from "@/server/workspaces";
 import { requirePage } from "@/server/permissions";
 import { errorResponse, AppError } from "@/server/errors";
 import { checkOrigin } from "@/server/security";
@@ -31,7 +31,22 @@ async function handle(request: Request, { params }: Context) {
       request.method === "DELETE" ? "edit" : "read",
     );
     if (request.method === "DELETE") {
-      await db.query("DELETE FROM attachments WHERE id=$1", [id]);
+      await withWorkspaceMutation(
+        db,
+        user.id,
+        file.workspace_id,
+        "edit",
+        async (tx, currentWorkspace) => {
+          await requirePage(
+            tx,
+            currentWorkspace,
+            user.id,
+            file.page_id,
+            "edit",
+          );
+          await tx.query("DELETE FROM attachments WHERE id=$1", [id]);
+        },
+      );
       await storage.remove(file.storage_key);
       return Response.json({ ok: true });
     }

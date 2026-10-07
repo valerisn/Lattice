@@ -23,6 +23,7 @@ export async function POST(request: Request) {
     const data = workspaceSchema.parse(
       await (await boundedRequest(request, 16384)).json(),
     );
+    await requireUser();
     const db = await database();
     return Response.json(
       {

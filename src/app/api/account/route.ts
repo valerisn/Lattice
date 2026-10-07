@@ -43,6 +43,7 @@ export async function PATCH(request: Request) {
           ),
       })
       .parse(await (await boundedRequest(request, 16384)).json());
+    await requireUser();
     await db.query(
       "UPDATE users SET name=$1,username=$2,avatar=$3 WHERE id=$4",
       [data.name, data.username, data.avatar || null, user.id],

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { database } from "@/server/db";
 import { requireUser } from "@/server/auth";
-import { membership } from "@/server/workspaces";
+import { membership, withWorkspaceMutation } from "@/server/workspaces";
 import { requirePage } from "@/server/permissions";
 import { errorResponse, AppError } from "@/server/errors";
 import { checkOrigin, rateLimit } from "@/server/security";
@@ -62,9 +62,24 @@ export async function POST(request: Request, { params }: Context) {
     const id = crypto.randomUUID();
     await storage.put(id, bytes);
     try {
-      await db.query(
-        "INSERT INTO attachments(id,workspace_id,page_id,name,storage_key,mime,size,uploaded_by) VALUES($1,$2,$3,$4,$8,$5,$6,$7)",
-        [id, workspaceId, pageId, name, mime, file.size, user.id, id],
+      const actor = await requireUser();
+      await withWorkspaceMutation(
+        db,
+        actor.id,
+        workspaceId,
+        "edit",
+        async (tx, currentWorkspace) => {
+          await requirePage(tx, currentWorkspace, actor.id, pageId, "edit");
+          if (file.size > currentWorkspace.upload_limit)
+            throw new AppError(
+              400,
+              "The workspace upload limit changed. Choose a smaller file.",
+            );
+          await tx.query(
+            "INSERT INTO attachments(id,workspace_id,page_id,name,storage_key,mime,size,uploaded_by) VALUES($1,$2,$3,$4,$8,$5,$6,$7)",
+            [id, workspaceId, pageId, name, mime, file.size, actor.id, id],
+          );
+        },
       );
     } catch (e) {
       await storage.remove(id);

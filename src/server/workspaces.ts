@@ -40,6 +40,22 @@ export async function listWorkspaces(db: Database, userId: string) {
     [userId],
   );
 }
+export async function withWorkspaceMutation<T>(
+  db: Database,
+  userId: string,
+  workspaceId: string,
+  action: "read" | "edit" | "manage",
+  operation: (tx: Database, workspace: Workspace) => Promise<T>,
+) {
+  return db.transaction(async (tx) => {
+    // Membership and permission changes share this lock with content writes.
+    // Never carry a pre-upload role snapshot into a mutation.
+    await tx.query("SELECT id FROM workspaces WHERE id=$1 FOR UPDATE", [
+      workspaceId,
+    ]);
+    return operation(tx, await membership(tx, userId, workspaceId, action));
+  });
+}
 export async function createWorkspace(
   db: Database,
   userId: string,
