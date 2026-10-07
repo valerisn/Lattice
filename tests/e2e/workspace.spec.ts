@@ -408,6 +408,8 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await expect(
     page
       .locator(".audit-list")
+      .getByRole("listitem")
+      .filter({ hasText: "viewer@example.test" })
       .getByText("Created an invitation", { exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Templates", exact: true }).click();
