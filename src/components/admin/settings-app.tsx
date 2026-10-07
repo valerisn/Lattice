@@ -471,6 +471,21 @@ export function SettingsApp({
                     )
                   }
                 />
+                <section className="settings-section stack">
+                  <h2>Host supervision with daemon</h2>
+                  <p className="muted">
+                    For Linux Docker installations, daemon provides health
+                    monitoring, app recovery, coordinated backups, and opt-in
+                    automatic updates. Install and configure it on your server.
+                  </p>
+                  <a
+                    href="https://github.com/valerisn/Lattice/tree/main/daemon"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Read the daemon setup guide
+                  </a>
+                </section>
                 <dl className="system-info">
                   {Object.entries(data.system).map(([key, value]) => (
                     <div key={key}>

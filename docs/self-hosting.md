@@ -21,6 +21,8 @@ Create reusable Markdown starting points under **Workspace settings → Template
 
 ## Persistence and backups
 
+Linux Docker hosts can use the optional PHP [daemon](../daemon/README.md) for systemd supervision, coordinated database/upload backups, and opt-in stable-release updates. The application itself does not need PHP. The supervisor runs on the host and keeps Docker control outside the web application.
+
 **Workspace settings → Audit log** records successful administrative changes from the time audit logging is installed. Entries retain the actor's display name, action, target label, and timestamp. Settings changes and their audit entries commit together. Only administrators can read this history. Page edits remain in page revision history; login attempts and collection changes are not yet included. Audit entries live in PostgreSQL and are retained with your database backups. There is currently no automatic retention limit.
 
 Compose creates `postgres` and `uploads` named volumes. Both matter. `docker compose down` preserves them; adding `-v` deletes all stored content.

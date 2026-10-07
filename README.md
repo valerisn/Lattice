@@ -29,6 +29,7 @@ A calm, connected home for your team's guides, notes, and decisions. Lattice is 
 - Documentation overview with publication counts and draft/empty-page review lists
 - Administrative audit history for settings, invitations, roles, groups, and access grants
 - Docker Compose with PostgreSQL, health checks, and persistent volumes
+- Optional PHP **daemon** for Linux supervision, coordinated backups, and opt-in stable-release updates
 
 Sharing copies a link; recipients still need workspace access. Mention labels do not send notifications. Drafts are visible to editors and administrators, but hidden from viewers. Anonymous publishing is not included.
 
@@ -65,6 +66,8 @@ Open [http://localhost:3000](http://localhost:3000), enter the `SETUP_TOKEN` fro
 For a public installation, set `APP_URL` to the exact public HTTPS origin and put a TLS reverse proxy in front of `127.0.0.1:3000`. Compose binds the app to loopback and does not publish PostgreSQL. HTTPS enables secure session cookies.
 
 See [deployment and backups](docs/self-hosting.md).
+
+For Linux hosts, [install daemon](daemon/README.md) to supervise the Docker stack through systemd. It provides health checks, bounded recovery, backups, and automatic updates when explicitly enabled.
 
 ### Environment variables
 
