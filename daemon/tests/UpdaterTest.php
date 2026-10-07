@@ -105,6 +105,11 @@ test('automatic updates are opt-in, rate-limited, and do not retry a failed rele
     check($updater->automatic(time()) === null);
     check($runner->calls === []);
     [$updater, $runner, $store] = updateFixture(true);
+    $store->write('monitor', ['paused' => true]);
+    check($updater->automatic(time()) === null);
+    check($runner->calls === []);
+    check($store->read('update') === []);
+    $store->write('monitor', ['paused' => false]);
     $store->write('update', ['last_check' => time()]);
     check($updater->automatic(time()) === null);
     $store->write('update', ['last_check' => 0, 'failed_tag' => 'v1.1.0']);

@@ -66,6 +66,8 @@ Get-Content "$env:ProgramData\LatticeDaemon\state\daemon.log" -Tail 30 -Wait
 
 `Stop-Service` stops supervision and leaves containers running. `daemon stop` stops the Lattice stack and pauses recovery. `daemon start` starts it again. The CLI exits with 0 for success, 1 for an execution/configuration error, or 2 when health needs attention.
 
+Use `daemon pause` for maintenance while keeping containers and health checks running. It suspends automatic recovery and automatic updates across service restarts. `daemon resume` requires a healthy stack before enabling supervision again. Manual backup and container commands remain available while paused. Pause refuses to interrupt an active backup, update, or recovery operation.
+
 For a long-running backup/update, Windows may continue to show **Stopping**. The service requests additional time while PHP finishes the current operation, up to one hour. It does not begin another automatic update after a stop request. A per-launch random stop token prevents stale requests from stopping a restarted service. Unexpected host termination kills its remaining child processes through a [Windows Job Object](https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects); persisted update blocks still require operator recovery. Windows shutdown/reboot deadlines can interrupt work sooner, so schedule host restarts outside update/backup periods.
 
 The service restarts after failures with 10, 30, and 60 second delays, then stops retrying until an administrator intervenes or the failure count resets after a day. Logs rotate at approximately 10 MiB, retaining three previous files. Backups are never deleted automatically.

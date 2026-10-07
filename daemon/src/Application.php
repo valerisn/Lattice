@@ -33,7 +33,7 @@ final class Application
             $console->output(['message' => 'Configuration created. Automatic updates are disabled.', 'config' => $options['config']]);
             return 0;
         }
-        if (!in_array($command, ['status', 'doctor', 'watch', 'start', 'stop', 'restart', 'resume', 'backup', 'backups', 'verify-backup', 'check-update', 'update', 'auto-update'], true)) {
+        if (!in_array($command, ['status', 'doctor', 'watch', 'start', 'stop', 'pause', 'restart', 'resume', 'backup', 'backups', 'verify-backup', 'check-update', 'update', 'auto-update'], true)) {
             throw new RuntimeException("Unknown command: $command. Run daemon help.");
         }
         if (count($positionals) > (in_array($command, ['auto-update', 'verify-backup'], true) ? 2 : 1)) { throw new RuntimeException('Unexpected command arguments.'); }
@@ -93,6 +93,11 @@ final class Application
                 case 'check-update': $console->output($updater->check()); return 0;
                 case 'update': $result = $updater->apply(); $console->output($result); return ($result['status'] ?? '') === 'major-blocked' ? 2 : 0;
                 case 'backup': $console->output($updater->backup()); return 0;
+                case 'pause':
+                    $state['paused'] = true;
+                    $store->write('monitor', $state);
+                    $console->output(['paused' => true, 'message' => 'Automatic recovery and updates are paused. Containers keep running and health checks continue. Use daemon resume after maintenance.']);
+                    return 0;
                 case 'stop':
                     $state['paused'] = true;
                     $store->write('monitor', $state);
@@ -206,6 +211,7 @@ Usage: daemon <command> [--config /etc/lattice/daemon.json] [--json]
   watch          Supervise continuously; --once performs one tick
   start          Build and start the Docker stack
   stop           Stop the stack and pause recovery, preserving data volumes
+  pause          Pause automatic recovery and updates, leaving containers running
   restart        Restart the application container and verify health
   resume         Resume supervision after an operator repairs the stack
   backup         Pause app, back up PostgreSQL/uploads, then resume app
