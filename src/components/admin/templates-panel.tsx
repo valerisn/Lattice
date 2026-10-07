@@ -27,11 +27,30 @@ export function TemplatesPanel({ workspaceId }: { workspaceId: string }) {
       active = false;
     };
   }, [base]);
-  const edit = async (id: string) => {
+  const reload = async () => {
     setBusy(true);
     setError("");
     try {
-      setEditing(await api<PageTemplate>(`${base}/${id}`));
+      setTemplates(await api<TemplateSummary[]>(base));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const edit = async (id: string, duplicate = false) => {
+    setBusy(true);
+    setError("");
+    try {
+      const template = await api<PageTemplate>(`${base}/${id}`);
+      setEditing(
+        duplicate
+          ? {
+              name: `${template.name.slice(0, 73).trimEnd()} (copy)`,
+              content: template.content,
+            }
+          : template,
+      );
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -68,7 +87,7 @@ export function TemplatesPanel({ workspaceId }: { workspaceId: string }) {
         <button
           type="button"
           className="primary"
-          disabled={busy}
+          disabled={busy || templates === null}
           onClick={() => setEditing({ name: "", content: "" })}
         >
           New template
@@ -78,6 +97,11 @@ export function TemplatesPanel({ workspaceId }: { workspaceId: string }) {
         <p className="error" role="alert">
           {error}
         </p>
+      )}
+      {!templates && error && (
+        <button type="button" disabled={busy} onClick={() => void reload()}>
+          Retry loading templates
+        </button>
       )}
       {!templates && !error && <p role="status">Loading templates…</p>}
       {templates?.length === 0 && (
@@ -98,6 +122,13 @@ export function TemplatesPanel({ workspaceId }: { workspaceId: string }) {
               onClick={() => void edit(template.id)}
             >
               Edit {template.name}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void edit(template.id, true)}
+            >
+              Duplicate {template.name}
             </button>
             <button
               type="button"

@@ -10,6 +10,7 @@ import { checkAuditFilters } from "./audit-filters";
 import { checkAccountFeedback } from "./account-feedback";
 import { checkInvitationLinks } from "./invitation-links";
 import { checkSettingsFeedback } from "./settings-feedback";
+import { checkTemplateCopies } from "./template-copies";
 
 test("workspace lifecycle, revisions, uploads, and authorization", async ({
   page,
@@ -70,6 +71,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await checkAccountFeedback(page);
   await checkInvitationLinks(page, base, headers);
   await checkSettingsFeedback(page, base);
+  await checkTemplateCopies(page, base, headers);
   await page.getByRole("button", { name: "New page", exact: true }).click();
   await page.getByLabel("Page title", { exact: true }).fill("Project notes");
   await page.getByLabel("Parent page").selectOption({ label: "Home" });

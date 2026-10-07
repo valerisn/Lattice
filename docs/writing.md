@@ -10,6 +10,8 @@ Images and linked files are not imported automatically. Upload them through the 
 
 Administrators can create reusable starting content in **Workspace settings → Templates**. Choose a **Starting template** when creating a page, or import a file. Imported content takes precedence. Editing or deleting a template never changes existing pages.
 
+Use **Duplicate** beside a template to start a separate copy. Adjust its name and content, then save it. The original stays unchanged, and closing without saving creates nothing.
+
 ## Edit and review
 
 Choose **Edit page** for the rich editor. Type `/` for blocks, or switch to Markdown for direct source editing. Changes save automatically; the save status tells you when they reach the server. If another session changes the page, the editor keeps your unsaved text and reports the conflict. Download it before reloading and merging.

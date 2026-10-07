@@ -19,6 +19,7 @@ Changes listed under **Unreleased** are available on the main branch. They are n
 
 ### Administration
 
+- Templates can be duplicated into a separate editable draft. Failed template-list loads can be retried before creating a template.
 - Generated invitation links have copy feedback and a manual-copy fallback. Revoking the displayed invitation clears its link.
 - Account changes keep their confirmed success message if session loading fails. The session list shows loading and retry states, and disables signing out other sessions when none remain.
 - Saved admin changes remain confirmed when the settings refresh fails. A retry reloads the latest data before editing resumes.
