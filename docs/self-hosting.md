@@ -15,9 +15,9 @@ Invite teammates through **Workspace settings → Members**. Share generated lin
 
 Use **Workspace settings → Documentation** to choose the default publication state for new pages, reading width, table of contents, visible page metadata, and footer message. These preferences apply per workspace. Drafts stay hidden from viewers; authors can explicitly publish a page. Disabling author display is a presentation preference, not an access-control change.
 
-## Persistence and backups
-
 Create reusable Markdown starting points under **Workspace settings → Templates**. Writers can choose a template in the new-page dialog. Templates are shared with all workspace writers, so keep restricted material in permission-controlled pages. Editing or deleting a template never changes pages already created from it.
+
+## Persistence and backups
 
 **Workspace settings → Audit log** records successful administrative changes from the time audit logging is installed. Entries retain the actor's display name, action, target label, and timestamp. Settings changes and their audit entries commit together. Only administrators can read this history. Page edits remain in page revision history; login attempts and collection changes are not yet included. Audit entries live in PostgreSQL and are retained with your database backups. There is currently no automatic retention limit.
 

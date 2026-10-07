@@ -304,6 +304,40 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await expect(
     page.getByText("No templates yet.", { exact: false }),
   ).toBeVisible();
+  await request("/documentation", "PATCH", { show_toc: true });
+  await page.goto("/w/test-studio");
+  await page.getByRole("button", { name: "New page", exact: true }).click();
+  await page.getByLabel("Import Markdown", { exact: true }).setInputFiles({
+    name: "Imported-handbook.md",
+    mimeType: "text/markdown",
+    buffer: Buffer.from(
+      "## **Install** the `SDK`\n\nImported knowledge.\n\n## Repeat\n\nFirst section.\n\n## Repeat\n\nSecond section.\n\n```md\n## Not a heading\n```",
+    ),
+  });
+  await expect(
+    page.getByText("Ready to import Imported-handbook.md", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Page title", { exact: true })).toHaveValue(
+    "Imported handbook",
+  );
+  await page.getByRole("button", { name: "Create page", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Imported handbook", exact: true }),
+  ).toBeVisible();
+  const outlineLinks = page.locator(".table-of-contents a");
+  await expect(outlineLinks).toHaveCount(3);
+  expect(
+    await outlineLinks.evaluateAll((links) =>
+      links.every(
+        (link) =>
+          !!document.getElementById(
+            decodeURIComponent((link as HTMLAnchorElement).hash.slice(1)),
+          ),
+      ),
+    ),
+  ).toBe(true);
+  await outlineLinks.last().click();
+  await expect(page).toHaveURL(/#lattice-heading-repeat-1$/);
   await page.goto("/w/test-studio");
   await page.getByLabel("Appearance", { exact: true }).selectOption("dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");

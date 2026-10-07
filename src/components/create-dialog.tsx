@@ -1,9 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { WikiPage, Collection } from "@/shared/types";
 import { Modal } from "./modal";
 import { api } from "@/client/api";
 import type { TemplateSummary } from "@/shared/templates";
+import type { ImportedMarkdown } from "@/client/markdown-import";
+import { MarkdownImport } from "./markdown-import";
 export function CreateDialog({
   kind,
   workspaceId,
@@ -25,6 +27,9 @@ export function CreateDialog({
   const [busy, setBusy] = useState(false);
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [templateError, setTemplateError] = useState("");
+  const [imported, setImported] = useState<ImportedMarkdown | null>(null);
+  const [importing, setImporting] = useState(false);
+  const titleInput = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (kind !== "page") return;
     let active = true;
@@ -60,7 +65,8 @@ export function CreateDialog({
                 ...form,
                 parent_id: form.parent_id || null,
                 collection_id: form.collection_id || null,
-                template_id: form.template_id || null,
+                template_id: imported ? null : form.template_id || null,
+                content: imported?.content,
               },
             );
             onCreated(result.id);
@@ -73,6 +79,7 @@ export function CreateDialog({
         <label>
           {kind === "page" ? "Page title" : "Collection name"}
           <input
+            ref={titleInput}
             autoFocus
             name={kind === "page" ? "title" : "name"}
             required
@@ -91,7 +98,11 @@ export function CreateDialog({
             {templates.length > 0 && (
               <label>
                 Starting template
-                <select name="template_id" aria-label="Starting template">
+                <select
+                  name="template_id"
+                  aria-label="Starting template"
+                  disabled={imported !== null}
+                >
                   <option value="">Blank page</option>
                   {templates.map((template) => (
                     <option key={template.id} value={template.id}>
@@ -106,6 +117,19 @@ export function CreateDialog({
                 {templateError}
               </p>
             )}
+            <MarkdownImport
+              value={imported}
+              onBusyChange={setImporting}
+              onChange={(value) => {
+                setImported(value);
+                if (
+                  value &&
+                  titleInput.current &&
+                  !titleInput.current.value.trim()
+                )
+                  titleInput.current.value = value.title;
+              }}
+            />
             <label>
               Parent page
               <select name="parent_id">
@@ -156,7 +180,7 @@ export function CreateDialog({
             {error}
           </p>
         )}
-        <button className="primary" type="submit" disabled={busy}>
+        <button className="primary" type="submit" disabled={busy || importing}>
           {busy ? "Creating…" : `Create ${kind}`}
         </button>
       </form>

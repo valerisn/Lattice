@@ -19,7 +19,7 @@ A calm, connected home for your team's guides, notes, and decisions. Lattice is 
 - Rich text and Markdown, slash commands, tables, tasks, links, images, code, callouts, expandable sections, and teammate mention labels
 - Autosave, conflict detection, immutable revisions, comparison, and restoration
 - Permission-aware search with **Ctrl/Cmd + K**
-- Syntax highlighting, table of contents, and Markdown export
+- Syntax highlighting, reliable heading navigation, and Markdown import/export
 - Protected attachments, file validation, and local storage
 - Light/dark/system appearance, branding, and workspace administration
 - Documentation settings for publication defaults, reading layout, metadata, and footer text
@@ -29,6 +29,8 @@ A calm, connected home for your team's guides, notes, and decisions. Lattice is 
 - Docker Compose with PostgreSQL, health checks, and persistent volumes
 
 Sharing copies a link; recipients still need workspace access. Mention labels do not send notifications. Drafts are visible to editors and administrators, but hidden from viewers. Anonymous publishing is not included.
+
+See the [writing guide](docs/writing.md) for imports, templates, editing, and page organization.
 
 ## Run locally
 
