@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Page, type ConsoleMessage } from "@playwright/test";
 
 export async function checkSectionLinks(
   page: Page,
@@ -31,6 +31,11 @@ ${"More space below the destination. ".repeat(120)}`,
   expect(response.status()).toBe(201);
   const doc = await response.json();
   const viewport = page.viewportSize()!;
+  const hydrationErrors: string[] = [];
+  const capture = (message: ConsoleMessage) => {
+    if (/hydrat/i.test(message.text())) hydrationErrors.push(message.text());
+  };
+  page.on("console", capture);
   try {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(`/w/${slug}?page=${doc.id}#lattice-heading-deep-section`);
@@ -59,6 +64,9 @@ ${"More space below the destination. ".repeat(120)}`,
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
+    await expect(
+      page.getByRole("button", { name: "Open navigation", exact: true }),
+    ).toBeVisible();
     await expect(destination).toBeInViewport();
     await expect(page.getByText("Keep this closed.")).not.toBeVisible();
     await page.evaluate(() => {
@@ -70,7 +78,9 @@ ${"More space below the destination. ".repeat(120)}`,
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
+    expect(hydrationErrors).toEqual([]);
   } finally {
+    page.off("console", capture);
     await page.setViewportSize(viewport);
     expect(
       (await page.request.delete(`${base}/pages/${doc.id}`, { headers })).ok(),

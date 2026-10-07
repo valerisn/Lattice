@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useMemo, type ComponentProps } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
@@ -43,6 +43,12 @@ function highlightNodes(nodes: RootContent[]): React.ReactNode {
 export function Markdown({ content }: { content: string }) {
   const components = useMemo(
     () => ({
+      details: (props: ComponentProps<"details"> & { node?: Element }) => {
+        const attributes = { ...props };
+        delete attributes.node;
+        // Browsers can open a fragment's ancestors before React hydrates them.
+        return <details {...attributes} suppressHydrationWarning />;
+      },
       blockquote: ({
         children,
         node,
