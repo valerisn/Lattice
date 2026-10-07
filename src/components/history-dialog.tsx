@@ -16,7 +16,7 @@ export function HistoryDialog({
   onClose: () => void;
   onRestored: () => void;
 }) {
-  const [items, setItems] = useState<Revision[]>([]);
+  const [items, setItems] = useState<Revision[] | null>(null);
   const [selected, setSelected] = useState("");
   const [compare, setCompare] = useState(false);
   const [error, setError] = useState("");
@@ -35,20 +35,40 @@ export function HistoryDialog({
       alive = false;
     };
   }, [base]);
-  const revision = items.find((r) => r.id === selected) || items[0];
+  const reload = async () => {
+    setError("");
+    try {
+      setItems(await api<Revision[]>(`${base}/revisions`));
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
+  const revision = items?.find((r) => r.id === selected) || items?.[0];
   return (
-    <Modal title="Every chapter, remembered" wide onClose={onClose}>
+    <Modal
+      title="Every chapter, remembered"
+      wide
+      onClose={onClose}
+      closeDisabled={busy}
+    >
       {error && (
         <p className="error" role="alert">
           {error}
         </p>
       )}
+      {!items && error && (
+        <button type="button" onClick={() => void reload()}>
+          Retry loading revisions
+        </button>
+      )}
       <div className="history-layout">
         <nav aria-label="Page revisions">
-          {items.map((r) => (
+          {items?.map((r) => (
             <button
               key={r.id}
               className={r.id === revision?.id ? "active" : ""}
+              aria-current={r.id === revision?.id ? "true" : undefined}
+              disabled={busy}
               onClick={() => setSelected(r.id)}
             >
               <strong>Version {r.version}</strong>
@@ -69,6 +89,7 @@ export function HistoryDialog({
                     <input
                       type="checkbox"
                       checked={compare}
+                      disabled={busy}
                       onChange={(e) => setCompare(e.target.checked)}
                     />
                     Compare with current
@@ -78,6 +99,7 @@ export function HistoryDialog({
                       disabled={busy}
                       onClick={async () => {
                         setBusy(true);
+                        setError("");
                         try {
                           await api(`${base}/restore`, "POST", {
                             revisionId: revision.id,
@@ -90,7 +112,9 @@ export function HistoryDialog({
                         }
                       }}
                     >
-                      Restore version {revision.version}
+                      {busy
+                        ? "Restoring…"
+                        : `Restore version ${revision.version}`}
                     </button>
                   )}
                 </div>
@@ -102,7 +126,13 @@ export function HistoryDialog({
               )}
             </>
           ) : (
-            <p className="muted">Loading revisions…</p>
+            !error && (
+              <p className="muted" role="status">
+                {items
+                  ? "No revisions are available for this page."
+                  : "Loading revisions…"}
+              </p>
+            )
           )}
         </section>
       </div>
