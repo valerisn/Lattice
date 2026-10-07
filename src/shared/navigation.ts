@@ -23,6 +23,7 @@ export function pageViewTitle(
 export const adminSectionId = (name: string) =>
   name.toLowerCase().replace(/ & /g, "-").replace(/\s+/g, "-");
 const adminSections = [
+  "Overview",
   "General",
   "Documentation",
   "Templates",
@@ -37,4 +38,4 @@ const adminSections = [
   "System",
 ];
 export const adminSectionName = (section: string | null | undefined) =>
-  adminSections.find((name) => adminSectionId(name) === section) || "General";
+  adminSections.find((name) => adminSectionId(name) === section) || "Overview";

@@ -295,6 +295,27 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await expect(viewerPage).toHaveTitle("Page · Test Studio · Lattice");
   await anonymous.close();
   await page.goto("/w/test-studio/settings");
+  await expect(
+    page.getByRole("heading", { name: "Overview", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Software updates" }),
+  ).toBeVisible();
+  const review = page.getByRole("region", { name: "Documentation review" });
+  await expect(
+    review.getByRole("link", { name: /Unpublished checklist/ }),
+  ).toBeVisible();
+  await page.getByLabel("Review list", { exact: true }).selectOption("empty");
+  await expect(
+    review.getByRole("link", { name: /Unpublished checklist/ }),
+  ).toBeVisible();
+  await expect(review.getByRole("link", { name: /Public index/ })).toHaveCount(
+    0,
+  );
+  await page.getByLabel("Review list", { exact: true }).selectOption("recent");
+  await expect(
+    review.getByRole("link", { name: /Public index/ }),
+  ).toBeVisible();
   await page
     .getByRole("button", { name: "Groups & access", exact: true })
     .click();

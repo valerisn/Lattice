@@ -15,7 +15,7 @@ A calm, connected home for your team's guides, notes, and decisions. Lattice is 
 - First-run setup, starter pages, and multiple workspaces
 - Email/password accounts, invitation links, expiring sessions, and profiles
 - Owner, admin, editor, and viewer roles; groups; inherited page/collection grants
-- Nested pages, drag reordering, collections, favorites, and recent pages
+- Nested pages, drag reordering, collections, favorites, drafts, and recent pages
 - Rich text and Markdown, slash commands, tables, tasks, links, images, code, callouts, expandable sections, and teammate mention labels
 - Autosave, conflict detection, immutable revisions, comparison, and restoration
 - Permission-aware search with **Ctrl/Cmd + K**
@@ -26,6 +26,7 @@ A calm, connected home for your team's guides, notes, and decisions. Lattice is 
 - Documentation settings for publication defaults, reading layout, metadata, and footer text
 - Reusable page templates with Markdown preview and protection against stale edits
 - Administrator version checker for published stable releases
+- Documentation overview with publication counts and draft/empty-page review lists
 - Administrative audit history for settings, invitations, roles, groups, and access grants
 - Docker Compose with PostgreSQL, health checks, and persistent volumes
 

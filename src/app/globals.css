@@ -207,6 +207,104 @@
   margin: 0;
   overflow-wrap: anywhere;
 }
+.overview-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 24px 0 12px;
+}
+.overview-stats > div {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.overview-stats dt {
+  color: var(--muted);
+  font-size: 11px;
+}
+.overview-stats dd {
+  margin: 8px 0 0;
+  font-size: 30px;
+  font-weight: 600;
+}
+.overview-note {
+  font-size: 11px;
+  line-height: 1.6;
+}
+.overview-shortcuts {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 24px 0 32px;
+  font-size: 12px;
+}
+.overview-shortcuts a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.overview-review-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.overview-review-heading p {
+  font-size: 12px;
+}
+.overview-review-filter {
+  min-width: 190px;
+}
+.overview-pages {
+  padding: 0;
+  margin: 12px 0 20px;
+  list-style: none;
+}
+.overview-pages li {
+  border-bottom: 1px solid var(--border);
+}
+.overview-pages a {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 4px;
+  color: var(--text);
+}
+.overview-pages a:hover {
+  background: var(--accent-soft);
+  text-decoration: none;
+}
+.overview-pages a > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.overview-pages strong {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.overview-pages span,
+.overview-pages time {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.overview-page-detail {
+  text-align: right;
+  flex: none;
+}
+.overview-pages svg {
+  flex: none;
+  color: var(--muted);
+}
+@media (max-width: 1000px) {
+  .overview-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 .documentation-options {
   border: 1px solid var(--border);
   border-radius: 8px;

@@ -15,6 +15,7 @@ import {
   BookOpen,
   ScrollText,
   LayoutTemplate,
+  LayoutDashboard,
 } from "lucide-react";
 import type { Workspace, WikiPage, Collection } from "@/shared/types";
 import { api } from "@/client/api";
@@ -26,6 +27,7 @@ import { UpdatePanel } from "./update-panel";
 import { DocumentationPanel } from "./documentation-panel";
 import { AuditPanel } from "./audit-panel";
 import { TemplatesPanel } from "./templates-panel";
+import { OverviewPanel } from "./overview-panel";
 import { adminSectionId, adminSectionName } from "@/shared/navigation";
 export function SettingsApp({
   workspace,
@@ -73,6 +75,7 @@ export function SettingsApp({
     }
   };
   const tabs = [
+    ["Overview", LayoutDashboard],
     ["General", Settings2],
     ["Documentation", BookOpen],
     ["Templates", LayoutTemplate],
@@ -170,6 +173,25 @@ export function SettingsApp({
           )
         ) : (
           <fieldset disabled={busy || refreshing} className="settings-fieldset">
+            {tab === "Overview" && (
+              <>
+                <OverviewPanel
+                  workspace={workspace}
+                  pages={pages}
+                  collections={collections}
+                />
+                <UpdatePanel
+                  workspaceId={workspace.id}
+                  installed={data.system.version}
+                  initial={data.update}
+                  onChecked={(update) =>
+                    setData((current) =>
+                      current ? { ...current, update } : current,
+                    )
+                  }
+                />
+              </>
+            )}
             {tab === "Templates" && (
               <TemplatesPanel workspaceId={workspace.id} />
             )}

@@ -13,6 +13,8 @@ The app runs as the non-root `node` user and waits for PostgreSQL health. Migrat
 
 Invite teammates through **Workspace settings → Members**. Share generated links yourself; Lattice does not send email yet.
 
+The administration **Overview** shows page counts, drafts, empty pages, and recently updated documentation, with links to open each page. Counts reflect publication states; permissions and draft ancestors still determine visibility. The release checker is available here and under **System**.
+
 Use **Workspace settings → Documentation** to choose the default publication state for new pages, reading width, table of contents, visible page metadata, and footer message. These preferences apply per workspace. Drafts stay hidden from viewers; authors can explicitly publish a page. Disabling author display is a presentation preference, not an access-control change.
 
 Create reusable Markdown starting points under **Workspace settings → Templates**. Writers can choose a template in the new-page dialog. Templates are shared with all workspace writers, so keep restricted material in permission-controlled pages. Editing or deleting a template never changes pages already created from it.
