@@ -1,16 +1,23 @@
 "use client";
-import { useEffect, useRef, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  type ReactNode,
+  type KeyboardEventHandler,
+} from "react";
 import { X } from "lucide-react";
 export function Modal({
   title,
   children,
   onClose,
   wide = false,
+  onKeyDown,
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
   wide?: boolean;
+  onKeyDown?: KeyboardEventHandler<HTMLDialogElement>;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -22,6 +29,7 @@ export function Modal({
     <dialog
       ref={ref}
       className={`modal ${wide ? "wide" : ""}`}
+      onKeyDownCapture={onKeyDown}
       onCancel={(e) => {
         e.preventDefault();
         onClose();

@@ -4,6 +4,7 @@ import { checkCodeExamples } from "./code-examples";
 import { checkSearchNavigation } from "./search-navigation";
 import { checkReadingOutline } from "./reading-outline";
 import { checkAttachmentFeedback } from "./attachment-feedback";
+import { checkEditorSaving } from "./editor-saving";
 
 test("workspace lifecycle, revisions, uploads, and authorization", async ({
   page,
@@ -58,6 +59,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await checkSearchNavigation(page, base);
   await checkReadingOutline(page, base, headers);
   await checkAttachmentFeedback(page, base);
+  await checkEditorSaving(page, base, headers);
   await page.getByRole("button", { name: "New page", exact: true }).click();
   await page.getByLabel("Page title", { exact: true }).fill("Project notes");
   await page.getByLabel("Parent page").selectOption({ label: "Home" });

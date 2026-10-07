@@ -35,6 +35,7 @@ export function PageEditor({
     }
     if (!dirty.current) return true;
     if (!latest.current.title.trim()) {
+      setStatus("Not saved");
       setError("Give this page a title before saving.");
       return false;
     }
@@ -70,9 +71,14 @@ export function PageEditor({
     const next = { ...latest.current, ...patch };
     latest.current = next;
     setDraft(next);
-    dirty.current = JSON.stringify(next) !== saved.current;
-    setStatus("Unsaved changes");
+    dirty.current =
+      JSON.stringify(next) !== saved.current || inflight.current !== null;
+    setStatus(dirty.current ? "Unsaved changes" : "Saved");
     if (timer.current) clearTimeout(timer.current);
+    if (!dirty.current) {
+      setError("");
+      return;
+    }
     timer.current = setTimeout(() => {
       void save();
     }, 900);
@@ -97,6 +103,16 @@ export function PageEditor({
     <Modal
       title="Make it worth keeping"
       wide
+      onKeyDown={(event) => {
+        if (
+          (event.ctrlKey || event.metaKey) &&
+          !event.altKey &&
+          event.key.toLowerCase() === "s"
+        ) {
+          event.preventDefault();
+          void save();
+        }
+      }}
       onClose={() => {
         void done();
       }}
@@ -117,7 +133,11 @@ export function PageEditor({
           </button>
         </div>
         <div className="row">
-          <span className="save-status muted" role="status">
+          <span
+            className="save-status muted"
+            role="status"
+            title="Ctrl/Cmd + S to save now"
+          >
             {status}
           </span>
           <button
