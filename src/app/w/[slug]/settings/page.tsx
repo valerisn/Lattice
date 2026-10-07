@@ -5,6 +5,7 @@ import { listWorkspaces } from "@/server/workspaces";
 import { accessContext } from "@/server/permissions";
 import { canManage } from "@/shared/types";
 import { SettingsApp } from "@/components/admin/settings-app";
+import { Suspense } from "react";
 export default async function Page({
   params,
 }: {
@@ -27,14 +28,22 @@ export default async function Page({
     );
   const ctx = await accessContext(db, current, user.id);
   return (
-    <SettingsApp
-      {...JSON.parse(
-        JSON.stringify({
-          workspace: current,
-          pages: ctx.pages,
-          collections: ctx.collections,
-        }),
-      )}
-    />
+    <Suspense
+      fallback={
+        <main className="welcome">
+          <p>Loading workspace settings…</p>
+        </main>
+      }
+    >
+      <SettingsApp
+        {...JSON.parse(
+          JSON.stringify({
+            workspace: current,
+            pages: ctx.pages,
+            collections: ctx.collections,
+          }),
+        )}
+      />
+    </Suspense>
   );
 }

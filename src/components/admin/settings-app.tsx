@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -33,7 +33,7 @@ export function SettingsApp({
   pages: WikiPage[];
   collections: Collection[];
 }) {
-  const [tab, setTab] = useState("General");
+  const searchParams = useSearchParams();
   const [data, setData] = useState<AdminData | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -82,6 +82,12 @@ export function SettingsApp({
     ["Integrations", Plug],
     ["System", Server],
   ] as const;
+  const sectionId = (name: string) =>
+    name.toLowerCase().replace(/ & /g, "-").replace(/\s+/g, "-");
+  const tab =
+    tabs.find(
+      ([name]) => sectionId(name) === searchParams.get("section"),
+    )?.[0] || "General";
   return (
     <main className="settings-layout">
       <aside className="settings-sidebar">
@@ -96,9 +102,15 @@ export function SettingsApp({
             <button
               className={tab === name ? "active" : ""}
               key={name}
+              aria-current={tab === name ? "page" : undefined}
               onClick={() => {
-                setTab(name);
+                if (tab !== name) {
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.set("section", sectionId(name));
+                  window.history.pushState(null, "", `?${params.toString()}`);
+                }
                 setNotice("");
+                setError("");
               }}
             >
               <Icon size={16} />
@@ -106,6 +118,7 @@ export function SettingsApp({
             </button>
           ))}
         </nav>
+        {data && <p className="muted">Lattice {data.system.version}</p>}
       </aside>
       <section className="settings-content">
         <p className="eyebrow">MAKE YOURSELF AT HOME</p>
@@ -394,6 +407,11 @@ export function SettingsApp({
                   workspaceId={workspace.id}
                   installed={data.system.version}
                   initial={data.update}
+                  onChecked={(update) =>
+                    setData((current) =>
+                      current ? { ...current, update } : current,
+                    )
+                  }
                 />
                 <dl className="system-info">
                   {Object.entries(data.system).map(([key, value]) => (

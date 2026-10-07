@@ -206,6 +206,11 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
     page.getByRole("heading", { name: "Writers", exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "System", exact: true }).click();
+  await expect(page).toHaveURL(/section=system/);
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "System", exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByRole("region", { name: "Software updates" }),
   ).toBeVisible();
@@ -216,6 +221,12 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await page
     .getByRole("button", { name: "Documentation", exact: true })
     .click();
+  await page.goBack();
+  await expect(page.getByText(/Last checked/)).toBeVisible();
+  await page.goForward();
+  await expect(
+    page.getByRole("heading", { name: "Documentation", exact: true }),
+  ).toBeVisible();
   await page.getByLabel("Default publication state").selectOption("draft");
   await page.getByLabel("Reading width").selectOption("wide");
   await page.getByLabel("Show table of contents").uncheck();

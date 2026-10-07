@@ -8,10 +8,12 @@ export function UpdatePanel({
   workspaceId,
   installed,
   initial,
+  onChecked,
 }: {
   workspaceId: string;
   installed: string;
   initial: UpdateCheck | null;
+  onChecked: (result: UpdateCheck) => void;
 }) {
   const [result, setResult] = useState(initial);
   const [busy, setBusy] = useState(false);
@@ -52,13 +54,13 @@ export function UpdatePanel({
             setBusy(true);
             setError("");
             try {
-              setResult(
-                await api<UpdateCheck>(
-                  `/api/w/${workspaceId}/updates`,
-                  "POST",
-                  {},
-                ),
+              const checked = await api<UpdateCheck>(
+                `/api/w/${workspaceId}/updates`,
+                "POST",
+                {},
               );
+              setResult(checked);
+              onChecked(checked);
             } catch (e) {
               setError((e as Error).message);
             } finally {
