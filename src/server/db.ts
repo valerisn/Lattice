@@ -39,11 +39,20 @@ function postgresDatabase(): Database {
 }
 
 export function embeddedDatabase(client: PGlite): Database {
-  const adapt = (connection: Pick<PGlite, "query">): Database => ({
-    query: async <T>(sql: string, params?: unknown[]) =>
-      (await connection.query<T>(sql, params)).rows,
-    transaction: async (fn) => client.transaction((tx) => fn(adapt(tx))),
-  });
+  const adapt = (
+    connection: Pick<PGlite, "query">,
+    inTransaction = false,
+  ): Database => {
+    const db: Database = {
+      query: async <T>(sql: string, params?: unknown[]) =>
+        (await connection.query<T>(sql, params)).rows,
+      transaction: async (fn) =>
+        inTransaction
+          ? fn(db)
+          : client.transaction((tx) => fn(adapt(tx, true))),
+    };
+    return db;
+  };
   return adapt(client);
 }
 

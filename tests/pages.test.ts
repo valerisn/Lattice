@@ -58,6 +58,20 @@ describe("workspace services", () => {
       createPage(db, view, viewer, { title: "Nope" }),
     ).rejects.toThrow("Viewers");
   });
+  it("rolls back nested service operations with the outer transaction", async () => {
+    await expect(
+      db.transaction(async (tx) => {
+        await createPage(tx, workspace, owner, { title: "Must roll back" });
+        throw new Error("Abort outer transaction");
+      }),
+    ).rejects.toThrow("Abort outer transaction");
+    expect(
+      await db.query(
+        "SELECT id FROM pages WHERE workspace_id=$1 AND title='Must roll back'",
+        [workspace.id],
+      ),
+    ).toHaveLength(0);
+  });
   it("creates revisions, prevents lost updates, and restores with a new revision", async () => {
     page = await createPage(db, workspace, owner, {
       title: "A real page",
