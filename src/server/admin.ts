@@ -7,8 +7,44 @@ import { newToken, digest } from "./security";
 import { saveDocumentation } from "./documentation";
 import { saveWorkspaceSettings } from "./workspace-settings";
 import { installedVersion, lastUpdateCheck, checkForUpdates } from "./updates";
+import { auditActions } from "@/shared/audit";
+import { auditTarget, listAuditEvents, writeAuditEvent } from "./audit";
 
 export async function adminRequest(
+  request: Request,
+  path: string[],
+  db: Database,
+  workspace: Workspace,
+  user: User,
+): Promise<Response | null> {
+  const action = `${path[0]}.${request.method}`;
+  if (!Object.hasOwn(auditActions, action))
+    return handleAdminRequest(request, path, db, workspace, user);
+  if (!canManage(workspace.role))
+    throw new AppError(403, "Only administrators can manage this workspace.");
+  const body = request.method === "DELETE" ? {} : await request.clone().json();
+  return db.transaction(async (tx) => {
+    const target = await auditTarget(
+      tx,
+      workspace,
+      path[0],
+      path[1],
+      body || {},
+    );
+    const response = await handleAdminRequest(
+      request,
+      path,
+      tx,
+      workspace,
+      user,
+    );
+    if (response?.ok)
+      await writeAuditEvent(tx, workspace, user, action, target);
+    return response;
+  });
+}
+
+async function handleAdminRequest(
   request: Request,
   path: string[],
   db: Database,
@@ -26,6 +62,7 @@ export async function adminRequest(
       "permissions",
       "updates",
       "documentation",
+      "audit",
     ].includes(resource)
   )
     return null;
@@ -38,6 +75,15 @@ export async function adminRequest(
     );
   if (!canManage(workspace.role))
     throw new AppError(403, "Only administrators can manage this workspace.");
+  if (resource === "audit" && method === "GET")
+    return Response.json(
+      await listAuditEvents(
+        db,
+        workspace,
+        new URL(request.url).searchParams.get("before"),
+      ),
+      { headers: { "Cache-Control": "no-store" } },
+    );
   if (resource === "documentation" && method === "PATCH")
     return Response.json(
       await saveDocumentation(db, workspace, await request.json()),
@@ -116,10 +162,11 @@ export async function adminRequest(
   }
   if (resource === "invites" && method === "DELETE") {
     z.uuid().parse(id);
-    await db.query("DELETE FROM invites WHERE id=$1 AND workspace_id=$2", [
-      id,
-      workspace.id,
-    ]);
+    const removed = await db.query(
+      "DELETE FROM invites WHERE id=$1 AND workspace_id=$2 RETURNING id",
+      [id, workspace.id],
+    );
+    if (!removed.length) throw new AppError(404, "Invitation not found.");
     return Response.json({ ok: true });
   }
   if (resource === "members" && (method === "PATCH" || method === "DELETE")) {
@@ -206,10 +253,11 @@ export async function adminRequest(
   }
   if (resource === "groups" && method === "DELETE") {
     z.uuid().parse(id);
-    await db.query("DELETE FROM groups WHERE id=$1 AND workspace_id=$2", [
-      id,
-      workspace.id,
-    ]);
+    const removed = await db.query(
+      "DELETE FROM groups WHERE id=$1 AND workspace_id=$2 RETURNING id",
+      [id, workspace.id],
+    );
+    if (!removed.length) throw new AppError(404, "Group not found.");
     return Response.json({ ok: true });
   }
   if (resource === "permissions" && method === "POST") {
@@ -244,10 +292,11 @@ export async function adminRequest(
   }
   if (resource === "permissions" && method === "DELETE") {
     z.uuid().parse(id);
-    await db.query("DELETE FROM permissions WHERE id=$1 AND workspace_id=$2", [
-      id,
-      workspace.id,
-    ]);
+    const removed = await db.query(
+      "DELETE FROM permissions WHERE id=$1 AND workspace_id=$2 RETURNING id",
+      [id, workspace.id],
+    );
+    if (!removed.length) throw new AppError(404, "Access grant not found.");
     return Response.json({ ok: true });
   }
   throw new AppError(405, "Method not allowed.");

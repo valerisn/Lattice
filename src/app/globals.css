@@ -855,6 +855,31 @@ kbd {
 .page-article {
   min-width: 0;
 }
+.audit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.audit-list li {
+  display: flex;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+.audit-list p {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+}
+.audit-marker {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
 .reader-wide {
   max-width: 1450px;
   grid-template-columns: minmax(0, 1100px) 180px;

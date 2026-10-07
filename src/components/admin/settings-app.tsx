@@ -13,6 +13,7 @@ import {
   Server,
   Folder,
   BookOpen,
+  ScrollText,
 } from "lucide-react";
 import type { Workspace, WikiPage, Collection } from "@/shared/types";
 import { api } from "@/client/api";
@@ -22,6 +23,7 @@ import { AccessPanel } from "./access-panel";
 import { ThemePicker } from "../theme-picker";
 import { UpdatePanel } from "./update-panel";
 import { DocumentationPanel } from "./documentation-panel";
+import { AuditPanel } from "./audit-panel";
 export function SettingsApp({
   workspace,
   pages,
@@ -76,6 +78,7 @@ export function SettingsApp({
     ["Appearance", Palette],
     ["Storage", HardDrive],
     ["Security", Shield],
+    ["Audit log", ScrollText],
     ["Integrations", Plug],
     ["System", Server],
   ] as const;
@@ -121,6 +124,7 @@ export function SettingsApp({
           <p className="muted">Loading workspace settings…</p>
         ) : (
           <fieldset disabled={busy} className="settings-fieldset">
+            {tab === "Audit log" && <AuditPanel workspaceId={workspace.id} />}
             {tab === "Documentation" && (
               <DocumentationPanel workspace={workspace} run={run} />
             )}

@@ -151,6 +151,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
     ).status(),
   ).toBe(403);
   expect((await anonymous.request.get(`${base}/admin`)).status()).toBe(403);
+  expect((await anonymous.request.get(`${base}/audit`)).status()).toBe(403);
   expect(
     (
       await anonymous.request.post(`${base}/updates`, { headers, data: {} })
@@ -226,6 +227,13 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
     .getByRole("button", { name: "Save documentation settings" })
     .click();
   await expect(page.getByText("Changes saved.", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Audit log", exact: true }).click();
+  await expect(
+    page.getByText("Updated documentation settings", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Created an invitation", { exact: true }),
+  ).toBeVisible();
   await page.goto("/w/test-studio");
   await expect(
     page.getByText("Test Studio knowledge base", { exact: true }),

@@ -17,6 +17,8 @@ Use **Workspace settings → Documentation** to choose the default publication s
 
 ## Persistence and backups
 
+**Workspace settings → Audit log** records successful administrative changes from the time audit logging is installed. Entries retain the actor's display name, action, target label, and timestamp. Settings changes and their audit entries commit together. Only administrators can read this history. Page edits remain in page revision history; login attempts and collection changes are not yet included. Audit entries live in PostgreSQL and are retained with your database backups. There is currently no automatic retention limit.
+
 Compose creates `postgres` and `uploads` named volumes. Both matter. `docker compose down` preserves them; adding `-v` deletes all stored content.
 
 For a consistent small-instance backup, stop the app, dump PostgreSQL, archive uploads, and restart. POSIX shell example:
