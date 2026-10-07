@@ -1,10 +1,10 @@
 import { mkdir, readFile, writeFile, unlink } from "node:fs/promises";
 import path from "node:path";
 export interface StorageProvider { put(key:string,bytes:Uint8Array):Promise<void>; get(key:string):Promise<Uint8Array>; remove(key:string):Promise<void> }
-function location(key:string){if(!/^[a-f0-9-]{36}$/.test(key))throw new Error("Invalid storage key");return path.join(path.resolve(process.env.UPLOAD_DIR || "uploads"),key);}
+function location(key:string){if(!/^[a-f0-9-]{36}$/.test(key))throw new Error("Invalid storage key");return path.join(/* turbopackIgnore: true */ process.env.UPLOAD_DIR || path.join(process.cwd(),"uploads"),key);}
 export const storage:StorageProvider={
   async put(key,bytes){const file=location(key);await mkdir(path.dirname(file),{recursive:true});await writeFile(file,bytes,{flag:"wx",mode:0o600});},
-  async get(key){return new Uint8Array(await readFile(location(key)));},
+  async get(key){return new Uint8Array(await readFile(/* turbopackIgnore: true */ location(key)));},
   async remove(key){try{await unlink(location(key));}catch(e){if((e as NodeJS.ErrnoException).code!=="ENOENT")throw e;}},
 };
 export function detectMime(bytes:Uint8Array,name:string):string|null{
