@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "db:migrate": "tsx scripts/migrate.ts",
-    "check": "npm run lint && npm run typecheck && npm test"
+    "check": "npm run lint && npm run typecheck && npm test",
+    "configure": "node scripts/configure.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",

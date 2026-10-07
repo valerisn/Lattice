@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:17-bookworm
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: lattice
+      POSTGRES_USER: lattice
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - dev-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lattice -d lattice"]
+      interval: 5s
+      retries: 10
+volumes:
+  dev-postgres:
