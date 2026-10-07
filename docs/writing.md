@@ -57,6 +57,8 @@ Move pages in the sidebar to change their order or parent. Moving under a restri
 
 The breadcrumb trail links to parent pages. Browser Back and Forward navigate between documents, and Recent pages, Favorites, and collection views have bookmarkable URLs. Browser tab titles include the current page and workspace.
 
+On phones, **Open navigation** reveals the sidebar. Selecting a page or pressing **Escape** closes it. Keyboard focus stays in the drawer while it is open and returns to the navigation button when closed. Desktop and phone sidebar choices are kept separately while you resize the workspace.
+
 Writers can use **Drafts** in the sidebar to find unfinished pages, ordered by most recently updated. Drafts stay hidden from viewers. Open a draft, choose **Edit page**, and change **Publication** to publish it. Published children of a draft remain hidden from viewers until their ancestors are published too.
 
 Administrators can use **Workspace settings → Overview → Documentation review** to find drafts, empty pages, recent changes, or published pages not updated in at least 90 days. The 90-day list starts with the oldest pages and provides a starting point for review; age alone does not mean content is incorrect. **Show more pages** expands any review list in groups of eight.

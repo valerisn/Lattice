@@ -479,6 +479,9 @@ html[data-theme="light"] .app-shell {
   --accent: var(--workspace-accent);
 }
 @media (max-width: 850px) {
+  html:has(.mobile-nav-open) {
+    overflow: hidden;
+  }
   .settings-layout {
     display: block;
   }

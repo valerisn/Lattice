@@ -89,9 +89,6 @@ export async function checkSharing(
     await page.keyboard.press("Escape");
     await expect(dialog).toHaveCount(0);
     await expect(share).toBeFocused();
-    await page
-      .getByRole("button", { name: "Close navigation", exact: true })
-      .press("Enter");
     await share.click();
     await expect(field).toHaveValue(canonical);
     await page.keyboard.press("Escape");

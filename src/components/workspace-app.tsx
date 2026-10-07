@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -29,6 +29,7 @@ import {
   canManage,
 } from "@/shared/types";
 import { api } from "@/client/api";
+import { useResponsiveSidebar } from "@/client/use-responsive-sidebar";
 import { HistoryDialog } from "./history-dialog";
 import { AttachmentsDialog } from "./attachments-dialog";
 import { PageEditor } from "./page-editor";
@@ -67,7 +68,8 @@ export function WorkspaceApp({
   const homepageId = getHomepageId(workspace, pages);
   const selected = searchParams.get("page") || homepageId;
   const view = searchParams.get("view") || "page";
-  const [sidebar, setSidebar] = useState(true);
+  const { sidebar, setSidebar, mobile } = useResponsiveSidebar();
+  const sidebarRef = useRef<HTMLElement>(null);
   const [search, setSearch] = useState(false);
   const [create, setCreate] = useState<"page" | "collection" | null>(null);
   const [error, setError] = useState("");
@@ -87,7 +89,7 @@ export function WorkspaceApp({
         }),
       );
     setError("");
-    if (window.innerWidth < 850) setSidebar(false);
+    if (mobile) setSidebar(false);
   };
   const selectPage = (id: string) => {
     if (id !== selected || view !== "page")
@@ -95,8 +97,20 @@ export function WorkspaceApp({
         router.push(`/w/${workspace.slug}?page=${id}`, { scroll: false }),
       );
     setError("");
-    if (window.innerWidth < 850) setSidebar(false);
+    if (mobile) setSidebar(false);
   };
+  useEffect(() => {
+    if (!mobile || !sidebar) return;
+    sidebarRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    return () => {
+      if (window.matchMedia("(max-width: 850px)").matches)
+        document
+          .querySelector<HTMLButtonElement>(
+            '.workspace-main button[aria-label="Open navigation"]',
+          )
+          ?.focus({ preventScroll: true });
+    };
+  }, [mobile, sidebar]);
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -131,7 +145,7 @@ export function WorkspaceApp({
   const currentTitle = title;
   return (
     <div
-      className={`app-shell ${sidebar ? "" : "sidebar-hidden"}`}
+      className={`app-shell ${sidebar ? "" : "sidebar-hidden"} ${mobile && sidebar ? "mobile-nav-open" : ""}`}
       aria-busy={navigating}
       style={{ "--workspace-accent": workspace.accent } as React.CSSProperties}
     >
@@ -140,9 +154,43 @@ export function WorkspaceApp({
           <button
             className="drawer-backdrop"
             aria-label="Close navigation"
+            tabIndex={-1}
             onClick={() => setSidebar(false)}
           />
-          <aside className="sidebar">
+          <aside
+            className="sidebar"
+            ref={sidebarRef}
+            aria-label="Workspace navigation"
+            onKeyDown={(event) => {
+              if (!mobile || event.defaultPrevented) return;
+              if (event.key === "Escape") {
+                event.preventDefault();
+                setSidebar(false);
+              } else if (
+                event.key === "Tab" &&
+                event.currentTarget.contains(event.target as Node)
+              ) {
+                const items = Array.from(
+                  event.currentTarget.querySelectorAll<HTMLElement>(
+                    "button:not(:disabled), a[href], select:not(:disabled), input:not(:disabled), [tabindex='0']",
+                  ),
+                ).filter(
+                  (element) =>
+                    element.getClientRects().length &&
+                    !element.closest("[inert]"),
+                );
+                const first = items[0];
+                const last = items.at(-1);
+                if (event.shiftKey && document.activeElement === first) {
+                  event.preventDefault();
+                  last?.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                  event.preventDefault();
+                  first?.focus();
+                }
+              }
+            }}
+          >
             <div className="workspace-brand">
               <img
                 src={workspace.logo || "/lattice-logo.png"}
@@ -331,7 +379,7 @@ export function WorkspaceApp({
           </aside>
         </>
       )}
-      <main className="workspace-main">
+      <main className="workspace-main" inert={mobile && sidebar}>
         <header className="topbar">
           <nav className="breadcrumbs" aria-label="Breadcrumb">
             {!sidebar && (

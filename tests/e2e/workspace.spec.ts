@@ -18,6 +18,7 @@ import { checkSlashCommands } from "./slash-commands";
 import { checkPageActions } from "./page-actions";
 import { checkSectionLinks } from "./section-links";
 import { checkSharing } from "./sharing";
+import { checkMobileNavigation } from "./mobile-navigation";
 
 test("workspace lifecycle, revisions, uploads, and authorization", async ({
   page,
@@ -86,6 +87,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await checkPageActions(page);
   await checkSectionLinks(page, base, headers);
   await checkSharing(page, base, headers);
+  await checkMobileNavigation(page);
   await page.getByRole("button", { name: "New page", exact: true }).click();
   await page.getByLabel("Page title", { exact: true }).fill("Project notes");
   await page.getByLabel("Parent page").selectOption({ label: "Home" });
