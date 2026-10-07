@@ -4,6 +4,7 @@ import { FileText, ArrowUpRight } from "lucide-react";
 import type { WikiPage, Collection } from "@/shared/types";
 import { Markdown } from "./markdown";
 import { pageHeadings } from "@/shared/headings";
+import { Backlinks } from "./backlinks";
 import {
   documentationSettings,
   type DocumentationSettings,
@@ -12,10 +13,16 @@ export function PageReader({
   page,
   collections,
   documentation,
+  pages,
+  workspaceSlug,
+  onSelect,
 }: {
   page: WikiPage;
   collections: Collection[];
   documentation?: Partial<DocumentationSettings>;
+  pages: WikiPage[];
+  workspaceSlug: string;
+  onSelect: (id: string) => void;
 }) {
   const settings = documentationSettings(documentation);
   const headings = useMemo(
@@ -88,6 +95,12 @@ export function PageReader({
             A little space for your next idea. Edit this page to start writing.
           </p>
         )}
+        <Backlinks
+          pages={pages}
+          pageId={page.id}
+          workspaceSlug={workspaceSlug}
+          onSelect={onSelect}
+        />
         <footer className="page-footer">
           {settings.footer_text && <span>{settings.footer_text}</span>}
           <a

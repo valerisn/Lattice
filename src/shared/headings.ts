@@ -112,3 +112,13 @@ export function pageHeadings(content: string): PageHeading[] {
   });
   return headings;
 }
+
+export function markdownLinks(content: string): string[] {
+  const tree = outlineProcessor.runSync(outlineProcessor.parse(content));
+  const links: string[] = [];
+  visit(tree, (element) => {
+    if (element.tagName === "a" && typeof element.properties.href === "string")
+      links.push(element.properties.href);
+  });
+  return links;
+}

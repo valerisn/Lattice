@@ -440,6 +440,9 @@ export function WorkspaceApp({
               page={page}
               collections={collections}
               documentation={workspace.documentation}
+              pages={pages}
+              workspaceSlug={workspace.slug}
+              onSelect={selectPage}
             />
           ) : (
             <div className="empty">

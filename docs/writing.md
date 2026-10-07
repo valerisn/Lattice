@@ -22,4 +22,6 @@ The table of contents follows rendered level-two and level-three headings. Repea
 
 Page links can connect related knowledge. Sharing copies the page URL; recipients still need permission to read it. Favorites keep frequently used pages close, and **Ctrl/Cmd + K** searches accessible pages and collections.
 
+The **Linked from** section lists accessible pages in the same workspace that link to the current page. It recognizes relative and same-origin full URLs, including Markdown reference links. Links inside code examples do not count. Restricted pages and drafts that you cannot read stay out of the list.
+
 Move pages in the sidebar to change their order or parent. Moving under a restricted page can change who can read the page through inherited permissions. Administrators can inspect group and individual access grants in workspace settings.

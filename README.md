@@ -19,6 +19,7 @@ A calm, connected home for your team's guides, notes, and decisions. Lattice is 
 - Rich text and Markdown, slash commands, tables, tasks, links, images, code, callouts, expandable sections, and teammate mention labels
 - Autosave, conflict detection, immutable revisions, comparison, and restoration
 - Permission-aware search with **Ctrl/Cmd + K**
+- Incoming page links that respect workspace visibility
 - Syntax highlighting, reliable heading navigation, and Markdown import/export
 - Protected attachments, file validation, and local storage
 - Light/dark/system appearance, branding, and workspace administration

@@ -196,6 +196,49 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
     await anonymous.request.get(`${base}/search?q=revision`)
   ).json();
   expect(results.some((p: { id: string }) => p.id === note.id)).toBe(false);
+  await request("/pages", "POST", {
+    title: "Public index",
+    content: `[Workspace home](${baseURL}/w/test-studio?page=${workspace.homepage_id})`,
+  });
+  const privateIndex = await (
+    await request("/pages", "POST", {
+      title: "Private planning",
+      content: `[Workspace home](/w/test-studio?page=${workspace.homepage_id})`,
+    })
+  ).json();
+  await request("/permissions", "POST", {
+    page_id: privateIndex.id,
+    collection_id: null,
+    user_id: owner.id,
+    group_id: null,
+    capability: "read",
+  });
+  await page.goto("/w/test-studio");
+  const ownerLinks = page.getByRole("region", {
+    name: "Linked from",
+    exact: true,
+  });
+  await expect(
+    ownerLinks.getByRole("link", { name: "Private planning", exact: true }),
+  ).toBeVisible();
+  await ownerLinks
+    .getByRole("link", { name: "Public index", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Public index", exact: true }),
+  ).toBeVisible();
+  const viewerPage = await anonymous.newPage();
+  await viewerPage.goto("/w/test-studio");
+  const viewerLinks = viewerPage.getByRole("region", {
+    name: "Linked from",
+    exact: true,
+  });
+  await expect(
+    viewerLinks.getByRole("link", { name: "Public index", exact: true }),
+  ).toBeVisible();
+  await expect(
+    viewerLinks.getByRole("link", { name: "Private planning", exact: true }),
+  ).toHaveCount(0);
   await anonymous.close();
   await page.goto("/w/test-studio/settings");
   await page
