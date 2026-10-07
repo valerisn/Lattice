@@ -23,7 +23,7 @@ $Docker = (Resolve-Path -LiteralPath $Docker).Path
 $Git = (Resolve-Path -LiteralPath $Git).Path
 if (!$DockerHost.StartsWith('npipe:////./pipe/') -or $DockerHost -match '[\r\n\x00]') { throw 'Use a local Docker Linux engine named pipe.' }
 if (!(Test-Path -LiteralPath "$Directory\compose.yaml") -or !(Test-Path -LiteralPath "$Directory\.env")) { throw 'Configure the Lattice Docker checkout first (compose.yaml and .env required).' }
-& $Php -r 'exit(PHP_VERSION_ID >= 80200 && extension_loaded("curl") ? 0 : 1);'
+& $Php -r "exit(PHP_VERSION_ID >= 80200 && extension_loaded('curl') ? 0 : 1);"
 if ($LASTEXITCODE -ne 0) { throw 'PHP 8.2+ with curl is required.' }
 & "$PSScriptRoot\build.ps1"
 $checker = Join-Path $PSScriptRoot 'daemon-host.exe'
