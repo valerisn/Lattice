@@ -21,6 +21,7 @@ export default defineConfig({
     reuseExistingServer: false,
     timeout: 120000,
     env: {
+      LATTICE_E2E: "1",
       PORT: String(port),
       HOSTNAME: "127.0.0.1",
       APP_URL: baseURL,

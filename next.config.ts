@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const config: NextConfig = {
   output: "standalone",
   devIndicators: false,
+  experimental: {
+    // Keep browser tests independent of the preview server's persisted cache.
+    turbopackFileSystemCacheForDev: process.env.LATTICE_E2E !== "1",
+  },
   turbopack: { root: process.cwd() },
   outputFileTracingExcludes: {
     "/*": ["./data/**/*", "./uploads/**/*", "./tests/**/*", "./.env*"],
