@@ -10,7 +10,8 @@ test('configuration defaults are opt-in and invalid values fail closed', functio
     rejects(fn () => new Config(['auto_update' => 'false']), 'true or false');
     rejects(fn () => new Config(['poll_seconds' => 0]), 'poll_seconds');
     rejects(fn () => new Config(['directory' => '/']), 'filesystem root');
-    rejects(fn () => new Config(['state_dir' => '/opt/lattice/data']), 'outside');
+    rejects(fn () => new Config(['state_dir' => $config->get('directory') . '/data']), 'outside');
+    rejects(fn () => new Config(['state_dir' => '/tmp/../opt/lattice/data']), 'dot path');
     rejects(fn () => new Config(['project_name' => '--evil']), 'invalid');
     rejects(fn () => new Config(['health_url' => 'file:///etc/passwd']), 'HTTP(S)');
     rejects(fn () => new Config(['health_url' => 'http://user:pass@localhost']), 'credentials');

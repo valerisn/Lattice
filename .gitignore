@@ -13,3 +13,4 @@ uploads/
 *.tsbuildinfo
 .DS_Store
 Thumbs.db
+daemon/windows/daemon-host.exe

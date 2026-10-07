@@ -7,7 +7,14 @@ final class PrivatePath
 {
     public static function check(string $path, bool $directory = false): string
     {
-        if (PHP_OS_FAMILY !== 'Linux') { return $path; }
+        if (PHP_OS_FAMILY === 'Windows') {
+            $host = dirname(__DIR__) . '/windows/daemon-host.exe';
+            if (!is_file($host)) { throw new RuntimeException('Build the Windows host first: powershell -File daemon/windows/build.ps1'); }
+            $result = (new ProcessRunner())->run([$host, '--check-private', $path, $directory ? 'directory' : 'file'], __DIR__);
+            if ($result->code !== 0) { throw new RuntimeException(trim($result->stderr) ?: 'Windows private path validation failed.'); }
+            return str_replace('\\', '/', trim($result->stdout));
+        }
+        if (PHP_OS_FAMILY !== 'Linux') { throw new RuntimeException('daemon supports Linux and Windows.'); }
         if (!function_exists('posix_geteuid')) { throw new RuntimeException('PHP posix is required for daemon ownership checks.'); }
         clearstatcache(true, $path);
         $stat = @lstat($path);

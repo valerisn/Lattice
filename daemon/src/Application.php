@@ -11,12 +11,12 @@ final class Application
 
     public function run(array $arguments): int
     {
-        $options = ['config' => '/etc/lattice/daemon.json', 'json' => false, 'once' => false];
+        $options = ['config' => Config::defaultFile(), 'json' => false, 'once' => false];
         $positionals = [];
         for ($index = 0; $index < count($arguments); $index++) {
             $arg = $arguments[$index];
             if (in_array($arg, ['--json', '--once'], true)) { $options[substr($arg, 2)] = true; }
-            elseif (in_array($arg, ['--config', '--directory', '--state-dir', '--project-name', '--health-url'], true)) {
+            elseif (in_array($arg, ['--config', '--directory', '--state-dir', '--project-name', '--health-url', '--stop-token'], true)) {
                 if (!isset($arguments[$index + 1]) || str_starts_with($arguments[$index + 1], '--')) { throw new RuntimeException("Missing value for $arg."); }
                 $options[substr($arg, 2)] = $arguments[++$index];
             } elseif (in_array($arg, ['--help', '-h'], true)) { $positionals = ['help']; break; }
@@ -41,6 +41,9 @@ final class Application
             if (isset($options[$key])) { throw new RuntimeException("--$key is only valid with init. Edit the configuration to change an existing installation."); }
         }
         if ($options['once'] && $command !== 'watch') { throw new RuntimeException('--once is only valid with watch.'); }
+        if (isset($options['stop-token']) && ($command !== 'watch' || $options['once'] || !preg_match('/^[a-f0-9]{32}$/D', $options['stop-token']))) {
+            throw new RuntimeException('--stop-token requires continuous watch and a 32-character lowercase hexadecimal service token.');
+        }
         $config = Config::load($options['config']);
         $store = new Store($config->get('state_dir'));
         $runner = new ProcessRunner();
@@ -55,16 +58,18 @@ final class Application
             return $status['healthy'] && !$status['update_blocked'] ? 0 : 2;
         }
         if ($command === 'doctor') {
-            $checks = ['php' => PHP_VERSION_ID >= 80200, 'curl' => extension_loaded('curl'), 'signals' => extension_loaded('pcntl'),
+            $checks = ['php' => PHP_VERSION_ID >= 80200, 'curl' => extension_loaded('curl'), 'service_runtime' => PHP_OS_FAMILY === 'Windows' || extension_loaded('pcntl'),
                 'compose_file' => is_file($config->get('directory') . '/compose.yaml'), 'environment_file' => is_file($config->get('directory') . '/.env')];
             foreach (['git' => ['git', '--version'], 'docker' => ['docker', 'info', '--format', '{{.ServerVersion}}'], 'compose' => ['docker', 'compose', 'version']] as $name => $args) {
                 $checks[$name] = $runner->run($args, $config->get('directory'))->code === 0;
             }
+            $engine = $runner->run(['docker', 'info', '--format', '{{.OSType}}'], $config->get('directory'));
+            $checks['linux_container_engine'] = $engine->code === 0 && trim($engine->stdout) === 'linux';
             foreach ($checks as $name => $ok) { $checks[$name] = $ok ? 'ready' : 'missing or unavailable'; }
             $console->output($checks);
             return in_array('missing or unavailable', $checks, true) ? 2 : 0;
         }
-        if ($command === 'watch') { return $this->watch($options['config'], $store, $options['once']); }
+        if ($command === 'watch') { return $this->watch($options['config'], $store, $options['once'], $options['stop-token'] ?? null); }
         return $store->locked('action', function () use ($command, $positionals, $options, $config, $store, $compose, $monitor, $updater, $console): int {
             $state = $store->read('monitor');
             switch ($command) {
@@ -120,6 +125,7 @@ final class Application
         $config = new Config($data);
         $parent = dirname($options['config']);
         if (!is_dir($parent) && !mkdir($parent, 0700, true)) { throw new RuntimeException('Cannot create configuration directory.'); }
+        if (PHP_OS_FAMILY === 'Windows') { PrivatePath::check($parent, true); }
         $file = @fopen($options['config'], 'x');
         if (!$file) { throw new RuntimeException('Configuration already exists or cannot be created. No changes made.'); }
         try {
@@ -130,29 +136,40 @@ final class Application
         new Store($config->get('state_dir'));
     }
 
-    private function watch(string $file, Store $store, bool $once): int
+    private function watch(string $file, Store $store, bool $once, ?string $stopToken): int
     {
-        if (!$once && (PHP_OS_FAMILY !== 'Linux' || !extension_loaded('pcntl'))) {
-            throw new RuntimeException('The service requires Linux and PHP pcntl for graceful shutdown.');
+        if (!$once && PHP_OS_FAMILY !== 'Windows' && (PHP_OS_FAMILY !== 'Linux' || !extension_loaded('pcntl'))) {
+            throw new RuntimeException('Continuous supervision requires Windows or Linux with PHP pcntl.');
         }
         if (extension_loaded('pcntl')) {
             pcntl_async_signals(true);
             pcntl_signal(SIGTERM, function (): void { $this->stopping = true; });
             pcntl_signal(SIGINT, function (): void { $this->stopping = true; });
         }
-        return $store->locked('watch', function () use ($file, $store, $once): int {
+        if (PHP_OS_FAMILY === 'Windows' && !$once && $stopToken === null && function_exists('sapi_windows_set_ctrl_handler')) {
+            if (!sapi_windows_set_ctrl_handler(function (): void { $this->stopping = true; })) {
+                throw new RuntimeException('Foreground watch requires a Windows console. Use the service host for background operation.');
+            }
+        }
+        $stopFile = $stopToken === null ? null : $store->path('stop-' . $stopToken);
+        $stopping = function () use ($stopFile): bool {
+            if ($stopFile !== null) { clearstatcache(true, $stopFile); }
+            return $this->stopping || ($stopFile !== null && file_exists($stopFile));
+        };
+        return $store->locked('watch', function () use ($file, $store, $once, $stopping): int {
             Console::log('started', ['version' => self::VERSION]);
             $signature = '';
             do {
+                if ($stopping()) { break; }
                 $config = Config::load($file);
                 if (PrivatePath::check($config->get('state_dir'), true) !== $store->directory) { throw new RuntimeException('Restart daemon after changing state_dir.'); }
                 $compose = new Compose($config, new ProcessRunner());
                 $http = new Http();
                 $monitor = new Monitor($compose, $http, $store);
                 try {
-                    $status = $store->locked('action', function () use ($monitor, $compose, $http, $store): array {
+                    $status = $store->locked('action', function () use ($monitor, $compose, $http, $store, $stopping): array {
                         $status = $monitor->tick(time());
-                        $result = (new Updater($compose, $store, new Release($http), $monitor))->automatic(time());
+                        $result = $stopping() ? null : (new Updater($compose, $store, new Release($http), $monitor))->automatic(time());
                         if ($result !== null) { Console::log('update-check', $result); }
                         return $status;
                     });
@@ -160,8 +177,8 @@ final class Application
                     if ($signature !== $next) { Console::log('health', $status); $signature = $next; }
                 } catch (Throwable $error) { Console::log('attention', ['message' => $error->getMessage()]); }
                 if ($once) { return isset($status) && $status['healthy'] && !$status['update_blocked'] ? 0 : 2; }
-                for ($wait = 0; $wait < $config->get('poll_seconds') && !$this->stopping; $wait++) { sleep(1); }
-            } while (!$this->stopping);
+                for ($wait = 0; $wait < $config->get('poll_seconds') && !$stopping(); $wait++) { sleep(1); }
+            } while (!$stopping());
             Console::log('stopped');
             return 0;
         });
@@ -169,7 +186,7 @@ final class Application
 
     private static function help(): string
     {
-        return <<<'HELP'
+        $help = <<<'HELP'
 daemon · Lattice supervisor
 
 Usage: daemon <command> [--config /etc/lattice/daemon.json] [--json]
@@ -201,6 +218,13 @@ Exit codes: 0 success, 1 error, 2 unhealthy or action required.
 Updates pause on interruption; no automatic database downgrade.
 
 HELP;
+        if (PHP_OS_FAMILY === 'Windows') {
+            $help = str_replace(['/etc/lattice/daemon.json', '/opt/lattice', '/var/lib/lattice-daemon',
+                'systemctl status lattice-daemon', 'journalctl -u lattice-daemon -f'],
+                [Config::defaultFile(), Config::defaults()['directory'], Config::defaults()['state_dir'],
+                 'Get-Service lattice-daemon', 'Get-Content "$env:ProgramData/LatticeDaemon/state/daemon.log" -Tail 30 -Wait'], $help);
+        }
+        return $help;
     }
 }
 

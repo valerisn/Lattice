@@ -14,7 +14,7 @@ function rejects(callable $fn, string $message): void {
     throw new RuntimeException('Expected failure: ' . $message);
 }
 function tempDirectory(): string {
-    $dir = sys_get_temp_dir() . '/lattice-daemon-test-' . bin2hex(random_bytes(8));
+    $dir = (getenv('LATTICE_DAEMON_TEST_ROOT') ?: sys_get_temp_dir()) . '/lattice-daemon-test-' . bin2hex(random_bytes(8));
     mkdir($dir, 0700);
     register_shutdown_function(static function () use ($dir): void {
         $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);

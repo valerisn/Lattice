@@ -23,6 +23,34 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  windows:
+    name: Windows · PHP ${{ matrix.php }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["8.2", "8.3", "8.4", "8.5"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl
+          coverage: none
+      - name: Lint PHP and PowerShell
+        shell: powershell
+        run: |
+          Get-ChildItem daemon -Filter '*.php' -Recurse | ForEach-Object { php -l $_.FullName; if ($LASTEXITCODE) { throw 'PHP lint failed' } }
+          php -l daemon/bin/daemon
+          if ($LASTEXITCODE) { throw 'CLI lint failed' }
+          Get-ChildItem daemon/windows -Filter '*.ps1' | ForEach-Object {
+            $tokens = $null; $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors) { throw ($errors | Out-String) }
+          }
+      - name: Build native host, validate ACLs, and test PHP runtime
+        shell: powershell
+        run: ./daemon/windows/test.ps1
   php:
     name: Linux · PHP ${{ matrix.php }}
     runs-on: ubuntu-24.04

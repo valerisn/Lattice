@@ -22,11 +22,16 @@ final class Config
                 throw new InvalidArgumentException("$field must be an absolute path.");
             }
             $data[$field] = rtrim(str_replace('\\', '/', $data[$field]), '/');
+            if (preg_match('~(?:^|/)\.{1,2}(?:/|$)~', $data[$field])) {
+                throw new InvalidArgumentException("$field cannot contain dot path segments.");
+            }
             if ($data[$field] === '' || preg_match('/^[A-Za-z]:$/', $data[$field])) {
                 throw new InvalidArgumentException("$field cannot be a filesystem root.");
             }
         }
-        if ($data['state_dir'] === $data['directory'] || str_starts_with($data['state_dir'], $data['directory'] . '/')) {
+        $state = PHP_OS_FAMILY === 'Windows' ? strtolower($data['state_dir']) : $data['state_dir'];
+        $checkout = PHP_OS_FAMILY === 'Windows' ? strtolower($data['directory']) : $data['directory'];
+        if ($state === $checkout || str_starts_with($state, $checkout . '/')) {
             throw new InvalidArgumentException('state_dir must be outside the application checkout.');
         }
         foreach (['project_name', 'database_name', 'database_user'] as $field) {
@@ -62,13 +67,24 @@ final class Config
     public static function defaults(): array
     {
         return [
-            'directory' => '/opt/lattice', 'state_dir' => '/var/lib/lattice-daemon', 'project_name' => 'lattice',
+            'directory' => PHP_OS_FAMILY === 'Windows' ? self::windowsRoot() . '/application' : '/opt/lattice',
+            'state_dir' => PHP_OS_FAMILY === 'Windows' ? self::windowsRoot() . '/state' : '/var/lib/lattice-daemon', 'project_name' => 'lattice',
             'health_url' => 'http://127.0.0.1:3000/api/health',
             'poll_seconds' => 30, 'failure_threshold' => 3, 'auto_recover' => true, 'recovery_cooldown_seconds' => 900,
             'auto_update' => false, 'allow_major_updates' => false, 'update_interval_seconds' => 21600,
             'update_window_utc' => '03-05', 'minimum_free_mb' => 2048,
             'database_name' => 'lattice', 'database_user' => 'lattice',
         ];
+    }
+
+    public static function windowsRoot(): string
+    {
+        return rtrim(str_replace('\\', '/', getenv('ProgramData') ?: 'C:/ProgramData'), '/') . '/LatticeDaemon';
+    }
+
+    public static function defaultFile(): string
+    {
+        return PHP_OS_FAMILY === 'Windows' ? self::windowsRoot() . '/daemon.json' : '/etc/lattice/daemon.json';
     }
 
     public static function load(string $file): self
