@@ -66,7 +66,11 @@ export function RichEditor({
       StarterKit.configure({ codeBlock: false, link: { openOnClick: false } }),
       TableKit,
       TaskList,
-      TaskItem.configure({ nested: true }),
+      TaskItem.configure({
+        nested: true,
+        // The live node view doesn't inherit renderHTML's data-type marker.
+        HTMLAttributes: { "data-type": "taskItem" },
+      }),
       Image.configure({ allowBase64: false }),
       Placeholder.configure({
         placeholder: "Write something worth keeping. Type / for blocks…",

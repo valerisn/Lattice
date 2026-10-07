@@ -633,14 +633,26 @@ html[data-theme="light"] .app-shell {
 }
 .editor-content li[data-type="taskItem"] {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 10px;
 }
 .editor-content li[data-type="taskItem"] > label {
-  display: block;
+  display: flex;
+  flex: 0 0 auto;
+  margin: 0;
+  padding-top: 0.35em;
+}
+.editor-content li[data-type="taskItem"] > label input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
 }
 .editor-content li[data-type="taskItem"] > div {
   flex: 1;
+  min-width: 0;
+}
+.editor-content li[data-type="taskItem"] > div > ul {
+  margin: 8px 0;
 }
 .editor-content li[data-type="taskItem"] p {
   margin: 0;
