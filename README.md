@@ -110,7 +110,7 @@ See [architecture and permission rules](docs/architecture.md) and [the internal 
 - S3 storage, external search indexes, background jobs, and pagination
 - Anonymous publishing, public API tokens, rich media embeds, custom favicons, and richer audit logs
 - The first release loads workspace pages for navigation/search; large installations need indexing and query tuning
-- Comparison is side by side; history shows the latest 100 revisions while the database retains all revisions
+- History shows the latest 100 revisions while the database retains all revisions; large comparisons fall back to side-by-side text
 - Page deletion removes history and may leave orphaned attachment files; a file cleanup tool is planned
 
 Planned integrations are clearly identified as unavailable in the interface.

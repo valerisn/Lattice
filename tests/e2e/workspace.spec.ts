@@ -99,6 +99,25 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
     await request(`/pages/${note.id}/revisions`, "GET")
   ).json();
   expect(revisions.length).toBeGreaterThanOrEqual(3);
+  await page.getByLabel("More page actions", { exact: true }).click();
+  await page
+    .getByRole("button", { name: "Version history", exact: true })
+    .click();
+  await page.getByLabel("Compare with current", { exact: true }).check();
+  await expect(
+    page.getByText("No content changes.", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Page revisions", exact: true })
+    .getByRole("button", { name: /^Version 2 / })
+    .click();
+  await expect(page.locator(".diff-removed")).toContainText("First revision");
+  await expect(page.locator(".diff-added")).toContainText("Second revision");
+  await page
+    .getByLabel("Comparison format", { exact: true })
+    .selectOption("side-by-side");
+  await expect(page.locator(".revision-comparison pre")).toHaveCount(2);
+  await page.getByRole("button", { name: "Close dialog", exact: true }).click();
   expect(
     (
       await request(`/pages/${note.id}`, "PATCH", {

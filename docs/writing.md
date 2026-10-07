@@ -14,7 +14,7 @@ Administrators can create reusable starting content in **Workspace settings → 
 
 Choose **Edit page** for the rich editor. Type `/` for blocks, or switch to Markdown for direct source editing. Changes save automatically; the save status tells you when they reach the server. If another session changes the page, the editor keeps your unsaved text and reports the conflict. Download it before reloading and merging.
 
-Use **More → History** to compare revisions or restore an earlier one. Restoring creates another revision. The **Markdown export** action downloads the current page source.
+Use **More page actions → Version history** to review previous versions. **Compare with current** highlights added and removed Markdown lines and shows title or description changes. You can switch to a side-by-side view. Large comparisons fall back to that view to keep the browser responsive. Restoring creates another revision and preserves the earlier history. The **Export Markdown** action downloads the current page source.
 
 The table of contents follows rendered level-two and level-three headings. Repeated headings receive unique links, formatted heading text stays readable, and code examples are excluded. Administrators can change reading width, metadata visibility, the footer, and the table of contents under **Workspace settings → Documentation**.
 

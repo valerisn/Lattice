@@ -4,6 +4,7 @@ import type { WikiPage, Revision } from "@/shared/types";
 import { Modal } from "./modal";
 import { Markdown } from "./markdown";
 import { api } from "@/client/api";
+import { RevisionComparison } from "./revision-comparison";
 export function HistoryDialog({
   page,
   editable,
@@ -95,16 +96,7 @@ export function HistoryDialog({
                 </div>
               </div>
               {compare ? (
-                <div className="revision-comparison">
-                  <div>
-                    <h4>Version {revision.version}</h4>
-                    <pre>{revision.content}</pre>
-                  </div>
-                  <div>
-                    <h4>Current · version {page.version}</h4>
-                    <pre>{page.content}</pre>
-                  </div>
-                </div>
+                <RevisionComparison revision={revision} page={page} />
               ) : (
                 <Markdown content={revision.content} />
               )}
