@@ -19,6 +19,7 @@ import type { AdminData } from "./types";
 import { MembersPanel } from "./members-panel";
 import { AccessPanel } from "./access-panel";
 import { ThemePicker } from "../theme-picker";
+import { UpdatePanel } from "./update-panel";
 export function SettingsApp({
   workspace,
   pages,
@@ -383,26 +384,33 @@ export function SettingsApp({
               </div>
             )}
             {tab === "System" && (
-              <dl className="system-info">
-                {Object.entries(data.system).map(([key, value]) => (
-                  <div key={key}>
-                    <dt>{key}</dt>
-                    <dd>{value}</dd>
+              <div className="stack">
+                <UpdatePanel
+                  workspaceId={workspace.id}
+                  installed={data.system.version}
+                  initial={data.update}
+                />
+                <dl className="system-info">
+                  {Object.entries(data.system).map(([key, value]) => (
+                    <div key={key}>
+                      <dt>{key}</dt>
+                      <dd>{value}</dd>
+                    </div>
+                  ))}
+                  <div>
+                    <dt>License</dt>
+                    <dd>AGPL-3.0-only</dd>
                   </div>
-                ))}
-                <div>
-                  <dt>License</dt>
-                  <dd>AGPL-3.0-only</dd>
-                </div>
-                <div>
-                  <dt>Source</dt>
-                  <dd>
-                    <a href="https://github.com/valerisn/Lattice">
-                      valerisn/Lattice
-                    </a>
-                  </dd>
-                </div>
-              </dl>
+                  <div>
+                    <dt>Source</dt>
+                    <dd>
+                      <a href="https://github.com/valerisn/Lattice">
+                        valerisn/Lattice
+                      </a>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
             )}
           </fieldset>
         )}

@@ -4,6 +4,7 @@ import type { Workspace, User, Role } from "@/shared/types";
 import { canManage } from "@/shared/types";
 import { AppError } from "./errors";
 import { newToken, digest } from "./security";
+import { installedVersion, lastUpdateCheck, checkForUpdates } from "./updates";
 
 export async function adminRequest(
   request: Request,
@@ -15,7 +16,14 @@ export async function adminRequest(
   const [resource, id] = path;
   const method = request.method;
   if (
-    !["admin", "members", "invites", "groups", "permissions"].includes(resource)
+    ![
+      "admin",
+      "members",
+      "invites",
+      "groups",
+      "permissions",
+      "updates",
+    ].includes(resource)
   )
     return null;
   if (resource === "members" && method === "GET")
@@ -27,6 +35,10 @@ export async function adminRequest(
     );
   if (!canManage(workspace.role))
     throw new AppError(403, "Only administrators can manage this workspace.");
+  if (resource === "updates" && method === "POST")
+    return Response.json(await checkForUpdates(), {
+      headers: { "Cache-Control": "no-store" },
+    });
   if (resource === "admin" && method === "GET") {
     const members = await db.query(
       "SELECT u.id,u.name,u.email,u.username,u.avatar,m.role,m.joined_at FROM workspace_members m JOIN users u ON u.id=m.user_id WHERE m.workspace_id=$1 ORDER BY u.name",
@@ -54,8 +66,9 @@ export async function adminRequest(
       groups,
       permissions,
       storage,
+      update: lastUpdateCheck(),
       system: {
-        version: "0.1.0",
+        version: installedVersion,
         database: "Connected",
         storage: "Local filesystem",
         authentication: "Email and password",

@@ -32,6 +32,8 @@ Restore into an empty database using `psql -U lattice`, restore upload files int
 
 ## Upgrades
 
+**Workspace settings → System → Check for updates** compares the installed package version with the latest stable GitHub release. Only administrators can check. Checks are manual, make one unauthenticated request to `api.github.com`, send no workspace or account data, and share a five-minute in-memory cache per server process. The cache clears on restart. A failed check does not mean the installation is up to date. Prereleases and unreleased commits are outside this check.
+
 Back up database, uploads, and configuration. Read migration/release notes, pull the intended revision, and run `docker compose up -d --build`. Check health, login, editing, and downloads. Migrations have no automated downgrade runner; restore coordinated backups when rollback requires an earlier schema.
 
 ## Troubleshooting

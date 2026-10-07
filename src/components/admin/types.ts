@@ -1,4 +1,5 @@
 import type { Role } from "@/shared/types";
+import type { UpdateCheck } from "@/shared/updates";
 export interface Member {
   id: string;
   name: string;
@@ -21,6 +22,7 @@ export interface Grant {
   capability: string;
 }
 export interface AdminData {
+  update: UpdateCheck | null;
   members: Member[];
   groups: Group[];
   permissions: Grant[];

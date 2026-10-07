@@ -18,6 +18,7 @@ Common statuses: 400 invalid input, 401 signed out, 403 denied, 404 missing/inac
 | GET               | `/api/w/:workspaceId/search?q=term`                      | Search accessible knowledge                 |
 | POST/PATCH/DELETE | `/api/w/:workspaceId/collections[/:id]`                  | Manage collections                          |
 | GET/PATCH         | `/api/w/:workspaceId/admin`                              | Admin overview/settings                     |
+| POST              | `/api/w/:workspaceId/updates`                            | Admin-only stable release check             |
 | GET/PATCH/DELETE  | `/api/w/:workspaceId/members[/:id]`                      | Members and roles                           |
 | POST/DELETE       | `/api/w/:workspaceId/invites[/:id]`                      | Generate/revoke invite links                |
 | POST              | `/api/invites/accept`                                    | Consume invitation                          |
