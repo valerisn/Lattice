@@ -1,11 +1,185 @@
 "use client";
-import type { Workspace,WikiPage,Collection } from "@/shared/types";
+import type { Workspace, WikiPage, Collection } from "@/shared/types";
 import type { AdminData } from "./types";
 import { api } from "@/client/api";
-export function AccessPanel({workspace,data,pages,collections,run}:{workspace:Workspace;data:AdminData;pages:WikiPage[];collections:Collection[];run:(fn:()=>Promise<void>)=>Promise<void>}){
-  const base=`/api/w/${workspace.id}`;
-  return <div className="stack"><h2>Groups & access</h2><form className="row" onSubmit={e=>{e.preventDefault();const name=new FormData(e.currentTarget).get("name");e.currentTarget.reset();void run(async()=>{await api(`${base}/groups`,"POST",{name});});}}><label>New group<input name="name" required maxLength={80}/></label><button className="primary">Create group</button></form>{data.groups.map(g=><section className="settings-section" key={g.id}><div className="row spread"><h3>{g.name}</h3><button className="danger" onClick={()=>{if(window.confirm("Delete this group and its access grants?"))void run(async()=>{await api(`${base}/groups/${g.id}`,"DELETE");});}}>Delete group</button></div><div className="member-checkboxes">{data.members.map(m=><label className="checkbox-label" key={m.id}><input type="checkbox" checked={g.members.includes(m.id)} onChange={e=>{const members=e.target.checked ? [...g.members,m.id] : g.members.filter(id=>id!==m.id);void run(async()=>{await api(`${base}/groups/${g.id}`,"PATCH",{members});});}}/>{m.name}</label>)}</div></section>)}
-    <section className="settings-section"><h3>Resource access</h3><p className="muted">The first grant restricts a page or collection to its listed members and groups. Child pages inherit all ancestor restrictions. Administrators always retain access. A grant never gives a viewer editing rights. Removing the last grant reopens a regular page or collection to the workspace; restricted collections remain closed.</p><form onSubmit={e=>{e.preventDefault();const form=new FormData(e.currentTarget);const [resource,id]=String(form.get("resource")).split(":");const [principal,principalId]=String(form.get("principal")).split(":");void run(async()=>{await api(`${base}/permissions`,"POST",{page_id:resource==="page" ? id : null,collection_id:resource==="collection" ? id : null,user_id:principal==="user" ? principalId : null,group_id:principal==="group" ? principalId : null,capability:form.get("capability")});});}}><label>Page or collection<select name="resource" required><option value="">Choose a resource</option><optgroup label="Pages">{pages.map(p=><option key={p.id} value={`page:${p.id}`}>{p.title}</option>)}</optgroup><optgroup label="Collections">{collections.map(c=><option key={c.id} value={`collection:${c.id}`}>{c.name}</option>)}</optgroup></select></label><label>Member or group<select name="principal" required><option value="">Choose who can access</option><optgroup label="Members">{data.members.map(m=><option key={m.id} value={`user:${m.id}`}>{m.name}</option>)}</optgroup><optgroup label="Groups">{data.groups.map(g=><option key={g.id} value={`group:${g.id}`}>{g.name}</option>)}</optgroup></select></label><label>Access<select name="capability"><option value="read">Read</option><option value="edit">Read and edit</option></select></label><button className="primary">Add access grant</button></form></section>
-    {data.permissions.map(p=><div className="permission-row row spread" key={p.id}><span><strong>{pages.find(page=>page.id===p.page_id)?.title || collections.find(c=>c.id===p.collection_id)?.name}</strong><small>{data.members.find(m=>m.id===p.user_id)?.name || data.groups.find(g=>g.id===p.group_id)?.name} · {p.capability}</small></span><button onClick={()=>{if(window.confirm("Remove this grant? Removing the last page grant restores inherited workspace access."))void run(async()=>{await api(`${base}/permissions/${p.id}`,"DELETE");});}}>Remove grant</button></div>)}
-  </div>;
+export function AccessPanel({
+  workspace,
+  data,
+  pages,
+  collections,
+  run,
+}: {
+  workspace: Workspace;
+  data: AdminData;
+  pages: WikiPage[];
+  collections: Collection[];
+  run: (fn: () => Promise<void>) => Promise<void>;
+}) {
+  const base = `/api/w/${workspace.id}`;
+  return (
+    <div className="stack">
+      <h2>Groups & access</h2>
+      <form
+        className="row"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const name = new FormData(e.currentTarget).get("name");
+          e.currentTarget.reset();
+          void run(async () => {
+            await api(`${base}/groups`, "POST", { name });
+          });
+        }}
+      >
+        <label>
+          New group
+          <input name="name" required maxLength={80} />
+        </label>
+        <button className="primary">Create group</button>
+      </form>
+      {data.groups.map((g) => (
+        <section className="settings-section" key={g.id}>
+          <div className="row spread">
+            <h3>{g.name}</h3>
+            <button
+              className="danger"
+              onClick={() => {
+                if (window.confirm("Delete this group and its access grants?"))
+                  void run(async () => {
+                    await api(`${base}/groups/${g.id}`, "DELETE");
+                  });
+              }}
+            >
+              Delete group
+            </button>
+          </div>
+          <div className="member-checkboxes">
+            {data.members.map((m) => (
+              <label className="checkbox-label" key={m.id}>
+                <input
+                  type="checkbox"
+                  checked={g.members.includes(m.id)}
+                  onChange={(e) => {
+                    const members = e.target.checked
+                      ? [...g.members, m.id]
+                      : g.members.filter((id) => id !== m.id);
+                    void run(async () => {
+                      await api(`${base}/groups/${g.id}`, "PATCH", { members });
+                    });
+                  }}
+                />
+                {m.name}
+              </label>
+            ))}
+          </div>
+        </section>
+      ))}
+      <section className="settings-section">
+        <h3>Resource access</h3>
+        <p className="muted">
+          The first grant restricts a page or collection to its listed members
+          and groups. Child pages inherit all ancestor restrictions.
+          Administrators always retain access. A grant never gives a viewer
+          editing rights. Removing the last grant reopens a regular page or
+          collection to the workspace; restricted collections remain closed.
+        </p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const form = new FormData(e.currentTarget);
+            const [resource, id] = String(form.get("resource")).split(":");
+            const [principal, principalId] = String(
+              form.get("principal"),
+            ).split(":");
+            void run(async () => {
+              await api(`${base}/permissions`, "POST", {
+                page_id: resource === "page" ? id : null,
+                collection_id: resource === "collection" ? id : null,
+                user_id: principal === "user" ? principalId : null,
+                group_id: principal === "group" ? principalId : null,
+                capability: form.get("capability"),
+              });
+            });
+          }}
+        >
+          <label>
+            Page or collection
+            <select name="resource" required>
+              <option value="">Choose a resource</option>
+              <optgroup label="Pages">
+                {pages.map((p) => (
+                  <option key={p.id} value={`page:${p.id}`}>
+                    {p.title}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Collections">
+                {collections.map((c) => (
+                  <option key={c.id} value={`collection:${c.id}`}>
+                    {c.name}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </label>
+          <label>
+            Member or group
+            <select name="principal" required>
+              <option value="">Choose who can access</option>
+              <optgroup label="Members">
+                {data.members.map((m) => (
+                  <option key={m.id} value={`user:${m.id}`}>
+                    {m.name}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Groups">
+                {data.groups.map((g) => (
+                  <option key={g.id} value={`group:${g.id}`}>
+                    {g.name}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </label>
+          <label>
+            Access
+            <select name="capability">
+              <option value="read">Read</option>
+              <option value="edit">Read and edit</option>
+            </select>
+          </label>
+          <button className="primary">Add access grant</button>
+        </form>
+      </section>
+      {data.permissions.map((p) => (
+        <div className="permission-row row spread" key={p.id}>
+          <span>
+            <strong>
+              {pages.find((page) => page.id === p.page_id)?.title ||
+                collections.find((c) => c.id === p.collection_id)?.name}
+            </strong>
+            <small>
+              {data.members.find((m) => m.id === p.user_id)?.name ||
+                data.groups.find((g) => g.id === p.group_id)?.name}{" "}
+              · {p.capability}
+            </small>
+          </span>
+          <button
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Remove this grant? Removing the last page grant restores inherited workspace access.",
+                )
+              )
+                void run(async () => {
+                  await api(`${base}/permissions/${p.id}`, "DELETE");
+                });
+            }}
+          >
+            Remove grant
+          </button>
+        </div>
+      ))}
+    </div>
+  );
 }

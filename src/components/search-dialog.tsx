@@ -3,9 +3,108 @@ import { useEffect, useState } from "react";
 import { FileText, Folder, Search } from "lucide-react";
 import { Modal } from "./modal";
 import { api } from "@/client/api";
-interface Result { id: string; title: string; excerpt: string; kind: "page" | "collection" }
-export function SearchDialog({ workspaceId, onSelect, onClose }: { workspaceId: string; onSelect: (id: string, kind: "page" | "collection") => void; onClose: () => void }) {
-  const [query, setQuery] = useState(""); const [results, setResults] = useState<Result[]>([]); const [error, setError] = useState(""); const [index, setIndex] = useState(0); const [pending, setPending] = useState(false);
-  useEffect(() => { let cancelled = false; const timer = setTimeout(async () => { setPending(true); try { const data = await api<Result[]>(`/api/w/${workspaceId}/search?q=${encodeURIComponent(query)}`); if (!cancelled) { setResults(data); setError(""); setIndex(0); } } catch (e) { if (!cancelled) setError((e as Error).message); } finally { if (!cancelled) setPending(false); } }, 150); return () => { cancelled = true; clearTimeout(timer); }; }, [query, workspaceId]);
-  return <Modal title="Find your way" onClose={onClose}><div className="search-input row"><Search size={20} /><input autoFocus aria-label="Search pages and collections" placeholder="Search your knowledge…" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => { if (e.key === "ArrowDown") { e.preventDefault(); setIndex(i => Math.min(i+1,results.length-1)); } if (e.key === "ArrowUp") { e.preventDefault(); setIndex(i => Math.max(0,i-1)); } if (e.key === "Enter" && results[index]) onSelect(results[index].id,results[index].kind); }} /></div>{error && <p role="alert" className="error">{error}</p>}<div className="search-results" aria-live="polite">{results.map((result,i) => <button className={`search-result ${i===index ? "selected" : ""}`} key={result.id} onClick={() => onSelect(result.id,result.kind)}>{result.kind === "page" ? <FileText size={18} /> : <Folder size={18} />}<span><strong>{result.title}</strong><small>{result.excerpt}</small></span></button>)}{!results.length && <p className="empty muted">{pending ? "Searching…" : query ? "No matches. Try another word." : "Search page titles, content, and collections."}</p>}</div><footer className="muted">↑ ↓ navigate · Enter open · Esc close</footer></Modal>;
+interface Result {
+  id: string;
+  title: string;
+  excerpt: string;
+  kind: "page" | "collection";
+}
+export function SearchDialog({
+  workspaceId,
+  onSelect,
+  onClose,
+}: {
+  workspaceId: string;
+  onSelect: (id: string, kind: "page" | "collection") => void;
+  onClose: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Result[]>([]);
+  const [error, setError] = useState("");
+  const [index, setIndex] = useState(0);
+  const [pending, setPending] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setPending(true);
+      try {
+        const data = await api<Result[]>(
+          `/api/w/${workspaceId}/search?q=${encodeURIComponent(query)}`,
+        );
+        if (!cancelled) {
+          setResults(data);
+          setError("");
+          setIndex(0);
+        }
+      } catch (e) {
+        if (!cancelled) setError((e as Error).message);
+      } finally {
+        if (!cancelled) setPending(false);
+      }
+    }, 150);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [query, workspaceId]);
+  return (
+    <Modal title="Find your way" onClose={onClose}>
+      <div className="search-input row">
+        <Search size={20} />
+        <input
+          autoFocus
+          aria-label="Search pages and collections"
+          placeholder="Search your knowledge…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              setIndex((i) => Math.min(i + 1, results.length - 1));
+            }
+            if (e.key === "ArrowUp") {
+              e.preventDefault();
+              setIndex((i) => Math.max(0, i - 1));
+            }
+            if (e.key === "Enter" && results[index])
+              onSelect(results[index].id, results[index].kind);
+          }}
+        />
+      </div>
+      {error && (
+        <p role="alert" className="error">
+          {error}
+        </p>
+      )}
+      <div className="search-results" aria-live="polite">
+        {results.map((result, i) => (
+          <button
+            className={`search-result ${i === index ? "selected" : ""}`}
+            key={result.id}
+            onClick={() => onSelect(result.id, result.kind)}
+          >
+            {result.kind === "page" ? (
+              <FileText size={18} />
+            ) : (
+              <Folder size={18} />
+            )}
+            <span>
+              <strong>{result.title}</strong>
+              <small>{result.excerpt}</small>
+            </span>
+          </button>
+        ))}
+        {!results.length && (
+          <p className="empty muted">
+            {pending
+              ? "Searching…"
+              : query
+                ? "No matches. Try another word."
+                : "Search page titles, content, and collections."}
+          </p>
+        )}
+      </div>
+      <footer className="muted">↑ ↓ navigate · Enter open · Esc close</footer>
+    </Modal>
+  );
 }
