@@ -1,7 +1,9 @@
 "use client";
+import { useMemo } from "react";
 import { FileText, ArrowUpRight } from "lucide-react";
 import type { WikiPage, Collection } from "@/shared/types";
-import { Markdown, headingId } from "./markdown";
+import { Markdown } from "./markdown";
+import { pageHeadings } from "@/shared/headings";
 import {
   documentationSettings,
   type DocumentationSettings,
@@ -16,8 +18,9 @@ export function PageReader({
   documentation?: Partial<DocumentationSettings>;
 }) {
   const settings = documentationSettings(documentation);
-  const headings = [...page.content.matchAll(/^(#{2,3})\s+(.+)$/gm)].map(
-    (m) => ({ depth: m[1].length, title: m[2] }),
+  const headings = useMemo(
+    () => (settings.show_toc ? pageHeadings(page.content) : []),
+    [page.content, settings.show_toc],
   );
   const collection = collections.find((c) => c.id === page.collection_id);
   return (
@@ -99,10 +102,10 @@ export function PageReader({
       {settings.show_toc && headings.length > 1 && (
         <aside className="table-of-contents">
           <p className="eyebrow">ON THIS PAGE</p>
-          {headings.map((h, i) => (
+          {headings.map((h) => (
             <a
-              key={i}
-              href={`#${headingId(h.title)}`}
+              key={h.id}
+              href={`#${h.id}`}
               style={{ paddingLeft: h.depth === 3 ? 14 : 0 }}
             >
               {h.title}

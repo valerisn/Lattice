@@ -6,6 +6,7 @@ import rehypeSanitize from "rehype-sanitize";
 import rehypeRaw from "rehype-raw";
 import { common, createLowlight } from "lowlight";
 import type { Element, RootContent } from "hast";
+import { rehypeHeadingIds } from "@/shared/headings";
 const lowlight = createLowlight(common);
 function highlightNodes(nodes: RootContent[]): React.ReactNode {
   return nodes.map((node, index) =>
@@ -23,26 +24,9 @@ function highlightNodes(nodes: RootContent[]): React.ReactNode {
     ) : null,
   );
 }
-export function headingId(text: string) {
-  return (
-    text
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "") || "section"
-  );
-}
 export function Markdown({ content }: { content: string }) {
   const components = useMemo(
     () => ({
-      h1: ({ children }: { children?: React.ReactNode }) => (
-        <h1 id={headingId(String(children))}>{children}</h1>
-      ),
-      h2: ({ children }: { children?: React.ReactNode }) => (
-        <h2 id={headingId(String(children))}>{children}</h2>
-      ),
-      h3: ({ children }: { children?: React.ReactNode }) => (
-        <h3 id={headingId(String(children))}>{children}</h3>
-      ),
       code: ({
         className,
         children,
@@ -63,11 +47,23 @@ export function Markdown({ content }: { content: string }) {
       a: ({
         href,
         children,
+        id,
+        "aria-describedby": describedBy,
+        "aria-label": label,
       }: {
         href?: string;
         children?: React.ReactNode;
+        id?: string;
+        "aria-describedby"?: string;
+        "aria-label"?: string;
       }) => (
-        <a href={href} rel="noopener noreferrer">
+        <a
+          href={href}
+          id={id}
+          aria-describedby={describedBy}
+          aria-label={label}
+          rel="noopener noreferrer"
+        >
           {children}
         </a>
       ),
@@ -82,7 +78,7 @@ export function Markdown({ content }: { content: string }) {
     <div className="prose">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, rehypeSanitize]}
+        rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHeadingIds]}
         components={components}
       >
         {content}
