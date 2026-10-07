@@ -66,7 +66,7 @@ export function WorkspaceApp({
   const [create, setCreate] = useState<"page" | "collection" | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState<WikiPage | null>(null);
   const [history, setHistory] = useState(false);
   const [attachments, setAttachments] = useState(false);
   const page = pages.find((p) => p.id === selected);
@@ -356,7 +356,16 @@ export function WorkspaceApp({
                 </div>
               </details>
               {editableIds.includes(page.id) && (
-                <button className="primary" onClick={() => setEditing(true)}>
+                <button
+                  className="primary"
+                  onClick={() =>
+                    run(async () => {
+                      setEditing(
+                        await api<WikiPage>(`${base}/pages/${page.id}`),
+                      );
+                    })
+                  }
+                >
                   <Pencil size={14} />
                   <span>Edit page</span>
                 </button>
@@ -482,14 +491,14 @@ export function WorkspaceApp({
           onClose={() => setAttachments(false)}
         />
       )}
-      {editing && page && (
+      {editing && (
         <PageEditor
-          page={page}
+          page={editing}
           pages={pages}
           collections={collections}
           workspaceSlug={workspace.slug}
           onClose={() => {
-            setEditing(false);
+            setEditing(null);
             refresh();
           }}
         />
