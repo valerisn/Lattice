@@ -35,6 +35,7 @@ import { PageEditor } from "./page-editor";
 import { PageTree } from "./page-tree";
 import { PageReader } from "./page-reader";
 import { PageActionsMenu } from "./page-actions-menu";
+import { ShareDialog } from "./share-dialog";
 import { CreateDialog } from "./create-dialog";
 import { SearchDialog } from "./search-dialog";
 import { ThemePicker } from "./theme-picker";
@@ -70,7 +71,7 @@ export function WorkspaceApp({
   const [search, setSearch] = useState(false);
   const [create, setCreate] = useState<"page" | "collection" | null>(null);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const [sharing, setSharing] = useState(false);
   const [editing, setEditing] = useState<WikiPage | null>(null);
   const [history, setHistory] = useState(false);
   const [attachments, setAttachments] = useState(false);
@@ -106,11 +107,6 @@ export function WorkspaceApp({
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
-  useEffect(() => {
-    if (!notice) return;
-    const timer = setTimeout(() => setNotice(""), 3500);
-    return () => clearTimeout(timer);
-  }, [notice]);
   const run = async (fn: () => Promise<void>) => {
     setError("");
     try {
@@ -433,6 +429,7 @@ export function WorkspaceApp({
               {editableIds.includes(page.id) && (
                 <button
                   className="primary"
+                  aria-label="Edit page"
                   onClick={() =>
                     run(async () => {
                       setEditing(
@@ -464,16 +461,8 @@ export function WorkspaceApp({
               </button>
               <button
                 className="ghost"
-                onClick={() =>
-                  run(async () => {
-                    await navigator.clipboard.writeText(
-                      `${window.location.origin}/w/${workspace.slug}?page=${page.id}`,
-                    );
-                    setNotice(
-                      "Page link copied. Workspace access is required.",
-                    );
-                  })
-                }
+                aria-label="Share"
+                onClick={() => setSharing(true)}
               >
                 <Share2 size={15} />
                 <span>Share</span>
@@ -502,11 +491,6 @@ export function WorkspaceApp({
         {error && (
           <div className="workspace-alert error" role="alert">
             {error}
-          </div>
-        )}
-        {notice && (
-          <div className="toast" role="status">
-            {notice}
           </div>
         )}
         {view === "page" ? (
@@ -595,6 +579,14 @@ export function WorkspaceApp({
             setEditing(null);
             refresh();
           }}
+        />
+      )}
+      {sharing && page && (
+        <ShareDialog
+          key={page.id}
+          page={page}
+          workspaceSlug={workspace.slug}
+          onClose={() => setSharing(false)}
         />
       )}
       {search && (
