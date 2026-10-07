@@ -8,7 +8,10 @@ export async function checkPageActions(page: Page) {
     exact: true,
   });
   const remove = menu.getByRole("button", { name: "Delete page", exact: true });
+  // A streamed response can attach the menu before the loading screen clears.
+  await expect(toggle).toBeVisible();
   await toggle.focus();
+  await expect(toggle).toBeFocused();
   await page.keyboard.press("ArrowDown");
   await expect(history).toBeFocused();
   await page.keyboard.press("ArrowUp");
