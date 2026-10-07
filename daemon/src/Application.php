@@ -182,7 +182,7 @@ final class Application
                         if ($result !== null) { Console::log('update-check', $result); }
                         return $status;
                     });
-                    $next = json_encode([$status['healthy'], $status['problems'], $status['paused'], $status['update_blocked'], $status['auto_update'], $status['recovery']], JSON_THROW_ON_ERROR);
+                    $next = json_encode([$status['healthy'], $status['problems'], $status['paused'], $status['update_blocked'], $status['auto_update'], $status['auto_recover'], $status['recovery'], $status['recovery_policy']['reason']], JSON_THROW_ON_ERROR);
                     if ($signature !== $next) { Console::log('health', $status); $signature = $next; }
                 } catch (Throwable $error) { Console::log('attention', ['message' => $error->getMessage()]); }
                 if ($once) { return isset($status) && $status['healthy'] && !$status['update_blocked'] ? 0 : 2; }

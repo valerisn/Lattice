@@ -32,6 +32,7 @@ Changes listed under **Unreleased** are available on the main branch. They are n
 
 ### daemon
 
+- Status explains automatic recovery eligibility, failed-check thresholds, cooldown, and the hourly restart limit, with structured JSON output.
 - `daemon backups` lists the newest 50 backup directories with complete, incomplete, or unreadable manifest states.
 - `daemon verify-backup <name>` verifies the four backup files against a completed manifest without requiring Docker or stopping containers. JSON output is supported.
 - Windows service lifecycle checks now report progress and use bounded diagnostic calls.

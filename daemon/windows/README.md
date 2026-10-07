@@ -47,6 +47,8 @@ Use `-ProjectName` and `-HealthUrl` on the first install when your existing stac
 
 ## Control and inspect
 
+`daemon status` also explains why automatic recovery is waiting, including failed checks, restart attempts in the last hour, and cooldown seconds. `daemon status --json` exposes these fields under `recovery_policy` without restarting containers.
+
 Run these in an elevated PowerShell terminal. Recreate the `daemon` alias in each terminal or invoke the full `daemon.ps1` path.
 
 ```powershell
@@ -74,13 +76,13 @@ Startup errors also appear in Windows Event Viewer under **Windows Logs → Appl
 
 ## Configuration and data
 
-| Location under `%ProgramData%\LatticeDaemon` | Purpose |
-| --- | --- |
-| `daemon.json` | PHP supervision and update settings, reloaded each cycle |
-| `runtime\windows\service.json` | PHP/tool locations and Docker pipe, reloaded on service restart |
-| `daemon.ps1` | CLI launcher using the service's engine and configuration |
-| `state\` | Private operation locks, health/update state, temporary files, and backups |
-| `state\daemon.log` | PHP events and service lifecycle messages |
+| Location under `%ProgramData%\LatticeDaemon` | Purpose                                                                    |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `daemon.json`                                | PHP supervision and update settings, reloaded each cycle                   |
+| `runtime\windows\service.json`               | PHP/tool locations and Docker pipe, reloaded on service restart            |
+| `daemon.ps1`                                 | CLI launcher using the service's engine and configuration                  |
+| `state\`                                     | Private operation locks, health/update state, temporary files, and backups |
+| `state\daemon.log`                           | PHP events and service lifecycle messages                                  |
 
 Automatic updates remain **disabled by default**. Enabling them updates the Lattice application only, inside the configured UTC maintenance window. The same coordinated backups, stable-release restrictions, and interrupted-update recovery rules apply as on Linux. Read [daemon's update and recovery guide](../README.md#automatic-updates) before enabling unattended updates.
 

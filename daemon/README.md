@@ -61,6 +61,8 @@ sudo journalctl -u lattice-daemon -f
 
 `daemon watch --once` runs one monitoring cycle. Continuous `watch` emits JSON log events when health changes or an operation needs attention. systemd captures these in the journal. `status.json` in the state directory records the latest cycle.
 
+`daemon status` explains whether automatic app recovery is eligible or waiting on failed-check thresholds, cooldown, the three-attempt hourly limit, database health, disk space, or operator intervention. JSON output includes this as `recovery_policy`. Status inspection does not restart containers; the supervisor evaluates recovery during its next cycle.
+
 Exit codes: **0** success, **1** execution/configuration error, **2** unhealthy or operator action required. `NO_COLOR=1` disables terminal color.
 
 ## Automatic updates

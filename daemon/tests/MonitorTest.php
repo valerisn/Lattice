@@ -46,6 +46,11 @@ test('recovery waits for failures, honors cooldown, and stops after three attemp
     check($monitor->tick(10180)['recovery'] === 'app restart requested');
     check($monitor->tick(10240)['recovery'] === 'none');
     check(count($store->read('monitor')['recoveries']) === 3);
+    $status = $monitor->tick(10241);
+    check($status['recovery_policy']['attempts_last_hour'] === 3);
+    check(!$status['recovery_policy']['eligible']);
+    check(str_contains($status['recovery_policy']['reason'], 'three recovery attempts'));
+    check($store->read('status')['recovery_policy'] === $status['recovery_policy']);
 });
 test('operator stop and incomplete updates inhibit automated recovery', function (): void {
     [$monitor, $runner, $http, $store] = monitorFixture();

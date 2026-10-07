@@ -20,6 +20,13 @@ final class Console
             echo '  Health         ' . ($data['healthy'] ? 'healthy' : 'needs attention') . "\n";
             echo '  Supervision    ' . (!empty($data['paused']) ? 'paused by operator' : (!empty($data['update_blocked']) ? 'blocked after update' : 'active')) . "\n";
             echo '  Auto-update    ' . (!empty($data['auto_update']) ? 'enabled' : 'disabled') . "\n";
+            if (isset($data['recovery_policy'])) {
+                $policy = $data['recovery_policy'];
+                echo '  Recovery       ' . $policy['reason'] . "\n";
+                echo '  Failed checks  ' . $policy['failed_checks'] . '/' . $policy['failure_threshold'] . "\n";
+                echo '  Restarts/hour  ' . $policy['attempts_last_hour'] . '/' . $policy['attempt_limit'] . "\n";
+                if ($policy['cooldown_remaining_seconds'] > 0) { echo '  Cooldown       ' . $policy['cooldown_remaining_seconds'] . " seconds remaining\n"; }
+            }
             echo '  Free space     ' . ($data['deployment_free_mb'] ?? '?') . ' MiB deployment / ' . ($data['state_free_mb'] ?? '?') . " MiB state\n";
             foreach ($data['problems'] as $problem) { echo "  ! $problem\n"; }
             $update = $data['last_update'] ?? [];

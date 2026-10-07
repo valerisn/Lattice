@@ -41,7 +41,7 @@ final class Monitor
         if (!$diskOk) { $problems[] = 'Low or unreadable disk space on the deployment or daemon state filesystem.'; }
         $state = $this->store->read('monitor');
         $update = $this->store->read('update');
-        return [
+        $status = [
             'checked_at' => gmdate('c'), 'healthy' => $serviceHealthy['app'] && $serviceHealthy['db'] && $endpoint && $diskOk,
             'services' => $services, 'database_ready' => $serviceHealthy['db'], 'http_ready' => $endpoint,
             'disk_ready' => $diskOk, 'deployment_free_mb' => $freeMb, 'state_free_mb' => $stateFreeMb,
@@ -49,6 +49,8 @@ final class Monitor
             'auto_update' => $config->get('auto_update'), 'auto_recover' => $config->get('auto_recover'),
             'problems' => $problems,
         ];
+        $status['recovery_policy'] = RecoveryPolicy::inspect($status, $state, $config, time());
+        return $status;
     }
 
     // The caller holds the action lock while inspecting and recovering.
@@ -61,11 +63,8 @@ final class Monitor
         $state['recoveries'] = array_values(array_filter($state['recoveries'] ?? [], static fn ($time) => $time > $now - 3600));
         $config = $this->compose->config;
         $status['recovery'] = 'none';
-        if (!$status['healthy'] && !$status['paused'] && !$status['update_blocked'] && $config->get('auto_recover')
-            && $status['database_ready'] && $status['disk_ready']
-            && $state['failures'] >= $config->get('failure_threshold')
-            && $now - ($state['last_recovery'] ?? 0) >= $config->get('recovery_cooldown_seconds')
-            && count($state['recoveries']) < 3) {
+        $status['recovery_policy'] = RecoveryPolicy::inspect($status, $state, $config, $now);
+        if ($status['recovery_policy']['eligible']) {
             $state['last_recovery'] = $now;
             $state['recoveries'][] = $now;
             $this->store->write('monitor', $state);
@@ -73,6 +72,7 @@ final class Monitor
                 $this->compose->must(['restart', '--timeout', '30', 'app'], 'Application recovery', 90);
                 $status['recovery'] = 'app restart requested';
             } catch (Throwable $error) { $status['recovery'] = $error->getMessage(); }
+            $status['recovery_policy'] = RecoveryPolicy::inspect($status, $state, $config, $now);
         }
         $this->store->write('monitor', $state);
         $this->store->write('status', $status);
