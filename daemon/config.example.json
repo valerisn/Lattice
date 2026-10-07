@@ -1,0 +1,18 @@
+{
+  "directory": "/opt/lattice",
+  "state_dir": "/var/lib/lattice-daemon",
+  "project_name": "lattice",
+  "health_url": "http://127.0.0.1:3000/api/health",
+  "poll_seconds": 30,
+  "failure_threshold": 3,
+  "auto_recover": true,
+  "recovery_cooldown_seconds": 900,
+  "auto_update": false,
+  "allow_major_updates": false,
+  "update_interval_seconds": 21600,
+  "update_window_utc": "03-05",
+  "minimum_free_mb": 2048,
+  "database_name": "lattice",
+  "database_user": "lattice"
+}
+
