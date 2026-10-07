@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, BookOpen, GitBranch, LockKeyhole } from "lucide-react";
 import { api } from "@/client/api";
@@ -8,7 +9,7 @@ export function AuthForm({ setup = false, tokenRequired = false, inviteToken }: 
   const [busy, setBusy] = useState(false);
   const [workspace, setWorkspace] = useState("");
   const [slug, setSlug] = useState("");
-  return <main className="auth-layout"><section className="auth-story"><a className="brand" href="/"><img src="/lattice-logo.png" width="40" height="40" alt="" />Lattice<span className="badge">OPEN SOURCE</span></a><div><p className="eyebrow">A HOME FOR WHAT YOU KNOW</p><h1>Good ideas.<br />Shared understanding.<br /><span>Room to grow.</span></h1><p>A calm, connected space for your team’s knowledge.<br />Built to be yours, from the first page.</p><div className="auth-benefits"><span><BookOpen size={18} /> Beautifully organized</span><span><GitBranch size={18} /> Open by design</span><span><LockKeyhole size={18} /> On your infrastructure</span></div></div><p className="muted">Lattice · Open knowledge, beautifully organized.</p></section><section className="auth-panel"><div className="auth-card"><p className="eyebrow">{setup ? "YOUR NEXT CHAPTER" : inviteToken ? "BETTER, TOGETHER" : "WELCOME BACK"}</p><h2>{setup ? "Plant the first seed." : inviteToken ? "Join your workspace." : "Your knowledge awaits."}</h2><p className="muted">{setup ? "Create your workspace and make yourself at home." : inviteToken ? "Create your account to accept this invitation. Existing users should sign in first." : "Sign in to pick up where you left off."}</p><form onSubmit={async event => {
+  return <main className="auth-layout"><section className="auth-story"><Link className="brand" href="/"><img src="/lattice-logo.png" width="40" height="40" alt="" />Lattice<span className="badge">OPEN SOURCE</span></Link><div><p className="eyebrow">A HOME FOR WHAT YOU KNOW</p><h1>Good ideas.<br />Shared understanding.<br /><span>Room to grow.</span></h1><p>A calm, connected space for your team’s knowledge.<br />Built to be yours, from the first page.</p><div className="auth-benefits"><span><BookOpen size={18} /> Beautifully organized</span><span><GitBranch size={18} /> Open by design</span><span><LockKeyhole size={18} /> On your infrastructure</span></div></div><p className="muted">Lattice · Open knowledge, beautifully organized.</p></section><section className="auth-panel"><div className="auth-card"><p className="eyebrow">{setup ? "YOUR NEXT CHAPTER" : inviteToken ? "BETTER, TOGETHER" : "WELCOME BACK"}</p><h2>{setup ? "Plant the first seed." : inviteToken ? "Join your workspace." : "Your knowledge awaits."}</h2><p className="muted">{setup ? "Create your workspace and make yourself at home." : inviteToken ? "Create your account to accept this invitation. Existing users should sign in first." : "Sign in to pick up where you left off."}</p><form onSubmit={async event => {
     event.preventDefault(); setBusy(true); setError("");
     const data = Object.fromEntries(new FormData(event.currentTarget));
     try { await api(inviteToken ? "/api/invites/accept" : `/api/auth/${setup ? "setup" : "login"}`, "POST", { ...data, token: inviteToken }); window.location.assign("/"); }
@@ -21,3 +22,4 @@ export function AuthForm({ setup = false, tokenRequired = false, inviteToken }: 
     {error && <div role="alert" className="error">{error}</div>}<button className="primary" disabled={busy} type="submit">{busy ? "One moment…" : setup ? "Create your workspace" : inviteToken ? "Create account & join" : "Sign in"}<ArrowRight size={16} /></button>
   </form>{inviteToken && <p><a href={`/login?next=${encodeURIComponent(`/invite/${inviteToken}`)}`}>Already have an account? Sign in</a></p>}<p className="auth-footnote">Your knowledge. Your server. Your space.</p></div></section></main>;
 }
+
