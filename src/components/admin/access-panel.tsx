@@ -23,10 +23,11 @@ export function AccessPanel({
         className="row"
         onSubmit={(e) => {
           e.preventDefault();
-          const name = new FormData(e.currentTarget).get("name");
-          e.currentTarget.reset();
+          const form = e.currentTarget;
+          const name = new FormData(form).get("name");
           void run(async () => {
             await api(`${base}/groups`, "POST", { name });
+            form.reset();
           });
         }}
       >
