@@ -29,3 +29,5 @@ The **Linked from** section lists accessible pages in the same workspace that li
 Move pages in the sidebar to change their order or parent. Moving under a restricted page can change who can read the page through inherited permissions. Administrators can inspect group and individual access grants in workspace settings.
 
 The breadcrumb trail links to parent pages. Browser Back and Forward navigate between documents, and Recent pages, Favorites, and collection views have bookmarkable URLs. Browser tab titles include the current page and workspace.
+
+Writers can use **Drafts** in the sidebar to find unfinished pages, ordered by most recently updated. Drafts stay hidden from viewers. Open a draft, choose **Edit page**, and change **Publication** to publish it. Published children of a draft remain hidden from viewers until their ancestors are published too.

@@ -7,6 +7,7 @@ import {
   Search,
   Home,
   Clock3,
+  FilePenLine,
   Star,
   Plus,
   Folder,
@@ -120,11 +121,15 @@ export function WorkspaceApp({
   const filtered =
     view === "favorites"
       ? pages.filter((p) => p.favorite)
-      : view === "recent"
-        ? [...pages]
+      : view === "drafts"
+        ? pages
+            .filter((p) => p.state === "draft")
             .sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
-            .slice(0, 20)
-        : pages.filter((p) => p.collection_id === view);
+        : view === "recent"
+          ? [...pages]
+              .sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
+              .slice(0, 20)
+          : pages.filter((p) => p.collection_id === view);
   const title = pageViewTitle(view, page, collections);
   const currentTitle = title;
   return (
@@ -207,6 +212,18 @@ export function WorkspaceApp({
                 <Star size={17} />
                 Favorites
               </button>
+              {canEdit(workspace.role) && (
+                <button
+                  className={view === "drafts" ? "active" : ""}
+                  onClick={() => setView("drafts")}
+                >
+                  <FilePenLine size={17} />
+                  Drafts
+                  <small>
+                    {pages.filter((p) => p.state === "draft").length}
+                  </small>
+                </button>
+              )}
             </nav>
             <div className="sidebar-scroll">
               <div className="section-label">
@@ -513,8 +530,10 @@ export function WorkspaceApp({
             <p className="eyebrow">YOUR KNOWLEDGE, TOGETHER</p>
             <h1>{title}</h1>
             <p className="muted">
-              {collections.find((c) => c.id === view)?.description ||
-                "A little less searching. A little more knowing."}
+              {view === "drafts"
+                ? "Work in progress, hidden from viewers. Open a page to edit or publish it."
+                : collections.find((c) => c.id === view)?.description ||
+                  "A little less searching. A little more knowing."}
             </p>
             <div className="list-rows">
               {filtered.map((p) => (
@@ -531,7 +550,9 @@ export function WorkspaceApp({
                   Nothing here yet.{" "}
                   {view === "favorites"
                     ? "Star a page to keep it close."
-                    : "Create a page to start growing this space."}
+                    : view === "drafts"
+                      ? "Pages saved as drafts appear here."
+                      : "Create a page to start growing this space."}
                 </p>
               )}
             </div>

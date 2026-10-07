@@ -14,6 +14,7 @@ export function pageViewTitle(
   if (view === "page") return page?.title || "Page";
   if (view === "favorites") return "Your favorites";
   if (view === "recent") return "Recently updated";
+  if (view === "drafts") return "Drafts";
   return (
     collections.find((collection) => collection.id === view)?.name || "Pages"
   );

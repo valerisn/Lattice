@@ -259,6 +259,21 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
     page.getByRole("heading", { name: "Public index", exact: true }),
   ).toBeVisible();
   const viewerPage = await anonymous.newPage();
+  const unpublished = await (
+    await request("/pages", "POST", {
+      title: "Unpublished checklist",
+      state: "draft",
+    })
+  ).json();
+  await viewerPage.goto("/w/test-studio?view=drafts");
+  await expect(
+    viewerPage.getByText(unpublished.title, { exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    viewerPage
+      .getByRole("navigation", { name: "Workspace", exact: true })
+      .getByRole("button", { name: /^Drafts/ }),
+  ).toHaveCount(0);
   await viewerPage.goto("/w/test-studio");
   const viewerLinks = viewerPage.getByRole("region", {
     name: "Linked from",
@@ -369,6 +384,19 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await expect(
     page.getByRole("heading", { name: "Recovery procedure", exact: true }),
   ).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Workspace", exact: true })
+    .getByRole("button", { name: /^Drafts/ })
+    .click();
+  await expect(page).toHaveURL(/view=drafts$/);
+  await expect(
+    page.locator(".list-rows").getByRole("button", { name: /On-call runbook/ }),
+  ).toBeVisible();
+  await expect(
+    page.locator(".list-rows").getByRole("button", { name: /Public index/ }),
+  ).toHaveCount(0);
+  await page.reload();
+  await expect(page).toHaveTitle("Drafts · Test Studio · Lattice");
   await page.goto("/w/test-studio/settings?section=templates");
   await page
     .getByRole("button", { name: "Edit Service runbook", exact: true })
