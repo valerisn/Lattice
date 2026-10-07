@@ -6,6 +6,7 @@ Changes listed under **Unreleased** are available on the main branch. They are n
 
 ### Writing and reading
 
+- Section links reveal their destination inside collapsed or nested details, including shared URLs and keyboard navigation.
 - Page actions support arrow-key navigation and dismiss on Escape or an outside click. Choosing an action closes the menu and provides a focus target when its dialog closes.
 - Slash commands open only in empty paragraphs, preserving URLs, paths, and code. Escape closes the block picker without closing the editor.
 - Markdown callouts render notes, tips, important information, warnings, and cautions with labels and icons. The rich editor's Callout block inserts a note.

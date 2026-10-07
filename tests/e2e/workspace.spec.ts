@@ -16,6 +16,7 @@ import { checkHistoryFeedback } from "./history-feedback";
 import { checkCallouts } from "./callouts";
 import { checkSlashCommands } from "./slash-commands";
 import { checkPageActions } from "./page-actions";
+import { checkSectionLinks } from "./section-links";
 
 test("workspace lifecycle, revisions, uploads, and authorization", async ({
   page,
@@ -82,6 +83,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await checkCallouts(page, base, headers);
   await checkSlashCommands(page, base, headers);
   await checkPageActions(page);
+  await checkSectionLinks(page, base, headers);
   await page.getByRole("button", { name: "New page", exact: true }).click();
   await page.getByLabel("Page title", { exact: true }).fill("Project notes");
   await page.getByLabel("Parent page").selectOption({ label: "Home" });

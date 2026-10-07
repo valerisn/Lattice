@@ -11,6 +11,26 @@ import {
   documentationSettings,
   type DocumentationSettings,
 } from "@/shared/documentation";
+
+function revealFragment(article: HTMLElement | null, hash: string) {
+  if (!article || !hash) return null;
+  let id: string;
+  try {
+    id = decodeURIComponent(hash.slice(1));
+  } catch {
+    return null;
+  }
+  const target = document.getElementById(id);
+  if (!target || !article.contains(target)) return null;
+  for (
+    let parent = target.parentElement;
+    parent && parent !== article;
+    parent = parent.parentElement
+  )
+    if (parent instanceof HTMLDetailsElement) parent.open = true;
+  return target;
+}
+
 export function PageReader({
   page,
   collections,
@@ -27,6 +47,17 @@ export function PageReader({
   onSelect: (id: string) => void;
 }) {
   const article = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const navigate = () => {
+      revealFragment(article.current, window.location.hash)?.scrollIntoView();
+    };
+    const frame = requestAnimationFrame(navigate);
+    window.addEventListener("hashchange", navigate);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("hashchange", navigate);
+    };
+  }, [page.id, page.content]);
   useEffect(() => {
     const opened = new Set<HTMLDetailsElement>();
     const beforePrint = () => {
@@ -60,6 +91,34 @@ export function PageReader({
   return (
     <div
       className={`reader-layout ${settings.reading_width === "wide" ? "reader-wide" : ""} ${!settings.show_toc || headings.length < 2 ? "reader-without-toc" : ""}`}
+      onClickCapture={(event) => {
+        if (
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.altKey ||
+          event.shiftKey
+        )
+          return;
+        const anchor =
+          event.target instanceof Element ? event.target.closest("a") : null;
+        if (
+          !anchor ||
+          anchor.target === "_blank" ||
+          anchor.hasAttribute("download")
+        )
+          return;
+        const url = new URL(anchor.href);
+        if (
+          url.origin !== location.origin ||
+          url.pathname !== location.pathname ||
+          url.search !== location.search ||
+          !url.hash
+        )
+          return;
+        // Reveal before native anchor scrolling, including clicks on the current hash.
+        revealFragment(article.current, url.hash);
+      }}
     >
       <article className="page-article" ref={article}>
         <header className="page-masthead">

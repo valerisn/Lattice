@@ -30,6 +30,8 @@ The table of contents follows rendered level-two and level-three headings. Repea
 
 On larger screens, the table of contents highlights the section you are reading as you scroll. Long outlines scroll independently to keep the current section visible.
 
+Section links open any expandable sections that contain their destination, including nested details. This works when opening a shared URL, following the table of contents, or navigating with the keyboard. Unrelated expandable sections stay closed.
+
 Fenced code examples show their language and a **Copy** button. Copying preserves indentation and line breaks. If your browser blocks clipboard access, the example stays selectable and the button lets you retry. Keyboard readers can focus a code example to scroll long lines. Copy controls stay out of printed pages.
 
 Choose **More → Print / Save as PDF**, or use your browser's print shortcut, for a paper-friendly layout. Navigation and editing controls are hidden, dark mode becomes white paper, and expandable sections open for printing. Choose your browser's PDF destination to save a copy.
