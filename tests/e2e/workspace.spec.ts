@@ -395,10 +395,14 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await expect(page.getByText("Changes saved.", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Audit log", exact: true }).click();
   await expect(
-    page.getByText("Updated documentation settings", { exact: true }),
+    page
+      .locator(".audit-list")
+      .getByText("Updated documentation settings", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByText("Created an invitation", { exact: true }),
+    page
+      .locator(".audit-list")
+      .getByText("Created an invitation", { exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Templates", exact: true }).click();
   await page.getByRole("button", { name: "New template", exact: true }).click();
