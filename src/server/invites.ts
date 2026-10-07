@@ -19,6 +19,20 @@ export async function acceptInvite(body: unknown) {
   const db = await database();
   await rateLimit(db, "invitation-accept", 50);
   const userId = await db.transaction(async (tx) => {
+    const [candidate] = await tx.query<{ workspace_id: string }>(
+      "SELECT workspace_id FROM invites WHERE token_hash=$1 AND expires_at>now() AND accepted_at IS NULL",
+      [digest(token)],
+    );
+    if (!candidate)
+      throw new AppError(
+        404,
+        "This invitation has expired or already been used.",
+      );
+    // Match the admin mutation lock order, then recheck the invite. Otherwise
+    // accepting an invite and revoking it can deadlock on opposite row locks.
+    await tx.query("SELECT id FROM workspaces WHERE id=$1 FOR UPDATE", [
+      candidate.workspace_id,
+    ]);
     const [invite] = await tx.query<Invite>(
       "SELECT * FROM invites WHERE token_hash=$1 AND expires_at>now() AND accepted_at IS NULL FOR UPDATE",
       [digest(token)],
