@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { User } from "@/shared/types";
 import { api } from "@/client/api";
@@ -13,29 +13,47 @@ export function AccountPanel({ user }: { user: User }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const load = async () =>
-    setSessions((await api<{ sessions: Session[] }>("/api/account")).sessions);
-  useEffect(() => {
-    let alive = true;
-    api<{ sessions: Session[] }>("/api/account")
-      .then((d) => {
-        if (alive) setSessions(d.sessions);
+  const [loadingSessions, setLoadingSessions] = useState(true);
+  const [sessionError, setSessionError] = useState("");
+  const sessionRequest = useRef(0);
+  const fetchSessions = useCallback(() => {
+    const request = ++sessionRequest.current;
+    return api<{ sessions: Session[] }>("/api/account")
+      .then((data) => {
+        if (request === sessionRequest.current) setSessions(data.sessions);
       })
-      .catch((e) => {
-        if (alive) setError(e.message);
+      .catch((e: Error) => {
+        if (request === sessionRequest.current) setSessionError(e.message);
+      })
+      .finally(() => {
+        if (request === sessionRequest.current) setLoadingSessions(false);
       });
-    return () => {
-      alive = false;
-    };
   }, []);
-  const run = async (fn: () => Promise<void>) => {
+  useEffect(() => {
+    const counter = sessionRequest;
+    void fetchSessions();
+    return () => {
+      counter.current++;
+    };
+  }, [fetchSessions]);
+  const refreshSessions = () => {
+    setLoadingSessions(true);
+    setSessionError("");
+    setSessions([]);
+    return fetchSessions();
+  };
+  const run = async (
+    fn: () => Promise<void>,
+    success: string,
+    refresh = false,
+  ) => {
     setBusy(true);
     setError("");
     setMessage("");
     try {
       await fn();
-      await load();
-      setMessage("Changes saved.");
+      setMessage(success);
+      if (refresh) await refreshSessions();
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -65,7 +83,7 @@ export function AccountPanel({ user }: { user: User }) {
             const body = Object.fromEntries(new FormData(e.currentTarget));
             void run(async () => {
               await api("/api/account", "PATCH", body);
-            });
+            }, "Profile saved.");
           }}
         >
           <h2>Your profile</h2>
@@ -107,13 +125,17 @@ export function AccountPanel({ user }: { user: User }) {
             e.preventDefault();
             const form = e.currentTarget;
             const body = Object.fromEntries(new FormData(form));
-            void run(async () => {
-              await api("/api/account", "POST", {
-                ...body,
-                action: "password",
-              });
-              form.reset();
-            });
+            void run(
+              async () => {
+                await api("/api/account", "POST", {
+                  ...body,
+                  action: "password",
+                });
+                form.reset();
+              },
+              "Password updated. Other sessions have been signed out.",
+              true,
+            );
           }}
         >
           <h2>Change password</h2>
@@ -144,6 +166,17 @@ export function AccountPanel({ user }: { user: User }) {
         </form>
         <section className="settings-section">
           <h2>Active sessions</h2>
+          {loadingSessions && <p role="status">Loading sessions…</p>}
+          {sessionError && (
+            <div>
+              <p role="alert" className="error">
+                Could not load active sessions: {sessionError}
+              </p>
+              <button type="button" onClick={() => void refreshSessions()}>
+                Retry loading sessions
+              </button>
+            </div>
+          )}
           {sessions.map((s, i) => (
             <p key={i}>
               {s.current ? "This session" : "Another session"} · Created{" "}
@@ -154,11 +187,26 @@ export function AccountPanel({ user }: { user: User }) {
               </small>
             </p>
           ))}
+          {!loadingSessions &&
+            !sessionError &&
+            !sessions.some((session) => !session.current) && (
+              <p className="muted">You have no other active sessions.</p>
+            )}
           <button
+            type="button"
+            disabled={
+              loadingSessions ||
+              !!sessionError ||
+              !sessions.some((session) => !session.current)
+            }
             onClick={() =>
-              run(async () => {
-                await api("/api/account", "POST", { action: "revoke" });
-              })
+              run(
+                async () => {
+                  await api("/api/account", "POST", { action: "revoke" });
+                },
+                "Other sessions have been signed out.",
+                true,
+              )
             }
           >
             Sign out other sessions

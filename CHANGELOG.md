@@ -19,6 +19,7 @@ Changes listed under **Unreleased** are available on the main branch. They are n
 
 ### Administration
 
+- Account changes keep their confirmed success message if session loading fails. The session list shows loading and retry states, and disables signing out other sessions when none remain.
 - Documentation review can show published pages not updated in at least 90 days, oldest first.
 - Review lists expand in groups of eight pages.
 - Audit history supports activity-type filters and literal searches across actor names and changed items, including older results.
