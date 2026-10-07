@@ -72,3 +72,18 @@ export async function restoreRevision(db: Database, workspace: Workspace, userId
   if (!old) throw new AppError(404, "Revision not found.");
   return updatePage(db, workspace, userId, pageId, { ...page, title: old.title, description: old.description, content: old.content, version, summary: `Restored version ${old.version}` });
 }
+export async function movePage(db:Database,workspace:Workspace,userId:string,pageId:string,body:unknown){
+  const data=z.object({parent_id:z.uuid().nullable(),before_id:z.uuid().nullable()}).parse(body);
+  return db.transaction(async tx=>{
+    await tx.query("SELECT id FROM workspaces WHERE id=$1 FOR UPDATE",[workspace.id]);
+    const current=await requirePage(tx,workspace,userId,pageId,"edit");
+    await validateLocation(tx,workspace,userId,data.parent_id,current.collection_id,pageId);
+    const siblings=await tx.query<{id:string}>("SELECT id FROM pages WHERE workspace_id=$1 AND parent_id IS NOT DISTINCT FROM $2 AND id<>$3 ORDER BY position,created_at",[workspace.id,data.parent_id,pageId]);
+    const index=data.before_id ? siblings.findIndex(p=>p.id===data.before_id) : siblings.length;
+    if(index<0)throw new AppError(400,"The destination page has moved. Reload and try again.");
+    siblings.splice(index,0,{id:pageId});
+    for(const [position,sibling] of siblings.entries())await tx.query("UPDATE pages SET position=$1 WHERE id=$2",[position,sibling.id]);
+    const [page]=await tx.query<WikiPage>("UPDATE pages SET parent_id=$1,version=version+1,updated_by=$2,updated_at=now() WHERE id=$3 RETURNING *",[data.parent_id,userId,pageId]);
+    await revision(tx,page,userId,"Moved page");return page;
+  });
+}

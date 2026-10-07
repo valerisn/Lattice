@@ -5,7 +5,7 @@ import { AppError, errorResponse } from "@/server/errors";
 import { checkOrigin } from "@/server/security";
 import { membership } from "@/server/workspaces";
 import { accessContext, requirePage } from "@/server/permissions";
-import { createPage, updatePage, deletePage, revisions, restoreRevision } from "@/server/pages";
+import { createPage, updatePage, deletePage, revisions, restoreRevision, movePage } from "@/server/pages";
 import { searchProvider } from "@/server/search";
 import { createCollection,updateCollection,deleteCollection } from "@/server/collections";
 import { adminRequest } from "@/server/admin";
@@ -41,6 +41,7 @@ async function handle(request: Request, context: Context) {
         return Response.json({ ok: true });
       }
       if (method === "POST" && action === "restore") return Response.json(await restoreRevision(db, workspace, user.id, id, await request.json()));
+      if(method === "POST" && action === "move") return Response.json(await movePage(db,workspace,user.id,id,await request.json()));
       if (method === "POST" && !id) return Response.json(await createPage(db, workspace, user.id, await request.json()), { status: 201 });
       if (method === "PATCH" && id && !action) return Response.json(await updatePage(db, workspace, user.id, id, await request.json()));
       if (method === "DELETE" && id && !action) { await deletePage(db, workspace, user.id, id); return Response.json({ ok: true }); }

@@ -2,7 +2,7 @@ import { beforeAll, afterAll, describe, expect, it } from "vitest";
 import { PGlite } from "@electric-sql/pglite";
 import { embeddedDatabase, migrate, type Database } from "../src/server/db";
 import { createWorkspace, membership } from "../src/server/workspaces";
-import { createPage, updatePage, deletePage, revisions, restoreRevision } from "../src/server/pages";
+import { createPage, updatePage, deletePage, revisions, restoreRevision, movePage } from "../src/server/pages";
 import { accessContext, requirePage } from "../src/server/permissions";
 import { rateLimit } from "../src/server/security";
 import type { Workspace, WikiPage } from "../src/shared/types";
@@ -53,6 +53,13 @@ describe("workspace services", () => {
   });
   it("uses durable rate limits", async () => {
     await rateLimit(db, "attempt", 1); await expect(rateLimit(db, "attempt", 1)).rejects.toThrow("Too many");
+  });
+  it("persists a stable sibling order and rejects invalid move targets",async()=>{
+    const a=await createPage(db,workspace,owner,{title:"Order A"});const b=await createPage(db,workspace,owner,{title:"Order B"});
+    await movePage(db,workspace,owner,b.id,{parent_id:null,before_id:a.id});
+    const rows=await db.query<{id:string}>("SELECT id FROM pages WHERE workspace_id=$1 AND parent_id IS NULL ORDER BY position,created_at",[workspace.id]);
+    expect(rows.findIndex(p=>p.id===b.id)).toBeLessThan(rows.findIndex(p=>p.id===a.id));
+    await expect(movePage(db,workspace,owner,a.id,{parent_id:null,before_id:crypto.randomUUID()})).rejects.toThrow("destination");
   });
 });
 
