@@ -44,11 +44,11 @@ export async function checkCallouts(
       name: "Page content",
       exact: true,
     });
-    await editor.locator(":scope > p").last().click();
-    await editor.press("End");
-    await editor.press("Enter");
-    await editor.pressSequentially("Another detail from the rich editor.");
-    await editor.press("Enter");
+    await editor
+      .locator(":scope > p")
+      .last()
+      .fill("Another detail from the rich editor.");
+    await page.keyboard.press("Enter");
     await dialog.getByRole("button", { name: "Block", exact: true }).click();
     await dialog.getByRole("button", { name: "Callout", exact: true }).click();
     await dialog.getByRole("button", { name: "Done", exact: true }).click();
