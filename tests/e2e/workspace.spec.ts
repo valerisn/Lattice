@@ -489,7 +489,8 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   ).toBe(true);
   await outlineLinks.last().click();
   await expect(page).toHaveURL(/#lattice-heading-repeat-1$/);
-  await page.getByLabel("Appearance", { exact: true }).selectOption("dark");
+  await page.getByRole("button", { name: /^Appearance:/ }).click();
+  await page.getByRole("menuitemradio", { name: "Dark", exact: true }).click();
   await page.evaluate(() => {
     window.print = () => {
       window.dispatchEvent(new Event("beforeprint"));
@@ -512,8 +513,32 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
   await expect(page.locator(".prose details")).not.toHaveAttribute("open");
   await page.goto("/w/test-studio");
-  await page.getByLabel("Appearance", { exact: true }).selectOption("dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const appearance = page.getByRole("button", {
+    name: "Appearance: Dark",
+    exact: true,
+  });
+  await appearance.focus();
+  await page.keyboard.press("ArrowDown");
+  await expect(
+    page.getByRole("menuitemradio", { name: "Dark", exact: true }),
+  ).toBeFocused();
+  await page.keyboard.press("Home");
+  await expect(
+    page.getByRole("menuitemradio", { name: "Light", exact: true }),
+  ).toBeFocused();
+  await page.keyboard.press("End");
+  await expect(
+    page.getByRole("menuitemradio", { name: "System", exact: true }),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(appearance).toBeFocused();
+  await expect(
+    page.getByRole("menu", { name: "Appearance", exact: true }),
+  ).toHaveCount(0);
+  await appearance.click();
+  await page.getByRole("heading", { name: "Home", exact: true }).click();
+  await expect(appearance).toHaveAttribute("aria-expanded", "false");
   await page.setViewportSize({ width: 390, height: 844 });
   await page
     .getByRole("button", { name: "Collapse sidebar", exact: true })
