@@ -9,6 +9,13 @@ import { saveWorkspaceSettings } from "./workspace-settings";
 import { installedVersion, lastUpdateCheck, checkForUpdates } from "./updates";
 import { auditActions } from "@/shared/audit";
 import { auditTarget, listAuditEvents, writeAuditEvent } from "./audit";
+import {
+  listTemplates,
+  getTemplate,
+  createTemplate,
+  updateTemplate,
+  deleteTemplate,
+} from "./templates";
 
 export async function adminRequest(
   request: Request,
@@ -63,9 +70,16 @@ async function handleAdminRequest(
       "updates",
       "documentation",
       "audit",
+      "templates",
     ].includes(resource)
   )
     return null;
+  if (resource === "templates" && method === "GET")
+    return Response.json(
+      id
+        ? await getTemplate(db, workspace, id)
+        : await listTemplates(db, workspace),
+    );
   if (resource === "members" && method === "GET")
     return Response.json(
       await db.query(
@@ -75,6 +89,19 @@ async function handleAdminRequest(
     );
   if (!canManage(workspace.role))
     throw new AppError(403, "Only administrators can manage this workspace.");
+  if (resource === "templates" && method === "POST")
+    return Response.json(
+      await createTemplate(db, workspace, await request.json()),
+      { status: 201 },
+    );
+  if (resource === "templates" && method === "PATCH" && id)
+    return Response.json(
+      await updateTemplate(db, workspace, id, await request.json()),
+    );
+  if (resource === "templates" && method === "DELETE" && id) {
+    await deleteTemplate(db, workspace, id);
+    return Response.json({ ok: true });
+  }
   if (resource === "audit" && method === "GET")
     return Response.json(
       await listAuditEvents(

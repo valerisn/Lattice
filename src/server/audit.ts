@@ -63,9 +63,15 @@ export async function auditTarget(
     return workspace.name;
   if (resource === "invites" && typeof body.email === "string")
     return body.email;
-  if (resource === "groups" && typeof body.name === "string") return body.name;
+  if (
+    (resource === "groups" || resource === "templates") &&
+    typeof body.name === "string"
+  )
+    return body.name;
   if (!id || !z.uuid().safeParse(id).success) return "Workspace access";
   const queries: Record<string, string> = {
+    templates:
+      "SELECT name AS label FROM page_templates WHERE id=$1 AND workspace_id=$2",
     members:
       "SELECT u.name AS label FROM users u JOIN workspace_members m ON m.user_id=u.id WHERE u.id=$1 AND m.workspace_id=$2",
     groups: "SELECT name AS label FROM groups WHERE id=$1 AND workspace_id=$2",

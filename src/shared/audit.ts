@@ -10,6 +10,9 @@ export interface AuditPage {
   nextCursor: string | null;
 }
 export const auditActions: Record<string, string> = {
+  "templates.POST": "Created a page template",
+  "templates.PATCH": "Updated a page template",
+  "templates.DELETE": "Deleted a page template",
   "admin.PATCH": "Updated workspace settings",
   "documentation.PATCH": "Updated documentation settings",
   "invites.POST": "Created an invitation",

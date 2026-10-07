@@ -4,6 +4,7 @@ import type { Workspace, WikiPage, Revision } from "@/shared/types";
 import { requirePage, accessContext } from "./permissions";
 import { AppError } from "./errors";
 import { documentationSettings } from "@/shared/documentation";
+import { getTemplate } from "./templates";
 
 export const pageInput = z.object({
   title: z.string().trim().min(1).max(200),
@@ -79,6 +80,8 @@ export async function createPage(
 ) {
   const data = pageInput
     .extend({
+      template_id: z.uuid().nullable().default(null),
+      content: z.string().max(500000).optional(),
       state: z
         .enum(["draft", "published"])
         .default(documentationSettings(workspace.documentation).default_state),
@@ -97,6 +100,9 @@ export async function createPage(
       data.parent_id,
       data.collection_id,
     );
+    const template = data.template_id
+      ? await getTemplate(tx, workspace, data.template_id)
+      : null;
     const id = crypto.randomUUID();
     const [page] = await tx.query<WikiPage>(
       "INSERT INTO pages(id,workspace_id,title,slug,description,content,parent_id,collection_id,state,position,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11) RETURNING *",
@@ -106,7 +112,7 @@ export async function createPage(
         data.title,
         `${slugify(data.title)}-${id.slice(0, 8)}`,
         data.description,
-        data.content,
+        data.content ?? template?.content ?? "",
         data.parent_id,
         data.collection_id,
         data.state,

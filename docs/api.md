@@ -36,6 +36,10 @@ Grants require one of `page_id`/`collection_id`, one of `user_id`/`group_id`, an
 
 API tokens, bulk endpoints, and long-term compatibility guarantees are planned.
 
+Page templates are available at `/api/w/:workspaceId/templates`: writers can `GET` summaries or `GET /:id` for Markdown content; administrators can `POST` a template, `PATCH /:id`, or `DELETE /:id`. Create accepts `name` (1–80 characters) and `content` (up to 500,000 characters). Updates also require `version` and reject stale edits with 409. Each workspace supports 100 templates. Template mutations appear in the audit log.
+
+Page creation accepts an optional `template_id` from the same workspace. The template supplies the initial Markdown when `content` is omitted. Later template changes or deletion never modify existing pages.
+
 Workspace settings (`PATCH /admin`) accept partial updates to `name`, `description`, `logo`, `accent`, `homepage_id`, and `upload_limit`. Omitted fields remain unchanged. Send an empty logo string to restore the default, or a null homepage ID to choose the first available page.
 
 Documentation preferences accept partial updates: `default_state` (`draft` or `published`), `reading_width` (`comfortable` or `wide`), `show_toc`, `show_author`, `show_updated`, `show_reading_time` (booleans), and `footer_text` (at most 200 characters). The configured publication default applies when a page creation request omits `state`; existing pages are unaffected.
