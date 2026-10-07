@@ -1,43 +1,81 @@
-<p align="center"><img src="public/lattice-logo.png" width="112" alt="Lattice logo"></p>
+<p align="center"><img src="public/lattice-logo.png" width="80" alt="Lattice logo"></p>
 
 <h1 align="center">Lattice</h1>
-<p align="center"><strong>Open knowledge, beautifully organized.</strong></p>
-<p align="center"><a href="https://github.com/valerisn/Lattice/actions/workflows/ci.yml"><img src="https://github.com/valerisn/Lattice/actions/workflows/ci.yml/badge.svg" alt="Build and test status"></a> · <a href="LICENSE">AGPL-3.0</a></p>
+<p align="center"><strong>Open knowledge, beautifully organized.</strong><br>A self-hosted wiki for the things your team wants to keep.</p>
 
-A calm, connected home for your team's guides, notes, and decisions. Lattice is an open-source, self-hosted wiki with multiple workspaces, a rich editor, and permissions that stay on your server.
+<p align="center">
+  <a href="https://github.com/valerisn/Lattice/actions/workflows/ci.yml"><img src="https://github.com/valerisn/Lattice/actions/workflows/ci.yml/badge.svg" alt="Application checks"></a>
+  <a href="https://github.com/valerisn/Lattice/actions/workflows/daemon.yml"><img src="https://github.com/valerisn/Lattice/actions/workflows/daemon.yml/badge.svg" alt="Linux and Windows daemon checks"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-39744c?style=flat" alt="License: AGPL-3.0 only"></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/0.1.0-early%20alpha-b5cf81?style=flat&amp;labelColor=243c2e" alt="Version 0.1.0, early alpha"></a>
+</p>
 
-**Early alpha, version 0.1.0.** Core workflows are functional. Expect changes before a stable release. Keep backups, especially before upgrading.
+<p align="center">
+  <a href="#take-a-look">Take a look</a> ·
+  <a href="#run-locally">Run locally</a> ·
+  <a href="#self-host-with-docker">Self-host</a> ·
+  <a href="#meet-daemon">Meet daemon</a> ·
+  <a href="#documentation">Documentation</a> ·
+  <a href="#contributing-and-license">Contribute</a>
+</p>
 
-![Lattice workspace](docs/images/workspace.png)
+![Good knowledge. Room to grow. A calm, connected home for your team's guides and ideas.](docs/images/readme-hero.svg)
 
-## What works today
+Bring guides, project notes, and decisions into one connected workspace. Write in rich text or Markdown, organize pages into collections, and give people the access they need. Lattice keeps the application, database, and attachments on infrastructure you control.
 
-- First-run setup, starter pages, and multiple workspaces
-- Email/password accounts, invitation links, expiring sessions, and profiles
-- Owner, admin, editor, and viewer roles; groups; inherited page/collection grants
-- Nested pages, drag reordering, collections, favorites, drafts, and recent pages
-- Rich text and Markdown, slash commands, tables, tasks, links, images, code, callouts, expandable sections, and teammate mention labels
-- Autosave, conflict detection, immutable revisions, comparison, and restoration
-- Permission-aware search with **Ctrl/Cmd + K**
-- Incoming page links that respect workspace visibility
-- Syntax highlighting, reliable heading navigation, and Markdown import/export
-- Protected attachments, file validation, and local storage
-- Light/dark/system appearance, branding, and workspace administration
-- Documentation settings for publication defaults, reading layout, metadata, and footer text
-- Reusable page templates with Markdown preview and protection against stale edits
-- Administrator version checker for published stable releases
-- Documentation overview with publication counts and draft/empty-page review lists
-- Administrative audit history for settings, invitations, roles, groups, and access grants
-- Docker Compose with PostgreSQL, health checks, and persistent volumes
-- Optional PHP **daemon** for Linux and Windows supervision, coordinated backups, and opt-in stable-release updates
+> [!NOTE]
+> **Early alpha, version 0.1.0.** Core workflows are functional, but expect changes before a stable release. Keep backups before upgrading. Screenshots below use an isolated sample workspace.
+
+## Take a look
+
+**A little less noise. A little more room to think.**
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark-mode.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/images/workspace.png">
+  <img src="docs/images/workspace.png" alt="Lattice's Acorn Studio sample workspace, with page navigation, a reading outline, green accents, and botanical details" width="1440">
+</picture>
+
+<p align="center"><sub>Fresh captures of the current interface. The workspace preview follows your light or dark appearance.</sub></p>
+
+<table>
+  <tr>
+    <td width="50%"><a href="docs/images/editor.png"><img src="docs/images/editor.png" alt="The rich-text editor with a sample design guide, formatting controls, a callout, and autosave"></a></td>
+    <td width="50%"><a href="docs/images/documentation.png"><img src="docs/images/documentation.png" alt="Documentation administration with publication defaults, reading width, page metadata, and footer settings"></a></td>
+  </tr>
+  <tr>
+    <td><strong>Write in your own way.</strong><br>Rich text, Markdown, reusable templates, and saved revisions.</td>
+    <td><strong>Make the workspace yours.</strong><br>Choose how documentation is created, read, and presented.</td>
+  </tr>
+</table>
+
+<details>
+<summary><strong>See the custom appearance picker</strong></summary>
+
+![The custom theme dropdown with visual previews for Light, Dark, and System](docs/images/theme-picker.png)
+
+Light, dark, and system themes, with keyboard controls and reduced-motion support.
+
+</details>
+
+## What you can do
+
+|                                   | Built into Lattice                                                                                                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Write something worth keeping** | Rich text and Markdown; slash commands; tables, tasks, code, images, callouts, and expandable sections; reusable templates; Markdown import/export.                   |
+| **Give knowledge a home**         | Multiple workspaces, nested pages, drag reordering, collections, favorites, drafts, recent pages, incoming links, and permission-aware **Ctrl/Cmd + K** search.       |
+| **Keep the context**              | Autosave, edit-conflict detection, immutable revisions, comparison, restoration, syntax highlighting, and heading navigation.                                         |
+| **Share with the right people**   | Email/password accounts, invitation links, expiring sessions, profiles, four workspace roles, groups, inherited access grants, and protected attachments.             |
+| **Shape your documentation**      | Branding, appearance, publication defaults, reading layouts, page metadata, footer text, a documentation overview, audit history, and an administrator version check. |
+| **Run it yourself**               | Docker Compose, PostgreSQL, health checks, persistent volumes, and the optional PHP **daemon** for Linux and Windows supervision, backups, and opt-in updates.        |
 
 Sharing copies a link; recipients still need workspace access. Mention labels do not send notifications. Drafts are visible to editors and administrators, but hidden from viewers. Anonymous publishing is not included.
 
-See the [writing guide](docs/writing.md) for imports, templates, editing, and page organization.
+[Explore the writing guide →](docs/writing.md)
 
 ## Run locally
 
-Requirements: **Node.js 24 LTS** (minimum 22), npm, and Git.
+For development or a first look. Requirements: **Node.js 24 LTS** (minimum 22), npm, and Git.
 
 ```sh
 git clone https://github.com/valerisn/Lattice.git
@@ -50,7 +88,7 @@ Open [http://localhost:3000](http://localhost:3000) and create your workspace. W
 
 ## Self-host with Docker
 
-Requirements: Docker Engine and Docker Compose v2. Node.js is only needed for the optional configuration helper.
+For a persistent installation. Requirements: Docker Engine with **Linux containers**, Docker Compose v2, and Git. Node.js is only needed for the optional configuration helper.
 
 ```sh
 git clone https://github.com/valerisn/Lattice.git
@@ -67,9 +105,8 @@ For a public installation, set `APP_URL` to the exact public HTTPS origin and pu
 
 See [deployment and backups](docs/self-hosting.md).
 
-For Linux hosts, [install daemon](daemon/README.md) to supervise the Docker stack through systemd. [Windows service support](daemon/windows/README.md) provides a native service host for the same PHP supervisor. It provides health checks, bounded recovery, backups, and automatic updates when explicitly enabled.
-
-### Environment variables
+<details>
+<summary><strong>Environment variables</strong></summary>
 
 | Variable            | Purpose                                                                                 |
 | ------------------- | --------------------------------------------------------------------------------------- |
@@ -83,11 +120,43 @@ For Linux hosts, [install daemon](daemon/README.md) to supervise the Docker stac
 
 Keep `.env`, databases, and uploads out of Git. The supplied ignore files cover them.
 
-### Development with PostgreSQL
+</details>
+
+<details>
+<summary><strong>Develop against PostgreSQL</strong></summary>
 
 Run `node scripts/configure.mjs`, then `docker compose -f compose.dev.yaml up -d`. Add a `DATABASE_URL` to `.env` pointing to `localhost:5432`, database/user `lattice`, and the generated password. Then run `npm run dev`.
 
 Next.js loads `.env`. For the migration CLI, export the variables or use `node --env-file=.env --import tsx scripts/migrate.ts`. Local PGlite data does not automatically transfer into a separate PostgreSQL database.
+
+</details>
+
+## Meet daemon
+
+**A quiet caretaker for your Lattice installation.**
+
+The optional PHP supervisor watches container health, the HTTP endpoint, and free disk space. It can restart a failing app within configured limits, coordinate PostgreSQL and upload backups, and install eligible stable releases when you enable updates.
+
+| Linux                                                 | Windows                                                         |
+| ----------------------------------------------------- | --------------------------------------------------------------- |
+| A systemd service with journal logs                   | A native Windows service host with rotating logs                |
+| PHP 8.2+ with cURL, pcntl, and posix                  | PHP 8.2+, cURL, .NET Framework 4.8, and Windows PowerShell 5.1  |
+| [Linux installation and operations](daemon/README.md) | [Windows installation and operations](daemon/windows/README.md) |
+
+**Automatic updates are off by default.** Stopping the supervisor leaves containers running. Interrupted updates block further automated recovery until an operator reviews the installation.
+
+Windows CI exercises the real service lifecycle using a fixture Docker executable. Full Windows Docker Desktop integration remains unverified. Linux CI exercises real containers and PostgreSQL/upload backups.
+
+## Documentation
+
+| Start here                                | What you'll find                                        |
+| ----------------------------------------- | ------------------------------------------------------- |
+| [Writing and organizing](docs/writing.md) | Editing, templates, imports, and page organization      |
+| [Self-hosting](docs/self-hosting.md)      | Configuration, deployment, upgrades, and recovery       |
+| [Architecture](docs/architecture.md)      | Application structure, data model, and permission rules |
+| [Internal API](docs/api.md)               | The application's internal endpoints                    |
+| [Security](SECURITY.md)                   | Security boundaries, known limits, and reporting issues |
+| [Contributing](CONTRIBUTING.md)           | Local development and contribution guidance             |
 
 ## Development and checks
 
@@ -120,6 +189,8 @@ Planned integrations are clearly identified as unavailable in the interface.
 
 ## Contributing and license
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities through the process in [SECURITY.md](SECURITY.md).
+Build something useful with us. Start with [CONTRIBUTING.md](CONTRIBUTING.md), browse [open issues](https://github.com/valerisn/Lattice/issues), or follow [SECURITY.md](SECURITY.md) to report a vulnerability.
 
 Copyright © 2026 Lattice contributors. Licensed under **GNU Affero General Public License v3.0 only**. See [LICENSE](LICENSE). Network users of a modified version must have access to its corresponding source under the license's terms.
+
+<p align="center"><sub>Made with care. Kept in Lattice.</sub></p>
