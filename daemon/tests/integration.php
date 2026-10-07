@@ -22,6 +22,8 @@ $store->locked('action', function () use ($config, $store, $runner, $compose, $m
     requireTrue($manifest['complete'] === true, 'Backup manifest is incomplete.');
     $verified = (new \Lattice\Daemon\BackupVerifier($store))->verify(basename($path));
     requireTrue($verified['verified'] === true, 'Backup verification rejected a completed Docker backup.');
+    $catalog = (new \Lattice\Daemon\BackupCatalog($store))->read();
+    requireTrue(in_array(['name' => basename($path), 'status' => 'complete'], $catalog['backups'], true), 'Completed backup is missing from the catalog.');
     foreach ($manifest['sha256'] as $name => $hash) {
         requireTrue(hash_file('sha256', $path . '/' . $name) === $hash, "Checksum failed for $name.");
     }

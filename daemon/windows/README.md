@@ -54,6 +54,7 @@ Set-Alias daemon "$env:ProgramData\LatticeDaemon\daemon.ps1"
 daemon status --json
 daemon check-update
 daemon backup
+daemon backups
 daemon auto-update on
 daemon auto-update off
 Stop-Service lattice-daemon

@@ -11,7 +11,12 @@ final class Console
         if ($this->json) { echo json_encode($data, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n"; return; }
         $color = function_exists('stream_isatty') && stream_isatty(STDOUT) && getenv('NO_COLOR') === false;
         echo ($color ? "\033[1;32m" : '') . "daemon · Lattice supervisor" . ($color ? "\033[0m" : '') . "\n\n";
-        if (array_key_exists('healthy', $data)) {
+        if (isset($data['backups'])) {
+            echo '  ' . str_pad('Backup', 28) . "Status\n";
+            foreach ($data['backups'] as $backup) { echo '  ' . str_pad($backup['name'], 28) . $backup['status'] . "\n"; }
+            echo "\n  " . count($data['backups']) . ' of ' . $data['total'] . " backups shown.\n";
+            echo '  ' . $data['message'] . "\n";
+        } elseif (array_key_exists('healthy', $data)) {
             echo '  Health         ' . ($data['healthy'] ? 'healthy' : 'needs attention') . "\n";
             echo '  Supervision    ' . (!empty($data['paused']) ? 'paused by operator' : (!empty($data['update_blocked']) ? 'blocked after update' : 'active')) . "\n";
             echo '  Auto-update    ' . (!empty($data['auto_update']) ? 'enabled' : 'disabled') . "\n";

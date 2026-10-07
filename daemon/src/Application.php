@@ -33,7 +33,7 @@ final class Application
             $console->output(['message' => 'Configuration created. Automatic updates are disabled.', 'config' => $options['config']]);
             return 0;
         }
-        if (!in_array($command, ['status', 'doctor', 'watch', 'start', 'stop', 'restart', 'resume', 'backup', 'verify-backup', 'check-update', 'update', 'auto-update'], true)) {
+        if (!in_array($command, ['status', 'doctor', 'watch', 'start', 'stop', 'restart', 'resume', 'backup', 'backups', 'verify-backup', 'check-update', 'update', 'auto-update'], true)) {
             throw new RuntimeException("Unknown command: $command. Run daemon help.");
         }
         if (count($positionals) > (in_array($command, ['auto-update', 'verify-backup'], true) ? 2 : 1)) { throw new RuntimeException('Unexpected command arguments.'); }
@@ -46,6 +46,10 @@ final class Application
         }
         $config = Config::load($options['config']);
         $store = new Store($config->get('state_dir'));
+        if ($command === 'backups') {
+            $console->output((new BackupCatalog($store))->read());
+            return 0;
+        }
         if ($command === 'verify-backup') {
             $result = (new BackupVerifier($store))->verify($positionals[1] ?? '');
             $console->output($result);
@@ -205,6 +209,7 @@ Usage: daemon <command> [--config /etc/lattice/daemon.json] [--json]
   restart        Restart the application container and verify health
   resume         Resume supervision after an operator repairs the stack
   backup         Pause app, back up PostgreSQL/uploads, then resume app
+  backups        List the newest 50 backups and manifest completion status
   verify-backup <name>
                  Check a completed backup's four file checksums, without Docker
   check-update   Check the official stable GitHub release

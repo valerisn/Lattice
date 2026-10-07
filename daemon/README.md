@@ -51,6 +51,7 @@ sudo daemon status --json
 sudo daemon start
 sudo daemon restart
 sudo daemon backup
+sudo daemon backups
 sudo daemon check-update
 sudo daemon update
 sudo journalctl -u lattice-daemon -f
@@ -122,7 +123,7 @@ Backups live under `state_dir/backups`. Each contains:
 
 Directories use mode 0700 and files use 0600. Only backups with a completed manifest should be used for recovery. Copy completed backups off the host and manage retention; daemon never deletes old backups automatically. The free-space check covers deployment/state filesystems, not Docker's internal storage when it is on another filesystem.
 
-Use `daemon verify-backup` with a backup directory name from `state_dir/backups` to check all four files against the completed manifest:
+Use `daemon backups` (or `daemon backups --json`) to list the newest 50 backup directories. The list distinguishes complete, incomplete, and unreadable manifests without reading archive contents or secrets. A complete manifest is not an integrity check. Use `daemon verify-backup` with a listed directory name to check all four files against the completed manifest:
 
 ```sh
 sudo daemon verify-backup 20261007-030000-a1b2c3d4

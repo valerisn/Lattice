@@ -58,6 +58,9 @@ test('verify-backup CLI needs no running Docker engine and returns checksum fail
     $result = $runner->run($args, __DIR__);
     check($result->code === 0, $result->stderr);
     check(json_decode($result->stdout, true)['verified'] === true);
+    $listing = $runner->run([PHP_BINARY, dirname(__DIR__) . '/bin/daemon', 'backups', '--config', $file, '--json'], __DIR__);
+    check($listing->code === 0, $listing->stderr);
+    check(json_decode($listing->stdout, true)['backups'] === [['name' => $name, 'status' => 'complete']]);
     Store::atomicText($directory . '/database.dump', 'damaged');
     $result = $runner->run($args, __DIR__);
     check($result->code === 2, $result->stderr);
