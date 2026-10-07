@@ -22,13 +22,13 @@ export async function checkSlashCommands(
     });
     const menu = dialog.locator(".slash-menu");
     await editor.click();
-    await editor.pressSequentially(
+    await page.keyboard.type(
       "Visit https://example.test/docs and read /opt/lattice.",
     );
     await expect(menu).toHaveCount(0);
     await expect(editor).toContainText("https://example.test/docs");
-    await editor.press("Enter");
-    await editor.press("/");
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("/");
     await expect(menu).toBeVisible();
     await expect(
       menu.getByRole("button", { name: "Text", exact: true }),
@@ -37,23 +37,26 @@ export async function checkSlashCommands(
     await expect(menu).toHaveCount(0);
     await expect(dialog).toBeVisible();
     await expect(editor).toBeFocused();
-    await editor.pressSequentially("opt/lattice");
+    await page.keyboard.type("opt/lattice");
     await expect(menu).toHaveCount(0);
     await expect(editor).toContainText("/opt/lattice");
-    await editor.press("Enter");
+    await page.keyboard.press("Enter");
     await dialog
       .getByRole("button", { name: "Inline code", exact: true })
       .click();
-    await editor.pressSequentially("/usr/local");
+    await expect(editor).toBeFocused();
+    await page.keyboard.type("/usr/local");
     await expect(menu).toHaveCount(0);
     await expect(editor.locator("p > code")).toHaveText("/usr/local");
     await dialog
       .getByRole("button", { name: "Inline code", exact: true })
       .click();
-    await editor.press("Enter");
+    await expect(editor).toBeFocused();
+    await page.keyboard.press("Enter");
     await dialog.getByRole("button", { name: "Block", exact: true }).click();
     await menu.getByRole("button", { name: "Code block", exact: true }).click();
-    await editor.pressSequentially("/var/log/lattice");
+    await expect(editor).toBeFocused();
+    await page.keyboard.type("/var/log/lattice");
     await expect(menu).toHaveCount(0);
     await expect(editor.locator("pre")).toHaveText("/var/log/lattice");
     await dialog.getByRole("button", { name: "Done", exact: true }).click();
