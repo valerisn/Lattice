@@ -16,7 +16,9 @@
     "test:e2e": "playwright test",
     "db:migrate": "tsx scripts/migrate.ts",
     "check": "npm run lint && npm run typecheck && npm test",
-    "configure": "node scripts/configure.mjs"
+    "configure": "node scripts/configure.mjs",
+    "format": "prettier --write src tests scripts *.ts *.mts *.mjs *.json *.yaml *.md docs .github",
+    "format:check": "prettier --check src tests scripts *.ts *.mts *.mjs *.json *.yaml *.md docs .github"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",
@@ -52,6 +54,7 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.0",
+    "prettier": "^3.9.9",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "vitest": "^5.0.3"
