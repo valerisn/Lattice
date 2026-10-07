@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="360" viewBox="0 0 1120 360" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Good knowledge. Room to grow.</title>
+  <desc id="desc">Lattice's forest-green banner with a woven botanical illustration. A self-hosted home for your team's knowledge.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1120" y2="360" gradientUnits="userSpaceOnUse"><stop stop-color="#143C2B"/><stop offset="1" stop-color="#0D251E"/></linearGradient>
+    <linearGradient id="leaf" x1="770" y1="90" x2="1000" y2="330" gradientUnits="userSpaceOnUse"><stop stop-color="#BBD97C"/><stop offset="1" stop-color="#538C61"/></linearGradient>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><path d="M44 0H0V44" stroke="#91BCA0" stroke-opacity=".08"/></pattern>
+    <clipPath id="frame"><rect width="1120" height="360" rx="24"/></clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+    <rect width="1120" height="360" fill="url(#background)"/>
+    <rect x="650" width="470" height="360" fill="url(#grid)"/>
+    <circle cx="900" cy="183" r="210" stroke="#B0D29D" stroke-opacity=".08"/>
+    <circle cx="900" cy="183" r="164" stroke="#B0D29D" stroke-opacity=".13"/>
+    <circle cx="900" cy="183" r="118" stroke="#B0D29D" stroke-opacity=".13" stroke-dasharray="3 7"/>
+    <path d="M651 360C790 267 686 179 812 43M747 360C863 253 766 144 895-19M848 380C997 254 904 150 1052-5" stroke="#A8C899" stroke-opacity=".15"/>
+    <g font-family="'Segoe UI',Arial,sans-serif">
+      <circle cx="57" cy="55" r="4" fill="#BCDB83"/>
+      <text x="72" y="60" fill="#BBD5BE" font-size="12" letter-spacing="3">A HOME FOR WHAT YOU KNOW</text>
+      <text x="52" y="140" fill="#F3F6E9" font-family="Georgia,'Times New Roman',serif" font-size="61" letter-spacing="-2">Good knowledge.</text>
+      <text x="52" y="211" fill="#BEDD8A" font-family="Georgia,'Times New Roman',serif" font-size="61" letter-spacing="-2">Room to grow.</text>
+      <text x="56" y="256" fill="#BBCEC0" font-size="16">A calm, connected home for your team's guides and ideas.</text>
+      <path d="M56 293H595" stroke="#A9C5AD" stroke-opacity=".2"/>
+      <text x="56" y="322" fill="#BBD5BE" font-size="11" letter-spacing="2">OPEN SOURCE</text>
+      <circle cx="181" cy="318" r="2" fill="#6D9477"/>
+      <text x="200" y="322" fill="#BBD5BE" font-size="11" letter-spacing="2">SELF-HOSTED</text>
+      <circle cx="332" cy="318" r="2" fill="#6D9477"/>
+      <text x="351" y="322" fill="#BBD5BE" font-size="11" letter-spacing="2">YOURS TO SHAPE</text>
+    </g>
+    <g stroke-linecap="round" stroke-linejoin="round">
+      <path d="M897 305C820 290 762 238 765 165C834 166 893 209 897 305Z" fill="url(#leaf)" fill-opacity=".8"/>
+      <path d="M897 305C962 285 1023 227 1023 150C949 161 894 224 897 305Z" fill="url(#leaf)"/>
+      <path d="M896 224C844 190 839 125 893 59C947 120 946 186 896 224Z" fill="#AFCF78" fill-opacity=".85"/>
+      <path d="M895 310C900 224 887 160 893 87M895 293C846 264 807 221 783 184M896 290C947 248 977 213 1004 172" stroke="#E7EFDA" stroke-width="2.4"/>
+      <path d="M851 260C860 233 840 205 816 194M830 239C805 244 790 227 781 211M946 246C938 215 959 194 978 182M967 224C987 225 1000 210 1006 192M893 183C874 168 866 145 871 126M895 157C915 144 919 126 911 110" stroke="#E7EFDA" stroke-opacity=".8" stroke-width="1.5"/>
+      <path d="M731 116H787L812 91M996 81H1039V122M1018 281H1064" stroke="#9DBD91" stroke-opacity=".5"/>
+      <circle cx="731" cy="116" r="4" fill="#B8D582"/>
+      <circle cx="812" cy="91" r="3" fill="#96B886"/>
+      <circle cx="1039" cy="122" r="4" fill="#B8D582"/>
+      <circle cx="1064" cy="281" r="3" fill="#96B886"/>
+      <path d="M765 288V302M758 295H772M1018 44V56M1012 50H1024" stroke="#B8D582" stroke-opacity=".7"/>
+    </g>
+  </g>
+</svg>
