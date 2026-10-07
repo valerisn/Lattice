@@ -52,6 +52,10 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
     .getByLabel("Markdown content", { exact: true })
     .fill("## Knowledge persists\n\nSecond revision from Markdown.");
   await page.getByRole("button", { name: "Done", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Knowledge persists", exact: true }),
+  ).toBeVisible();
   await page.reload();
   await expect(
     page.getByRole("heading", { name: "Knowledge persists", exact: true }),
