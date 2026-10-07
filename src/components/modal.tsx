@@ -11,12 +11,14 @@ export function Modal({
   children,
   onClose,
   wide = false,
+  fullScreen = false,
   onKeyDown,
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
   wide?: boolean;
+  fullScreen?: boolean;
   onKeyDown?: KeyboardEventHandler<HTMLDialogElement>;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -28,7 +30,7 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      className={`modal ${wide ? "wide" : ""}`}
+      className={`modal ${wide ? "wide" : ""} ${fullScreen ? "full-screen" : ""}`}
       onKeyDownCapture={onKeyDown}
       onCancel={(e) => {
         e.preventDefault();

@@ -46,6 +46,17 @@ export async function checkEditorSaving(
   await title.fill("Saving feedback");
   await expect(status).toHaveText("Saved");
   await expect(dialog.getByRole("alert")).toHaveCount(0);
+  const description = dialog.getByLabel("Description", { exact: true });
+  await description.fill("Context kept while writing.");
+  const normalBounds = await dialog.boundingBox();
+  const focus = dialog.getByRole("button", { name: "Focus mode", exact: true });
+  await focus.click();
+  await expect(focus).toHaveAttribute("aria-pressed", "true");
+  await expect(description).toBeHidden();
+  await expect(parents).toBeHidden();
+  expect((await dialog.boundingBox())!.width).toBeGreaterThan(
+    normalBounds!.width,
+  );
   await dialog.getByRole("button", { name: "Markdown", exact: true }).click();
   const content = dialog.getByLabel("Markdown content");
   await content.fill("Saved with the keyboard.");
@@ -54,6 +65,19 @@ export async function checkEditorSaving(
   expect(
     (await (await page.request.get(`${base}/pages/${doc.id}`)).json()).content,
   ).toBe("Saved with the keyboard.");
+  const viewport = page.viewportSize()!;
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await dialog.evaluate(
+      (element) => element.scrollWidth <= element.clientWidth + 1,
+    ),
+  ).toBe(true);
+  await expect(content).toBeVisible();
+  await page.setViewportSize(viewport);
+  await focus.click();
+  await expect(description).toBeVisible();
+  await expect(description).toHaveValue("Context kept while writing.");
+  await expect(parents).toBeVisible();
 
   let release!: () => void;
   let started!: () => void;

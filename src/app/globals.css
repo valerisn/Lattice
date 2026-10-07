@@ -537,6 +537,8 @@ html[data-theme="light"] .app-shell {
 
 .editor-heading {
   margin: 0 0 20px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 .segmented {
   display: flex;
@@ -1463,6 +1465,21 @@ kbd {
 }
 .modal.wide {
   width: min(960px, calc(100vw - 32px));
+}
+.modal.full-screen {
+  width: calc(100vw - 32px);
+  max-width: 1440px;
+  height: calc(100dvh - 32px);
+  max-height: calc(100dvh - 32px);
+}
+.modal.full-screen > * {
+  width: 100%;
+  max-width: 1080px;
+  margin-inline: auto;
+}
+.modal.full-screen .editor-content .tiptap,
+.modal.full-screen .markdown-source {
+  min-height: max(300px, calc(100dvh - 390px));
 }
 .modal::backdrop {
   background: #10291b66;

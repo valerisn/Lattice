@@ -16,6 +16,8 @@ Choose **Edit page** for the rich editor. Type `/` for blocks, or switch to Mark
 
 Press **Ctrl/Cmd + S** inside the editor to save immediately without closing it. **Done** saves pending changes before returning to the page.
 
+Choose **Focus** for a larger writing surface in either rich text or Markdown. Description, location, and publication controls stay hidden while you write; **Exit focus** brings them back with your changes intact. Autosave and keyboard saving continue in focus mode.
+
 Use **More page actions → Version history** to review previous versions. **Compare with current** highlights added and removed Markdown lines and shows title or description changes. You can switch to a side-by-side view. Large comparisons fall back to that view to keep the browser responsive. Restoring creates another revision and preserves the earlier history. The **Export Markdown** action downloads the current page source.
 
 The table of contents follows rendered level-two and level-three headings. Repeated headings receive unique links, formatted heading text stays readable, and code examples are excluded. Administrators can change reading width, metadata visibility, the footer, and the table of contents under **Workspace settings → Documentation**.

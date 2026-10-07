@@ -5,6 +5,7 @@ import { api } from "@/client/api";
 import { Modal } from "./modal";
 import { RichEditor } from "./rich-editor";
 import { pageSubtreeIds } from "@/shared/page-tree";
+import { Maximize2, Minimize2 } from "lucide-react";
 export function PageEditor({
   page,
   pages,
@@ -22,6 +23,7 @@ export function PageEditor({
 }) {
   const [draft, setDraft] = useState(page);
   const [mode, setMode] = useState<"rich" | "markdown">("rich");
+  const [focused, setFocused] = useState(false);
   const [status, setStatus] = useState("Saved");
   const [error, setError] = useState("");
   const latest = useRef(page);
@@ -113,6 +115,7 @@ export function PageEditor({
     <Modal
       title="Make it worth keeping"
       wide
+      fullScreen={focused}
       onKeyDown={(event) => {
         if (
           (event.ctrlKey || event.metaKey) &&
@@ -143,6 +146,20 @@ export function PageEditor({
           </button>
         </div>
         <div className="row">
+          <button
+            type="button"
+            aria-label="Focus mode"
+            aria-pressed={focused}
+            title={focused ? "Show page details" : "More space for writing"}
+            onClick={() => setFocused((value) => !value)}
+          >
+            {focused ? (
+              <Minimize2 size={14} aria-hidden="true" />
+            ) : (
+              <Maximize2 size={14} aria-hidden="true" />
+            )}
+            {focused ? "Exit focus" : "Focus"}
+          </button>
           <span
             className="save-status muted"
             role="status"
@@ -210,56 +227,60 @@ export function PageEditor({
           onChange={(e) => change({ title: e.target.value })}
         />
       </label>
-      <label className="editor-description">
-        Description
-        <input
-          value={draft.description}
-          maxLength={500}
-          onChange={(e) => change({ description: e.target.value })}
-          placeholder="A little context goes a long way."
-        />
-      </label>
-      <div className="editor-location">
-        <label>
-          Parent page
-          <select
-            value={draft.parent_id || ""}
-            onChange={(e) => change({ parent_id: e.target.value || null })}
-          >
-            <option value="">Top level</option>
-            {parentOptions.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.title}
-              </option>
-            ))}
-          </select>
+      <div hidden={focused}>
+        <label className="editor-description">
+          Description
+          <input
+            value={draft.description}
+            maxLength={500}
+            onChange={(e) => change({ description: e.target.value })}
+            placeholder="A little context goes a long way."
+          />
         </label>
-        <label>
-          Collection
-          <select
-            value={draft.collection_id || ""}
-            onChange={(e) => change({ collection_id: e.target.value || null })}
-          >
-            <option value="">No collection</option>
-            {collections.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Publication
-          <select
-            value={draft.state}
-            onChange={(e) =>
-              change({ state: e.target.value as "draft" | "published" })
-            }
-          >
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-          </select>
-        </label>
+        <div className="editor-location">
+          <label>
+            Parent page
+            <select
+              value={draft.parent_id || ""}
+              onChange={(e) => change({ parent_id: e.target.value || null })}
+            >
+              <option value="">Top level</option>
+              {parentOptions.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Collection
+            <select
+              value={draft.collection_id || ""}
+              onChange={(e) =>
+                change({ collection_id: e.target.value || null })
+              }
+            >
+              <option value="">No collection</option>
+              {collections.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Publication
+            <select
+              value={draft.state}
+              onChange={(e) =>
+                change({ state: e.target.value as "draft" | "published" })
+              }
+            >
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+            </select>
+          </label>
+        </div>
       </div>
       {mode === "rich" ? (
         <RichEditor
