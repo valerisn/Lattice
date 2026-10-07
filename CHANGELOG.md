@@ -21,6 +21,7 @@ Changes listed under **Unreleased** are available on the main branch. They are n
 
 - Generated invitation links have copy feedback and a manual-copy fallback. Revoking the displayed invitation clears its link.
 - Account changes keep their confirmed success message if session loading fails. The session list shows loading and retry states, and disables signing out other sessions when none remain.
+- Saved admin changes remain confirmed when the settings refresh fails. A retry reloads the latest data before editing resumes.
 - System settings link to both Linux and Windows daemon setup, with backup inspection commands.
 - Documentation review can show published pages not updated in at least 90 days, oldest first.
 - Review lists expand in groups of eight pages.

@@ -41,6 +41,7 @@ export function SettingsApp({
   const searchParams = useSearchParams();
   const [data, setData] = useState<AdminData | null>(null);
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [refreshing, transition] = useTransition();
@@ -53,21 +54,32 @@ export function SettingsApp({
         if (alive) setData(d);
       })
       .catch((e) => {
-        if (alive) setError(e.message);
+        if (alive) setLoadError(e.message);
       });
     return () => {
       alive = false;
     };
   }, [base]);
+  const reload = async () => {
+    setBusy(true);
+    try {
+      setData(await api<AdminData>(`${base}/admin`));
+      setLoadError("");
+    } catch (e) {
+      setLoadError((e as Error).message);
+    } finally {
+      setBusy(false);
+      transition(() => router.refresh());
+    }
+  };
   const run = async (fn: () => Promise<void>) => {
     setError("");
     setNotice("");
     setBusy(true);
     try {
       await fn();
-      setData(await api<AdminData>(`${base}/admin`));
       setNotice("Changes saved.");
-      transition(() => router.refresh());
+      await reload();
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -151,28 +163,31 @@ export function SettingsApp({
             {notice}
           </p>
         )}
-        {!data ? (
-          error ? (
+        {loadError && (
+          <div className="stack">
+            <p className="error" role="alert">
+              Could not load the latest settings: {loadError}
+            </p>
             <button
               type="button"
-              onClick={async () => {
-                setError("");
-                try {
-                  setData(await api<AdminData>(`${base}/admin`));
-                } catch (e) {
-                  setError((e as Error).message);
-                }
-              }}
+              disabled={busy || refreshing}
+              onClick={() => void reload()}
             >
-              Retry loading settings
+              {busy ? "Loading settings…" : "Retry loading settings"}
             </button>
-          ) : (
+          </div>
+        )}
+        {!data ? (
+          !loadError && (
             <p className="muted" role="status">
               Loading workspace settings…
             </p>
           )
         ) : (
-          <fieldset disabled={busy || refreshing} className="settings-fieldset">
+          <fieldset
+            disabled={busy || refreshing || !!loadError}
+            className="settings-fieldset"
+          >
             {tab === "Overview" && (
               <>
                 <OverviewPanel
