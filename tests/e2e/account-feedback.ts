@@ -14,7 +14,8 @@ export async function checkAccountFeedback(page: Page, slug = "test-studio") {
     const request = route.request();
     if (request.method() === "GET") {
       reads++;
-      if (reads === 1) await held;
+      // Strict Mode can start more than one initial read in development.
+      await held;
       await route.fulfill(
         failReads
           ? {
@@ -119,7 +120,7 @@ export async function checkAccountFeedback(page: Page, slug = "test-studio") {
     await page.setViewportSize(viewport);
   } finally {
     release();
-    await page.unroute(pattern);
+    await page.unrouteAll({ behavior: "wait" });
     await page.goto(`/w/${slug}`);
   }
 }
