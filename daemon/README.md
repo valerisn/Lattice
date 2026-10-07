@@ -2,11 +2,13 @@
 
 # daemon
 
-**A PHP supervisor for Lattice Docker installations on Linux.**
+**A PHP supervisor for Lattice Docker installations on Linux and Windows.**
 
 [![Verify daemon](https://github.com/valerisn/Lattice/actions/workflows/daemon.yml/badge.svg)](https://github.com/valerisn/Lattice/actions/workflows/daemon.yml)
 
-daemon watches the application container, PostgreSQL, the HTTP health endpoint, and free space on the deployment and state filesystems. It runs under systemd, provides a readable CLI and JSON output, restarts a failing application within configured limits, and can install stable Lattice releases when automatic updates are enabled.
+daemon watches the application container, PostgreSQL, the HTTP health endpoint, and free space on the deployment and state filesystems. It runs under systemd or the Windows Service Control Manager, provides a readable CLI and JSON output, restarts a failing application within configured limits, and can install stable Lattice releases when automatic updates are enabled.
+
+**Windows:** use the [Windows installation and service guide](windows/README.md). The commands and filesystem paths below describe Linux. Windows uses the same PHP policies with a small native service host, private ACLs, rotating logs, and PowerShell installation.
 
 The PHP runtime has no Composer dependencies. Requirements: Linux with systemd, **PHP 8.2+ with cURL, pcntl, and posix**, Git, Docker Engine, and Docker Compose v2 with `--wait` support. Ubuntu 24.04 is exercised in CI across PHP 8.2–8.5.
 
@@ -142,4 +144,6 @@ php daemon/bin/daemon help
 
 [daemon CI](../.github/workflows/daemon.yml) runs PHP lint, ShellCheck, runtime/service-policy tests, and update failure-path tests on Linux with PHP 8.2, 8.3, 8.4, and 8.5. A separate Linux job installs the actual systemd service and exercises Docker health checks, PostgreSQL/upload backups, archive readability, graceful shutdown, and app recovery against a disposable Lattice stack.
 
-The supervisor does not expose an HTTP listener. Runtime tests can run on Windows; the installed service targets Linux. Licensed under the repository's [AGPL-3.0 license](../LICENSE).
+Windows CI runs PHP 8.2–8.5, compiles the native host, and checks ACLs and graceful stop tokens. A Windows service test exercises real SCM installation, monitoring, shutdown, crash recovery, reinstall, and preserving uninstall with a fixture Docker CLI. Real Windows Docker Desktop integration remains unverified; the Linux job provides real container/backup coverage.
+
+The supervisor does not expose an HTTP listener. Licensed under the repository's [AGPL-3.0 license](../LICENSE).

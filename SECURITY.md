@@ -24,7 +24,7 @@ Scrypt parameters follow an [OWASP recommended configuration](https://cheatsheet
 
 Use HTTPS on public instances. Keep `APP_URL` accurate and setup credentials private. Update dependencies and back up the database and uploads. Restrict database/filesystem access to the operator.
 
-The optional Linux daemon controls Docker with host-level authority. Configuration and state must belong to the service user, with private file/directory permissions; daemon rejects symlinks and unsafe parent directories. Backups contain secrets. Keep the deployment checkout writable only by trusted host administrators. Release updates trust the official HTTPS GitHub origin; independent release-signature verification is not implemented.
+The optional Linux/Windows daemon controls Docker with host-level authority. Configuration and state must belong to a trusted service identity, with private file/directory permissions; daemon rejects symlinks/reparse points and unsafe parent directories. Windows installation requires SYSTEM/Administrators-controlled runtime, checkout, and tools; the service runs as LocalSystem and uses an explicit local Docker Linux-engine pipe. It does not copy personal Docker credentials or expose a control listener. Backups contain secrets. Keep the deployment checkout writable only by trusted host administrators. Release updates trust the official HTTPS GitHub origin; independent release-signature verification is not implemented.
 
 Attachments are not malware-scanned. Non-image documents download as attachments. SVG, HTML, executable, and archive uploads are unsupported. Treat downloaded documents as untrusted.
 
