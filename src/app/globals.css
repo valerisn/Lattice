@@ -1466,6 +1466,17 @@ kbd {
 .modal.wide {
   width: min(960px, calc(100vw - 32px));
 }
+@media screen {
+  html {
+    scrollbar-gutter: stable;
+  }
+  html:has(dialog:modal) {
+    overflow: hidden;
+  }
+}
+.modal {
+  overscroll-behavior: contain;
+}
 .modal.full-screen {
   width: calc(100vw - 32px);
   max-width: 1440px;
