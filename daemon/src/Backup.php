@@ -9,13 +9,14 @@ final class Backup
 
     public function capture(): array
     {
-        $definition = json_decode($this->compose->must(['config', '--format', 'json'], 'Compose configuration'), true, 64, JSON_THROW_ON_ERROR);
+        $raw = $this->compose->must(['config', '--format', 'json'], 'Compose configuration');
+        $definition = json_decode($raw, true, 64, JSON_THROW_ON_ERROR);
         $id = trim($this->compose->must(['ps', '--all', '--quiet', 'app'], 'App container lookup'));
         if (!preg_match('/^[a-f0-9]{12,64}$/D', $id)) { throw new RuntimeException('Exactly one existing app container is required for backup.'); }
         $image = $this->compose->runner->run(['docker', 'inspect', '--format', '{{.Image}}', $id], $this->compose->config->get('directory'));
         $imageId = trim($image->stdout);
         if ($image->code !== 0 || !preg_match('/^sha256:[a-f0-9]{64}$/D', $imageId)) { throw new RuntimeException('Cannot identify the running app image.'); }
-        return ['definition' => $definition, 'container' => $id, 'image' => $imageId];
+        return ['definition' => $definition, 'definition_json' => $raw, 'container' => $id, 'image' => $imageId];
     }
 
     public function create(array $context, string $revision): string
@@ -23,7 +24,8 @@ final class Backup
         $config = $this->compose->config;
         $path = $this->store->directory . '/backups/' . gmdate('Ymd-His') . '-' . bin2hex(random_bytes(4));
         if (!mkdir($path, 0700, true)) { throw new RuntimeException('Cannot create backup directory.'); }
-        Store::atomic($path . '/compose.json', $context['definition']);
+        // Re-encoding associative PHP arrays turns empty Compose maps into lists.
+        Store::atomicText($path . '/compose.json', $context['definition_json']);
         Store::atomic($path . '/manifest.json', [
             'complete' => false, 'created_at' => gmdate('c'), 'revision' => $revision,
             'image' => $context['image'], 'project' => $config->get('project_name'),

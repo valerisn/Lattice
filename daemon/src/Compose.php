@@ -19,7 +19,14 @@ final class Compose
     public function must(array $args, string $step, int $timeout = 60, ?string $output = null, ?string $file = null): string
     {
         $result = $this->run($args, $timeout, $output, $file);
-        if ($result->code !== 0) { throw new RuntimeException("$step failed (exit {$result->code}). Inspect Docker logs locally."); }
+        if ($result->code !== 0) {
+            $detail = '';
+            // Only surface structural validation errors; raw Compose output can contain credentials.
+            if (preg_match('/(?:services|volumes|networks)\.[A-Za-z0-9_.-]+ must be [A-Za-z ]+/', $result->stderr, $match)) {
+                $detail = ' ' . $match[0] . '.';
+            }
+            throw new RuntimeException("$step failed (exit {$result->code}).$detail Inspect Docker logs locally.");
+        }
         return $result->stdout;
     }
 

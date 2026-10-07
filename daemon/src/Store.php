@@ -29,12 +29,16 @@ final class Store
 
     public static function atomic(string $path, array $data): void
     {
+        self::atomicText($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n");
+    }
+
+    public static function atomicText(string $path, string $encoded): void
+    {
         $temp = $path . '.' . bin2hex(random_bytes(6)) . '.tmp';
         $handle = fopen($temp, 'x');
         if (!$handle) { throw new RuntimeException('Cannot write state file.'); }
         try {
             chmod($temp, 0600);
-            $encoded = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n";
             if (fwrite($handle, $encoded) !== strlen($encoded)) { throw new RuntimeException('Incomplete state write.'); }
             fflush($handle);
             if (function_exists('fsync')) { fsync($handle); }

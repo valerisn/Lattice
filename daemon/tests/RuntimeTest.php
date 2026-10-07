@@ -28,6 +28,8 @@ test('state writes are atomic, persist, and actions cannot overlap', function ()
     $store->write('monitor', ['failures' => 1]);
     $store->write('monitor', ['failures' => 2]);
     check($store->read('monitor')['failures'] === 2);
+    Store::atomicText($dir . '/compose.json', '{"networks":{"default":{}}}');
+    check(file_get_contents($dir . '/compose.json') === '{"networks":{"default":{}}}');
     $store->locked('action', function () use ($store): void {
         rejects(fn () => $store->locked('action', fn () => null), 'Another daemon');
     });
