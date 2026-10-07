@@ -865,6 +865,25 @@ kbd {
 .breadcrumbs > span {
   white-space: nowrap;
 }
+.ancestor-crumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.ancestor-crumb a {
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 140px;
+}
+.ancestor-crumb a:hover {
+  color: var(--accent);
+}
+.breadcrumbs svg {
+  flex: none;
+}
 .page-actions {
   display: flex;
   gap: 3px;

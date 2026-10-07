@@ -91,6 +91,13 @@ export function SettingsApp({
     tabs.find(
       ([name]) => sectionId(name) === searchParams.get("section"),
     )?.[0] || "General";
+  useEffect(() => {
+    const previous = document.title;
+    document.title = `${tab} · ${workspace.name} · Lattice`;
+    return () => {
+      document.title = previous;
+    };
+  }, [tab, workspace.name]);
   return (
     <main className="settings-layout">
       <aside className="settings-sidebar">

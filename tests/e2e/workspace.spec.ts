@@ -34,10 +34,21 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
     page.request.fetch(`${base}${path}`, { method, headers, data });
   await page.getByRole("button", { name: "New page", exact: true }).click();
   await page.getByLabel("Page title", { exact: true }).fill("Project notes");
+  await page.getByLabel("Parent page").selectOption({ label: "Home" });
   await page.getByRole("button", { name: "Create page", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Project notes", exact: true }),
   ).toBeVisible();
+  await expect(page).toHaveTitle("Project notes · Test Studio · Lattice");
+  await page
+    .getByRole("navigation", { name: "Breadcrumb", exact: true })
+    .getByRole("link", { name: "Home", exact: true })
+    .click();
+  await expect(page).toHaveTitle("Home · Test Studio · Lattice");
+  await page
+    .getByRole("navigation", { name: "Page tree", exact: true })
+    .getByRole("button", { name: "Project notes", exact: true })
+    .click();
   await page.getByRole("button", { name: "Edit page", exact: true }).click();
   await page
     .getByRole("textbox", { name: "Page content", exact: true })
@@ -255,6 +266,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await expect(
     page.getByRole("heading", { name: "System", exact: true }),
   ).toBeVisible();
+  await expect(page).toHaveTitle("System · Test Studio · Lattice");
   await expect(
     page.getByRole("region", { name: "Software updates" }),
   ).toBeVisible();

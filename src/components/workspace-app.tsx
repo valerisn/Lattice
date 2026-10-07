@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -36,6 +36,7 @@ import { PageReader } from "./page-reader";
 import { CreateDialog } from "./create-dialog";
 import { SearchDialog } from "./search-dialog";
 import { ThemePicker } from "./theme-picker";
+import { pageAncestors } from "@/shared/page-tree";
 
 export interface WorkspaceProps {
   user: User;
@@ -70,6 +71,7 @@ export function WorkspaceApp({
   const [history, setHistory] = useState(false);
   const [attachments, setAttachments] = useState(false);
   const page = pages.find((p) => p.id === selected);
+  const ancestors = useMemo(() => pageAncestors(page, pages), [page, pages]);
   const base = `/api/w/${workspace.id}`;
   const refresh = () => startTransition(() => router.refresh());
   const selectPage = (id: string) => {
@@ -116,6 +118,14 @@ export function WorkspaceApp({
       : view === "recent"
         ? "Recently updated"
         : collections.find((c) => c.id === view)?.name || "Pages";
+  const currentTitle = view === "page" ? page?.title || "Page" : title;
+  useEffect(() => {
+    const previous = document.title;
+    document.title = `${currentTitle} · ${workspace.name} · Lattice`;
+    return () => {
+      document.title = previous;
+    };
+  }, [currentTitle, workspace.name]);
   return (
     <div
       className={`app-shell ${sidebar ? "" : "sidebar-hidden"}`}
@@ -309,7 +319,7 @@ export function WorkspaceApp({
       )}
       <main className="workspace-main">
         <header className="topbar">
-          <div className="breadcrumbs">
+          <nav className="breadcrumbs" aria-label="Breadcrumb">
             {!sidebar && (
               <button
                 className="icon-button ghost"
@@ -321,8 +331,42 @@ export function WorkspaceApp({
             )}
             <span>{workspace.name}</span>
             <ChevronRight size={13} />
-            <strong>{view === "page" ? page?.title || "Page" : title}</strong>
-          </div>
+            {view === "page" && ancestors.length > 2 && (
+              <span
+                title={ancestors
+                  .slice(0, -2)
+                  .map((ancestor) => ancestor.title)
+                  .join(" / ")}
+              >
+                …
+              </span>
+            )}
+            {view === "page" &&
+              ancestors.slice(-2).map((ancestor) => (
+                <span className="ancestor-crumb" key={ancestor.id}>
+                  <a
+                    href={`/w/${workspace.slug}?page=${ancestor.id}`}
+                    title={ancestor.title}
+                    onClick={(event) => {
+                      if (
+                        event.button !== 0 ||
+                        event.metaKey ||
+                        event.ctrlKey ||
+                        event.shiftKey ||
+                        event.altKey
+                      )
+                        return;
+                      event.preventDefault();
+                      selectPage(ancestor.id);
+                    }}
+                  >
+                    {ancestor.title}
+                  </a>
+                  <ChevronRight size={13} aria-hidden="true" />
+                </span>
+              ))}
+            <strong aria-current="page">{currentTitle}</strong>
+          </nav>
           {view === "page" && page && (
             <div className="page-actions">
               <details className="more-menu">
