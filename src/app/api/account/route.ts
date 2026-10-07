@@ -2,15 +2,10 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { requireUser } from "@/server/auth";
 import { database } from "@/server/db";
-import {
-  checkOrigin,
-  digest,
-  hashPassword,
-  verifyPassword,
-  rateLimit,
-} from "@/server/security";
+import { checkOrigin, digest } from "@/server/security";
 import { boundedRequest } from "@/server/body";
 import { AppError, errorResponse } from "@/server/errors";
+import { changePassword, revokeOtherSessions } from "@/server/sessions";
 export async function GET() {
   try {
     const user = await requireUser();
@@ -73,33 +68,16 @@ export async function POST(request: Request) {
       (await cookies()).get("lattice_session")?.value || "",
     );
     if (data.action === "password") {
-      await rateLimit(db, `password:${user.id}`, 10);
-      const [row] = await db.query<{ password_hash: string }>(
-        "SELECT password_hash FROM users WHERE id=$1",
-        [user.id],
-      );
-      if (
-        !data.currentPassword ||
-        !data.password ||
-        !(await verifyPassword(data.currentPassword, row.password_hash))
-      )
+      if (!data.currentPassword || !data.password)
         throw new AppError(400, "Your current password is incorrect.");
-      const hash = await hashPassword(data.password);
-      await db.transaction(async (tx) => {
-        await tx.query("UPDATE users SET password_hash=$1 WHERE id=$2", [
-          hash,
-          user.id,
-        ]);
-        await tx.query(
-          "DELETE FROM sessions WHERE user_id=$1 AND token_hash<>$2",
-          [user.id, current],
-        );
-      });
-    } else
-      await db.query(
-        "DELETE FROM sessions WHERE user_id=$1 AND token_hash<>$2",
-        [user.id, current],
+      await changePassword(
+        db,
+        user.id,
+        current,
+        data.currentPassword,
+        data.password,
       );
+    } else await revokeOtherSessions(db, user.id, current);
     return Response.json({ ok: true });
   } catch (e) {
     return errorResponse(e);

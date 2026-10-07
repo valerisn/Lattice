@@ -52,5 +52,5 @@ export async function acceptInvite(body: unknown) {
     ]);
     return id;
   });
-  await createSession(userId);
+  if (!user) await createSession(userId);
 }

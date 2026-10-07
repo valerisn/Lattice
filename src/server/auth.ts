@@ -10,6 +10,7 @@ import {
 } from "./security";
 import { AppError } from "./errors";
 import type { User } from "@/shared/types";
+import { insertSession, type PasswordProof } from "./sessions";
 
 export const accountSchema = z.object({
   name: z.string().trim().min(1).max(100),
@@ -38,14 +39,10 @@ export async function requireUser() {
   if (!user) throw new AppError(401, "Please sign in.");
   return user;
 }
-export async function createSession(userId: string) {
+export async function createSession(userId: string, proof?: PasswordProof) {
   const token = newToken();
   const db = await database();
-  await db.query("DELETE FROM sessions WHERE expires_at<now()");
-  await db.query(
-    "INSERT INTO sessions(token_hash,user_id,expires_at) VALUES($1,$2,now()+interval '14 days')",
-    [digest(token), userId],
-  );
+  await insertSession(db, userId, digest(token), proof);
   (await cookies()).set(cookieName, token, {
     httpOnly: true,
     secure:
@@ -106,10 +103,10 @@ export async function login(body: unknown) {
   );
   if (!user || !valid)
     throw new AppError(401, "Email or password is incorrect.");
-  if (user.password_hash.startsWith("scrypt:"))
-    await db.query("UPDATE users SET password_hash=$1 WHERE id=$2", [
-      await hashPassword(data.password),
-      user.id,
-    ]);
-  await createSession(user.id);
+  await createSession(user.id, {
+    expectedHash: user.password_hash,
+    replacementHash: user.password_hash.startsWith("scrypt:")
+      ? await hashPassword(data.password)
+      : undefined,
+  });
 }
