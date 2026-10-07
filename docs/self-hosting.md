@@ -21,7 +21,11 @@ Create reusable Markdown starting points under **Workspace settings → Template
 
 ## Persistence and backups
 
-Linux Docker hosts can use the optional PHP [daemon](../daemon/README.md) for systemd supervision, coordinated database/upload backups, and opt-in stable-release updates. The application itself does not need PHP. The supervisor runs on the host and keeps Docker control outside the web application.
+Docker hosts can use the optional PHP **daemon** for health monitoring, bounded application recovery, coordinated database/upload backups, and opt-in stable-release updates. Follow the [Linux systemd guide](../daemon/README.md) or the [Windows service guide](../daemon/windows/README.md). Windows requires a reachable Linux container engine; the service does not start Docker Desktop. The application itself does not need PHP. The supervisor runs on the host and keeps Docker control outside the web application.
+
+During maintenance, `daemon pause` leaves containers and health checks running while suspending automatic recovery and updates. `daemon resume` requires a healthy stack before supervision resumes. Run these commands with the administrative privileges and launcher described in your platform's guide.
+
+Use `daemon backup` for a coordinated backup, `daemon backups` to inspect saved backup manifests, and `daemon verify-backup` with a listed directory name to check its file checksums. A complete manifest alone does not establish integrity, and matching checksums do not prove restoration will succeed. Copy completed backups off the host and periodically test restoration. See [backup verification and interrupted-update recovery](../daemon/README.md#backups-and-interrupted-updates).
 
 **Workspace settings → Audit log** records successful administrative changes from the time audit logging is installed. Entries retain the actor's display name, action, target label, and timestamp. Settings changes and their audit entries commit together. Only administrators can read this history. Page edits remain in page revision history; login attempts and collection changes are not yet included. Audit entries live in PostgreSQL and are retained with your database backups. There is currently no automatic retention limit.
 
