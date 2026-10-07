@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
+import rehypeRaw from "rehype-raw";
 import { common, createLowlight } from "lowlight";
 import type { Element, RootContent } from "hast";
 const lowlight = createLowlight(common);
@@ -23,5 +24,5 @@ export function Markdown({ content }: { content: string }) {
     a: ({ href, children }: { href?: string; children?: React.ReactNode }) => <a href={href} rel="noopener noreferrer">{children}</a>,
     img: ({ src, alt }: { src?: string | Blob; alt?: string }) => typeof src === "string" ? <img src={src} alt={alt || ""} loading="lazy" /> : null,
   }), []);
-  return <div className="prose"><ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]} components={components}>{content}</ReactMarkdown></div>;
+  return <div className="prose"><ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize]} components={components}>{content}</ReactMarkdown></div>;
 }
