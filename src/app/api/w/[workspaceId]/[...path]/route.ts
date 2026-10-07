@@ -7,7 +7,7 @@ import { membership } from "@/server/workspaces";
 import { accessContext, requirePage } from "@/server/permissions";
 import { createPage, updatePage, deletePage, revisions, restoreRevision } from "@/server/pages";
 import { searchProvider } from "@/server/search";
-import { createCollection } from "@/server/collections";
+import { createCollection,updateCollection,deleteCollection } from "@/server/collections";
 import { adminRequest } from "@/server/admin";
 import { boundedRequest } from "@/server/body";
 
@@ -26,6 +26,8 @@ async function handle(request: Request, context: Context) {
     if(adminResponse) return adminResponse;
     if (resource === "search" && method === "GET") return Response.json(await searchProvider.search(db, workspace, user.id, new URL(request.url).searchParams.get("q") || ""));
     if (resource === "collections" && method === "POST") return Response.json(await createCollection(db, workspace, await request.json()), { status: 201 });
+    if(resource === "collections" && method === "PATCH" && id){await updateCollection(db,workspace,id,await request.json());return Response.json({ok:true});}
+    if(resource === "collections" && method === "DELETE" && id){await deleteCollection(db,workspace,id);return Response.json({ok:true});}
     if (resource === "pages") {
       if (id) z.uuid().parse(id);
       if (method === "GET" && !id) { const ctx = await accessContext(db, workspace, user.id); return Response.json(ctx.pages.filter(p => ctx.allowed(p))); }
