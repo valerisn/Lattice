@@ -6,6 +6,7 @@ import { Markdown } from "./markdown";
 import { pageHeadings } from "@/shared/headings";
 import { Backlinks } from "./backlinks";
 import { LatticeWeave } from "./lattice-weave";
+import { TableOfContents } from "./table-of-contents";
 import {
   documentationSettings,
   type DocumentationSettings,
@@ -144,18 +145,7 @@ export function PageReader({
         </footer>
       </article>
       {settings.show_toc && headings.length > 1 && (
-        <aside className="table-of-contents">
-          <p className="eyebrow">ON THIS PAGE</p>
-          {headings.map((h) => (
-            <a
-              key={h.id}
-              href={`#${h.id}`}
-              style={{ paddingLeft: h.depth === 3 ? 14 : 0 }}
-            >
-              {h.title}
-            </a>
-          ))}
-        </aside>
+        <TableOfContents headings={headings} article={article} />
       )}
     </div>
   );

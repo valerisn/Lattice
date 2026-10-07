@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { checkEditorChecklists } from "./editor-checklists";
 import { checkCodeExamples } from "./code-examples";
 import { checkSearchNavigation } from "./search-navigation";
+import { checkReadingOutline } from "./reading-outline";
 
 test("workspace lifecycle, revisions, uploads, and authorization", async ({
   page,
@@ -54,6 +55,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await checkEditorChecklists(page, base, headers);
   await checkCodeExamples(page, base, headers);
   await checkSearchNavigation(page, base);
+  await checkReadingOutline(page, base, headers);
   await page.getByRole("button", { name: "New page", exact: true }).click();
   await page.getByLabel("Page title", { exact: true }).fill("Project notes");
   await page.getByLabel("Parent page").selectOption({ label: "Home" });

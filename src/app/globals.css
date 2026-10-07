@@ -1352,6 +1352,21 @@ kbd {
   font-size: 11px;
   line-height: 1.5;
   padding: 7px 0;
+  border-left: 2px solid transparent;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+}
+.table-of-contents nav {
+  max-height: calc(100dvh - 260px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.table-of-contents a[aria-current="location"] {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
 }
 .table-of-contents a:hover {
   color: var(--accent);

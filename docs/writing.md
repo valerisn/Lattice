@@ -18,6 +18,8 @@ Use **More page actions → Version history** to review previous versions. **Com
 
 The table of contents follows rendered level-two and level-three headings. Repeated headings receive unique links, formatted heading text stays readable, and code examples are excluded. Administrators can change reading width, metadata visibility, the footer, and the table of contents under **Workspace settings → Documentation**.
 
+On larger screens, the table of contents highlights the section you are reading as you scroll. Long outlines scroll independently to keep the current section visible.
+
 Fenced code examples show their language and a **Copy** button. Copying preserves indentation and line breaks. If your browser blocks clipboard access, the example stays selectable and the button lets you retry. Keyboard readers can focus a code example to scroll long lines. Copy controls stay out of printed pages.
 
 Choose **More → Print / Save as PDF**, or use your browser's print shortcut, for a paper-friendly layout. Navigation and editing controls are hidden, dark mode becomes white paper, and expandable sections open for printing. Choose your browser's PDF destination to save a copy.
