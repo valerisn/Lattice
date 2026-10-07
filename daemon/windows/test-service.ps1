@@ -84,6 +84,7 @@ try {
     Write-Host 'PASS real SCM install, monitor, graceful stop, crash recovery, reinstall, and preserving uninstall (fixture Docker CLI).'
 } finally {
     if (Test-Path -LiteralPath "$installation\state\daemon.log") { Get-Content -LiteralPath "$installation\state\daemon.log" -Tail 30 }
+    if (Test-Path -LiteralPath "$tools\calls.log") { Get-Content -LiteralPath "$tools\calls.log" -Tail 30 }
     if (Get-Service lattice-daemon -ErrorAction SilentlyContinue) { & "$PSScriptRoot\uninstall.ps1" }
     if (!$server.HasExited) { $server.Kill(); $server.WaitForExit() }
     $expected = [System.IO.Path]::GetFullPath((Join-Path $env:ProgramData 'LatticeDaemon'))

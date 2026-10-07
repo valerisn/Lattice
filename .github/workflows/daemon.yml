@@ -26,6 +26,7 @@ jobs:
   windows:
     name: Windows · PHP ${{ matrix.php }}
     runs-on: windows-2022
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:

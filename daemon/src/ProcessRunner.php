@@ -7,6 +7,16 @@ final class ProcessRunner implements Runner
 {
     public function run(array $arguments, string $directory, int $timeout = 30, ?string $outputFile = null): CommandResult
     {
+        if (PHP_OS_FAMILY === 'Windows' && in_array($arguments[0] ?? '', ['docker', 'git'], true)) {
+            $executable = getenv('LATTICE_DAEMON_' . strtoupper($arguments[0]));
+            if ($executable !== false && $executable !== '') {
+                if (!preg_match('~^[A-Za-z]:[/\\\\]~', $executable) || !is_file($executable)) {
+                    throw new RuntimeException('The configured Windows tool executable is unavailable.');
+                }
+                // Windows searches the working directory before PATH. Pin the service tools.
+                $arguments[0] = $executable;
+            }
+        }
         $out = $outputFile ? fopen($outputFile, 'x+b') : tmpfile();
         $err = tmpfile();
         $input = fopen(PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null', 'r');

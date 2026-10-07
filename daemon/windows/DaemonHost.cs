@@ -165,6 +165,8 @@ internal sealed class DaemonHost : ServiceBase
         start.RedirectStandardOutput = true;
         start.RedirectStandardError = true;
         start.EnvironmentVariables["PATH"] = dockerDirectory + ";" + gitDirectory + ";" + Path.GetDirectoryName(php) + ";" + Environment.GetFolderPath(Environment.SpecialFolder.System);
+        start.EnvironmentVariables["LATTICE_DAEMON_DOCKER"] = Path.Combine(dockerDirectory, "docker.exe");
+        start.EnvironmentVariables["LATTICE_DAEMON_GIT"] = Path.Combine(gitDirectory, "git.exe");
         start.EnvironmentVariables["DOCKER_HOST"] = dockerHost;
         start.EnvironmentVariables.Remove("DOCKER_CONTEXT");
         start.EnvironmentVariables.Remove("DOCKER_TLS_VERIFY");

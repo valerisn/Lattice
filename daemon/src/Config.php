@@ -28,6 +28,12 @@ final class Config
             if ($data[$field] === '' || preg_match('/^[A-Za-z]:$/', $data[$field])) {
                 throw new InvalidArgumentException("$field cannot be a filesystem root.");
             }
+            if (PHP_OS_FAMILY === 'Windows') {
+                if (!preg_match('~^[A-Za-z]:/[^/:*?"<>|]+(?:/[^/:*?"<>|]+)*$~D', $data[$field])
+                    || preg_match('~[. ](?:/|$)~', $data[$field])) {
+                    throw new InvalidArgumentException("$field must be a local drive path without aliases, empty segments, or trailing dots/spaces.");
+                }
+            }
         }
         $state = PHP_OS_FAMILY === 'Windows' ? strtolower($data['state_dir']) : $data['state_dir'];
         $checkout = PHP_OS_FAMILY === 'Windows' ? strtolower($data['directory']) : $data['directory'];
