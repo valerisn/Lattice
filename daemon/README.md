@@ -122,6 +122,15 @@ Backups live under `state_dir/backups`. Each contains:
 
 Directories use mode 0700 and files use 0600. Only backups with a completed manifest should be used for recovery. Copy completed backups off the host and manage retention; daemon never deletes old backups automatically. The free-space check covers deployment/state filesystems, not Docker's internal storage when it is on another filesystem.
 
+Use `daemon verify-backup` with a backup directory name from `state_dir/backups` to check all four files against the completed manifest:
+
+```sh
+sudo daemon verify-backup 20261007-030000-a1b2c3d4
+sudo daemon verify-backup 20261007-030000-a1b2c3d4 --json
+```
+
+Replace the example name with your backup's name. Verification works on Linux and Windows without a running Docker engine, does not stop containers, and does not print backup contents or secrets. It returns 0 when checksums match, 2 for damaged, missing, or unsafe files, and 1 for an invalid name or manifest. It reads every backup file, so large backups may take time. Checksums detect changes against the manifest; they do not authenticate its source or prove that the database can be restored. Test a restoration separately.
+
 On Linux, daemon rejects configuration/state files or state directories that belong to another user, expose group/other permissions, or use symlinks. Parent directories must belong to root or the service user and must not allow shared writes unless protected by the sticky bit. For the installed root service, keep `/etc/lattice/daemon.json` root-owned with mode 0600 and `/var/lib/lattice-daemon` root-owned with mode 0700. Correct unsafe ownership or permissions before restarting; daemon will not silently trust an existing shared directory.
 
 After a failed activation, inspect `sudo daemon status --json`, the journal, app logs, and the recorded manifest. Keep supervision stopped while repairing. Restore the matching source revision, database dump, uploads, and configuration together into a recovery deployment, or complete the forward migration. Test login, a document, and an attachment before returning traffic. Do not run older code against a possibly migrated database based only on the image ID.

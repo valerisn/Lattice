@@ -67,6 +67,8 @@ For a long-running backup/update, Windows may continue to show **Stopping**. The
 
 The service restarts after failures with 10, 30, and 60 second delays, then stops retrying until an administrator intervenes or the failure count resets after a day. Logs rotate at approximately 10 MiB, retaining three previous files. Backups are never deleted automatically.
 
+`daemon verify-backup` accepts the directory name of a completed backup under `state\backups`, with optional `--json`. It checks all four file checksums without requiring Docker or interrupting supervision. See the [backup verification guide](../README.md#backups-and-interrupted-updates) for exit codes and recovery limits.
+
 Startup errors also appear in Windows Event Viewer under **Windows Logs → Application**, source `lattice-daemon`.
 
 ## Configuration and data

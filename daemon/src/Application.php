@@ -33,10 +33,10 @@ final class Application
             $console->output(['message' => 'Configuration created. Automatic updates are disabled.', 'config' => $options['config']]);
             return 0;
         }
-        if (!in_array($command, ['status', 'doctor', 'watch', 'start', 'stop', 'restart', 'resume', 'backup', 'check-update', 'update', 'auto-update'], true)) {
+        if (!in_array($command, ['status', 'doctor', 'watch', 'start', 'stop', 'restart', 'resume', 'backup', 'verify-backup', 'check-update', 'update', 'auto-update'], true)) {
             throw new RuntimeException("Unknown command: $command. Run daemon help.");
         }
-        if (count($positionals) > ($command === 'auto-update' ? 2 : 1)) { throw new RuntimeException('Unexpected command arguments.'); }
+        if (count($positionals) > (in_array($command, ['auto-update', 'verify-backup'], true) ? 2 : 1)) { throw new RuntimeException('Unexpected command arguments.'); }
         foreach (['directory', 'state-dir', 'project-name', 'health-url'] as $key) {
             if (isset($options[$key])) { throw new RuntimeException("--$key is only valid with init. Edit the configuration to change an existing installation."); }
         }
@@ -46,6 +46,11 @@ final class Application
         }
         $config = Config::load($options['config']);
         $store = new Store($config->get('state_dir'));
+        if ($command === 'verify-backup') {
+            $result = (new BackupVerifier($store))->verify($positionals[1] ?? '');
+            $console->output($result);
+            return $result['verified'] ? 0 : 2;
+        }
         $runner = new ProcessRunner();
         $http = new Http();
         $compose = new Compose($config, $runner);
@@ -200,6 +205,8 @@ Usage: daemon <command> [--config /etc/lattice/daemon.json] [--json]
   restart        Restart the application container and verify health
   resume         Resume supervision after an operator repairs the stack
   backup         Pause app, back up PostgreSQL/uploads, then resume app
+  verify-backup <name>
+                 Check a completed backup's four file checksums, without Docker
   check-update   Check the official stable GitHub release
   update         Back up and install an eligible stable release
   auto-update on|off
