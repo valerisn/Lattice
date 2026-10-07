@@ -474,17 +474,31 @@ export function SettingsApp({
                 <section className="settings-section stack">
                   <h2>Host supervision with daemon</h2>
                   <p className="muted">
-                    For Linux Docker installations, daemon provides health
-                    monitoring, app recovery, coordinated backups, and opt-in
-                    automatic updates. Install and configure it on your server.
+                    daemon supervises Lattice Docker installations on Linux and
+                    Windows, with health monitoring, app recovery, coordinated
+                    backups, and opt-in automatic updates. Install and configure
+                    it on the host running your containers.
                   </p>
                   <a
                     href="https://github.com/valerisn/Lattice/tree/main/daemon"
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Read the daemon setup guide
+                    Linux setup and command guide
                   </a>
+                  <a
+                    href="https://github.com/valerisn/Lattice/blob/main/daemon/windows/README.md"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Windows service setup guide
+                  </a>
+                  <p className="muted">
+                    Run <code>daemon backups</code> on the host to list saved
+                    backups, then <code>daemon verify-backup &lt;name&gt;</code>{" "}
+                    to check their files against the recorded checksums.
+                    Automatic updates are off by default.
+                  </p>
                 </section>
                 <dl className="system-info">
                   {Object.entries(data.system).map(([key, value]) => (
