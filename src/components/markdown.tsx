@@ -8,6 +8,21 @@ import { common, createLowlight } from "lowlight";
 import type { Element, RootContent } from "hast";
 import { rehypeHeadingIds } from "@/shared/headings";
 import { CodeBlock } from "./code-block";
+import {
+  Info,
+  Lightbulb,
+  BookmarkCheck,
+  TriangleAlert,
+  ShieldAlert,
+} from "lucide-react";
+import { calloutKind, calloutLabels, rehypeCallouts } from "@/shared/callouts";
+const calloutIcons = {
+  note: Info,
+  tip: Lightbulb,
+  important: BookmarkCheck,
+  warning: TriangleAlert,
+  caution: ShieldAlert,
+};
 const lowlight = createLowlight(common);
 function highlightNodes(nodes: RootContent[]): React.ReactNode {
   return nodes.map((node, index) =>
@@ -28,6 +43,29 @@ function highlightNodes(nodes: RootContent[]): React.ReactNode {
 export function Markdown({ content }: { content: string }) {
   const components = useMemo(
     () => ({
+      blockquote: ({
+        children,
+        node,
+      }: {
+        children?: React.ReactNode;
+        node?: Element;
+      }) => {
+        const kind = calloutKind(node);
+        if (!kind) return <blockquote>{children}</blockquote>;
+        const Icon = calloutIcons[kind];
+        return (
+          <aside
+            className={`callout callout-${kind}`}
+            aria-label={`${calloutLabels[kind]} callout`}
+          >
+            <div className="callout-title">
+              <Icon size={18} aria-hidden="true" />
+              {calloutLabels[kind]}
+            </div>
+            {children}
+          </aside>
+        );
+      },
       pre: ({
         children,
         node,
@@ -102,7 +140,12 @@ export function Markdown({ content }: { content: string }) {
     <div className="prose">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHeadingIds]}
+        rehypePlugins={[
+          rehypeRaw,
+          rehypeSanitize,
+          rehypeCallouts,
+          rehypeHeadingIds,
+        ]}
         components={components}
       >
         {content}

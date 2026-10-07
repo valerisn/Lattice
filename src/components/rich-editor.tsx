@@ -135,7 +135,7 @@ export function RichEditor({
         editor
           .chain()
           .focus()
-          .insertContent("> **Note**\n> Something worth noticing.", {
+          .insertContent("> [!NOTE]\n> Something worth noticing.", {
             contentType: "markdown",
           })
           .run(),

@@ -1240,6 +1240,45 @@ kbd {
   border-radius: 0 7px 7px 0;
   color: var(--text);
 }
+.prose .callout {
+  --callout-color: var(--accent);
+  margin: 24px 0;
+  padding: 18px 22px;
+  border: 1px solid color-mix(in srgb, var(--callout-color) 28%, var(--border));
+  border-left: 3px solid var(--callout-color);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--callout-color) 7%, var(--surface));
+  color: var(--text);
+}
+.prose .callout-warning {
+  --callout-color: #a56608;
+}
+.prose .callout-caution {
+  --callout-color: #b54c43;
+}
+html[data-theme="dark"] .prose .callout-warning {
+  --callout-color: #e9b15d;
+}
+html[data-theme="dark"] .prose .callout-caution {
+  --callout-color: #eb9389;
+}
+.callout-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--callout-color);
+  font-size: 13px;
+  font-weight: 650;
+}
+.callout-title svg {
+  flex-shrink: 0;
+}
+.prose .callout > :last-child {
+  margin-bottom: 0;
+}
+.prose .callout-title + * {
+  margin-top: 12px;
+}
 .prose code {
   font-family: Consolas, monospace;
   font-size: 12px;
@@ -1998,6 +2037,14 @@ form {
     background: #f5f5f5;
     border: 1px solid #ccc;
     break-inside: avoid;
+  }
+  .prose .callout {
+    background: #fff;
+    border-color: #aaa;
+    break-inside: avoid;
+  }
+  .prose .callout-title {
+    color: #222;
   }
   .prose pre,
   .prose pre span,

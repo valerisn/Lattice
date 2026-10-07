@@ -30,6 +30,17 @@ Fenced code examples show their language and a **Copy** button. Copying preserve
 
 Choose **More → Print / Save as PDF**, or use your browser's print shortcut, for a paper-friendly layout. Navigation and editing controls are hidden, dark mode becomes white paper, and expandable sections open for printing. Choose your browser's PDF destination to save a copy.
 
+## Call out useful details
+
+Start a blockquote with `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, or `[!CAUTION]` on its own line. Lattice renders a labeled callout with an icon. Use the rich editor's **Callout** block to insert a note, or edit the marker in Markdown. Ordinary blockquotes keep their existing appearance.
+
+```markdown
+> [!TIP]
+> Link to the decision behind a process, not just the steps.
+>
+> You can include **emphasis**, links, lists, and code examples.
+```
+
 ## Share and organize
 
 Page links can connect related knowledge. Sharing copies the page URL; recipients still need permission to read it. Favorites keep frequently used pages close, and **Ctrl/Cmd + K** searches accessible pages and collections.

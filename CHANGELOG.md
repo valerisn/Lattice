@@ -6,6 +6,7 @@ Changes listed under **Unreleased** are available on the main branch. They are n
 
 ### Writing and reading
 
+- Markdown callouts render notes, tips, important information, warnings, and cautions with labels and icons. The rich editor's Callout block inserts a note.
 - Creation dialogs keep submitted fields stable and stay open until the request finishes. Markdown import cannot be cleared while a file is still being read.
 - Version history distinguishes loading, empty, and failed responses, supports retry, and keeps the selected version fixed while a restore runs.
 - Focus mode expands the editor and hides page details while keeping autosave active.
