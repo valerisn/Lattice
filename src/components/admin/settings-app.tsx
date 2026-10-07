@@ -136,8 +136,6 @@ export function SettingsApp({
                   );
                   void run(async () => {
                     await api(`${base}/admin`, "PATCH", {
-                      ...workspace,
-                      logo: workspace.logo || "",
                       ...form,
                       homepage_id: form.homepage_id || null,
                     });
@@ -206,7 +204,6 @@ export function SettingsApp({
                     );
                     void run(async () => {
                       await api(`${base}/admin`, "PATCH", {
-                        ...workspace,
                         ...form,
                       });
                     });
@@ -251,8 +248,6 @@ export function SettingsApp({
                     );
                     void run(async () => {
                       await api(`${base}/admin`, "PATCH", {
-                        ...workspace,
-                        logo: workspace.logo || "",
                         upload_limit: Math.round(value * 1024 * 1024),
                       });
                     });

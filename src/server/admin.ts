@@ -5,6 +5,7 @@ import { canManage } from "@/shared/types";
 import { AppError } from "./errors";
 import { newToken, digest } from "./security";
 import { saveDocumentation } from "./documentation";
+import { saveWorkspaceSettings } from "./workspace-settings";
 import { installedVersion, lastUpdateCheck, checkForUpdates } from "./updates";
 
 export async function adminRequest(
@@ -82,47 +83,7 @@ export async function adminRequest(
     });
   }
   if (resource === "admin" && method === "PATCH") {
-    const data = z
-      .object({
-        name: z.string().trim().min(1).max(80),
-        description: z.string().max(500),
-        accent: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-        logo: z
-          .string()
-          .max(2000)
-          .refine(
-            (v) =>
-              !v ||
-              v.startsWith("https://") ||
-              /^\/api\/attachments\/[0-9a-f-]+$/.test(v),
-            "Use an HTTPS image URL or uploaded attachment.",
-          ),
-        homepage_id: z.uuid().nullable(),
-        upload_limit: z.number().int().min(1024).max(52428800),
-      })
-      .parse(await request.json());
-    if (
-      data.homepage_id &&
-      !(
-        await db.query("SELECT id FROM pages WHERE id=$1 AND workspace_id=$2", [
-          data.homepage_id,
-          workspace.id,
-        ])
-      ).length
-    )
-      throw new AppError(400, "Homepage must belong to this workspace.");
-    await db.query(
-      "UPDATE workspaces SET name=$1,description=$2,accent=$3,logo=$4,homepage_id=$5,upload_limit=$6 WHERE id=$7",
-      [
-        data.name,
-        data.description,
-        data.accent,
-        data.logo || null,
-        data.homepage_id,
-        data.upload_limit,
-        workspace.id,
-      ],
-    );
+    await saveWorkspaceSettings(db, workspace, await request.json());
     return Response.json({ ok: true });
   }
   if (resource === "invites" && method === "POST") {

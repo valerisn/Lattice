@@ -35,4 +35,6 @@ Grants require one of `page_id`/`collection_id`, one of `user_id`/`group_id`, an
 
 API tokens, bulk endpoints, and long-term compatibility guarantees are planned.
 
+Workspace settings (`PATCH /admin`) accept partial updates to `name`, `description`, `logo`, `accent`, `homepage_id`, and `upload_limit`. Omitted fields remain unchanged. Send an empty logo string to restore the default, or a null homepage ID to choose the first available page.
+
 Documentation preferences accept partial updates: `default_state` (`draft` or `published`), `reading_width` (`comfortable` or `wide`), `show_toc`, `show_author`, `show_updated`, `show_reading_time` (booleans), and `footer_text` (at most 200 characters). The configured publication default applies when a page creation request omits `state`; existing pages are unaffected.

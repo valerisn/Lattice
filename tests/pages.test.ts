@@ -13,6 +13,7 @@ import {
 import { accessContext, requirePage } from "../src/server/permissions";
 import { rateLimit } from "../src/server/security";
 import { saveDocumentation } from "../src/server/documentation";
+import { saveWorkspaceSettings } from "../src/server/workspace-settings";
 import type { Workspace, WikiPage } from "../src/shared/types";
 
 describe("workspace services", () => {
@@ -212,6 +213,26 @@ describe("workspace services", () => {
         })
       ).state,
     ).toBe("published");
+  });
+  it("updates only submitted workspace settings and rejects unauthorized changes", async () => {
+    await saveWorkspaceSettings(db, workspace, { accent: "#123456" });
+    await saveWorkspaceSettings(db, workspace, { upload_limit: 2048 });
+    const updated = await membership(db, owner, workspace.id);
+    expect(updated.accent).toBe("#123456");
+    expect(updated.upload_limit).toBe(2048);
+    expect(updated.name).toBe(workspace.name);
+    expect(updated.documentation.default_state).toBe("draft");
+    await expect(saveWorkspaceSettings(db, updated, {})).rejects.toThrow(
+      "at least one",
+    );
+    await expect(
+      saveWorkspaceSettings(db, updated, { homepage_id: crypto.randomUUID() }),
+    ).rejects.toThrow("Homepage");
+    await expect(
+      saveWorkspaceSettings(db, await membership(db, viewer, workspace.id), {
+        name: "Nope",
+      }),
+    ).rejects.toThrow("administrators");
   });
   it("persists a stable sibling order and rejects invalid move targets", async () => {
     const a = await createPage(db, workspace, owner, { title: "Order A" });
