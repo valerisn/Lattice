@@ -10,6 +10,7 @@ export function CreateDialog({
   collections,
   onClose,
   onCreated,
+  defaultState = "published",
 }: {
   kind: "page" | "collection";
   workspaceId: string;
@@ -17,6 +18,7 @@ export function CreateDialog({
   collections: Collection[];
   onClose: () => void;
   onCreated: (id: string) => void;
+  defaultState?: "draft" | "published";
 }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -89,7 +91,11 @@ export function CreateDialog({
             </label>
             <label>
               Publication
-              <select name="state">
+              <select
+                aria-label="Publication"
+                name="state"
+                defaultValue={defaultState}
+              >
                 <option value="published">Published to workspace</option>
                 <option value="draft">Draft (hidden from viewers)</option>
               </select>

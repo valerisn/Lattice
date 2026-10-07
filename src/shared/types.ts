@@ -1,3 +1,4 @@
+import type { DocumentationSettings } from "./documentation";
 export type Role = "owner" | "admin" | "editor" | "viewer";
 export interface User {
   id: string;
@@ -16,6 +17,7 @@ export interface Workspace {
   accent: string;
   homepage_id: string | null;
   upload_limit: number;
+  documentation: Partial<DocumentationSettings>;
   role: Role;
 }
 export interface WikiPage {

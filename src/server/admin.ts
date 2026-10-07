@@ -4,6 +4,7 @@ import type { Workspace, User, Role } from "@/shared/types";
 import { canManage } from "@/shared/types";
 import { AppError } from "./errors";
 import { newToken, digest } from "./security";
+import { saveDocumentation } from "./documentation";
 import { installedVersion, lastUpdateCheck, checkForUpdates } from "./updates";
 
 export async function adminRequest(
@@ -23,6 +24,7 @@ export async function adminRequest(
       "groups",
       "permissions",
       "updates",
+      "documentation",
     ].includes(resource)
   )
     return null;
@@ -35,6 +37,10 @@ export async function adminRequest(
     );
   if (!canManage(workspace.role))
     throw new AppError(403, "Only administrators can manage this workspace.");
+  if (resource === "documentation" && method === "PATCH")
+    return Response.json(
+      await saveDocumentation(db, workspace, await request.json()),
+    );
   if (resource === "updates" && method === "POST")
     return Response.json(await checkForUpdates(), {
       headers: { "Cache-Control": "no-store" },

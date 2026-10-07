@@ -12,6 +12,7 @@ import {
 } from "../src/server/pages";
 import { accessContext, requirePage } from "../src/server/permissions";
 import { rateLimit } from "../src/server/security";
+import { saveDocumentation } from "../src/server/documentation";
 import type { Workspace, WikiPage } from "../src/shared/types";
 
 describe("workspace services", () => {
@@ -173,6 +174,44 @@ describe("workspace services", () => {
     await expect(requirePage(db, view, viewer, restricted.id)).rejects.toThrow(
       "Page not found",
     );
+  });
+  it("configures documentation with role checks and defaults new pages to drafts", async () => {
+    const view = await membership(db, viewer, workspace.id);
+    await expect(
+      saveDocumentation(db, view, { default_state: "draft" }),
+    ).rejects.toThrow("administrators");
+    await expect(
+      saveDocumentation(db, workspace, { show_toc: "false" }),
+    ).rejects.toThrow();
+    await expect(
+      saveDocumentation(db, workspace, { footer_text: "x".repeat(201) }),
+    ).rejects.toThrow();
+    await saveDocumentation(db, workspace, {
+      default_state: "draft",
+      show_author: false,
+    });
+    await saveDocumentation(db, workspace, { footer_text: "Team handbook" });
+    const configured = await membership(db, owner, workspace.id);
+    expect(configured.documentation).toMatchObject({
+      default_state: "draft",
+      show_author: false,
+      footer_text: "Team handbook",
+    });
+    const draft = await createPage(db, configured, owner, {
+      title: "Unpublished by default",
+    });
+    expect(draft.state).toBe("draft");
+    await expect(requirePage(db, view, viewer, draft.id)).rejects.toThrow(
+      "Page not found",
+    );
+    expect(
+      (
+        await createPage(db, configured, owner, {
+          title: "Explicitly published",
+          state: "published",
+        })
+      ).state,
+    ).toBe("published");
   });
   it("persists a stable sibling order and rejects invalid move targets", async () => {
     const a = await createPage(db, workspace, owner, { title: "Order A" });

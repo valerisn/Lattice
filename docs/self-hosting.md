@@ -13,6 +13,8 @@ The app runs as the non-root `node` user and waits for PostgreSQL health. Migrat
 
 Invite teammates through **Workspace settings → Members**. Share generated links yourself; Lattice does not send email yet.
 
+Use **Workspace settings → Documentation** to choose the default publication state for new pages, reading width, table of contents, visible page metadata, and footer message. These preferences apply per workspace. Drafts stay hidden from viewers; authors can explicitly publish a page. Disabling author display is a presentation preference, not an access-control change.
+
 ## Persistence and backups
 
 Compose creates `postgres` and `uploads` named volumes. Both matter. `docker compose down` preserves them; adding `-v` deletes all stored content.

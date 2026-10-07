@@ -19,6 +19,7 @@ Common statuses: 400 invalid input, 401 signed out, 403 denied, 404 missing/inac
 | POST/PATCH/DELETE | `/api/w/:workspaceId/collections[/:id]`                  | Manage collections                          |
 | GET/PATCH         | `/api/w/:workspaceId/admin`                              | Admin overview/settings                     |
 | POST              | `/api/w/:workspaceId/updates`                            | Admin-only stable release check             |
+| PATCH             | `/api/w/:workspaceId/documentation`                      | Admin-only documentation preferences        |
 | GET/PATCH/DELETE  | `/api/w/:workspaceId/members[/:id]`                      | Members and roles                           |
 | POST/DELETE       | `/api/w/:workspaceId/invites[/:id]`                      | Generate/revoke invite links                |
 | POST              | `/api/invites/accept`                                    | Consume invitation                          |
@@ -33,3 +34,5 @@ Page create/update fields: `title`, `description`, `content`, `parent_id`, `coll
 Grants require one of `page_id`/`collection_id`, one of `user_id`/`group_id`, and `capability` (`read` or `edit`). Set unused target fields to null. See [permission semantics](architecture.md).
 
 API tokens, bulk endpoints, and long-term compatibility guarantees are planned.
+
+Documentation preferences accept partial updates: `default_state` (`draft` or `published`), `reading_width` (`comfortable` or `wide`), `show_toc`, `show_author`, `show_updated`, `show_reading_time` (booleans), and `footer_text` (at most 200 characters). The configured publication default applies when a page creation request omits `state`; existing pages are unaffected.

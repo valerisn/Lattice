@@ -153,6 +153,19 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   expect((await anonymous.request.get(`${base}/admin`)).status()).toBe(403);
   expect(
     (
+      await anonymous.request.post(`${base}/updates`, { headers, data: {} })
+    ).status(),
+  ).toBe(403);
+  expect(
+    (
+      await anonymous.request.patch(`${base}/documentation`, {
+        headers,
+        data: { show_author: false },
+      })
+    ).status(),
+  ).toBe(403);
+  expect(
+    (
       await page.request.post(`${base}/pages`, {
         headers: { origin: "https://evil.example" },
         data: { title: "Forbidden" },
@@ -191,7 +204,40 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await expect(
     page.getByRole("heading", { name: "Writers", exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "System", exact: true }).click();
+  await expect(
+    page.getByRole("region", { name: "Software updates" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Check for updates", exact: true })
+    .click();
+  await expect(page.getByText(/Last checked/)).toBeVisible({ timeout: 15000 });
+  await page
+    .getByRole("button", { name: "Documentation", exact: true })
+    .click();
+  await page.getByLabel("Default publication state").selectOption("draft");
+  await page.getByLabel("Reading width").selectOption("wide");
+  await page.getByLabel("Show table of contents").uncheck();
+  await page.getByLabel("Show author", { exact: true }).uncheck();
+  await page.getByLabel("Show last updated date").uncheck();
+  await page.getByLabel("Show reading time").uncheck();
+  await page.getByLabel("Footer text").fill("Test Studio knowledge base");
+  await page
+    .getByRole("button", { name: "Save documentation settings" })
+    .click();
+  await expect(page.getByText("Changes saved.", { exact: true })).toBeVisible();
   await page.goto("/w/test-studio");
+  await expect(
+    page.getByText("Test Studio knowledge base", { exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".page-meta")).toHaveCount(0);
+  await expect(page.locator(".table-of-contents")).toHaveCount(0);
+  await expect(page.locator(".reader-layout")).toHaveClass(/reader-wide/);
+  await page.getByRole("button", { name: "New page", exact: true }).click();
+  await expect(page.getByLabel("Publication", { exact: true })).toHaveValue(
+    "draft",
+  );
+  await page.keyboard.press("Escape");
   await page.getByLabel("Appearance", { exact: true }).selectOption("dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.setViewportSize({ width: 390, height: 844 });

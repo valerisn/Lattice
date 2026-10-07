@@ -3,6 +3,7 @@ import type { Database } from "./db";
 import type { Workspace, WikiPage, Revision } from "@/shared/types";
 import { requirePage, accessContext } from "./permissions";
 import { AppError } from "./errors";
+import { documentationSettings } from "@/shared/documentation";
 
 export const pageInput = z.object({
   title: z.string().trim().min(1).max(200),
@@ -76,7 +77,13 @@ export async function createPage(
   userId: string,
   body: unknown,
 ) {
-  const data = pageInput.parse(body);
+  const data = pageInput
+    .extend({
+      state: z
+        .enum(["draft", "published"])
+        .default(documentationSettings(workspace.documentation).default_state),
+    })
+    .parse(body);
   if (workspace.role === "viewer")
     throw new AppError(403, "Viewers cannot create pages.");
   return db.transaction(async (tx) => {

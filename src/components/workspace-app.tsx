@@ -436,7 +436,11 @@ export function WorkspaceApp({
         )}
         {view === "page" ? (
           page ? (
-            <PageReader page={page} collections={collections} />
+            <PageReader
+              page={page}
+              collections={collections}
+              documentation={workspace.documentation}
+            />
           ) : (
             <div className="empty">
               <h2>This page is not available.</h2>
@@ -517,6 +521,7 @@ export function WorkspaceApp({
       {create && (
         <CreateDialog
           kind={create}
+          defaultState={workspace.documentation.default_state}
           workspaceId={workspace.id}
           pages={pages.filter((p) => editableIds.includes(p.id))}
           collections={collections}

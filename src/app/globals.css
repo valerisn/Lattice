@@ -855,6 +855,17 @@ kbd {
 .page-article {
   min-width: 0;
 }
+.reader-wide {
+  max-width: 1450px;
+  grid-template-columns: minmax(0, 1100px) 180px;
+}
+.reader-without-toc {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 880px;
+}
+.reader-wide.reader-without-toc {
+  max-width: 1200px;
+}
 .page-symbol {
   display: inline-flex;
   padding: 13px;

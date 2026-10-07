@@ -2,19 +2,28 @@
 import { FileText, ArrowUpRight } from "lucide-react";
 import type { WikiPage, Collection } from "@/shared/types";
 import { Markdown, headingId } from "./markdown";
+import {
+  documentationSettings,
+  type DocumentationSettings,
+} from "@/shared/documentation";
 export function PageReader({
   page,
   collections,
+  documentation,
 }: {
   page: WikiPage;
   collections: Collection[];
+  documentation?: Partial<DocumentationSettings>;
 }) {
+  const settings = documentationSettings(documentation);
   const headings = [...page.content.matchAll(/^(#{2,3})\s+(.+)$/gm)].map(
     (m) => ({ depth: m[1].length, title: m[2] }),
   );
   const collection = collections.find((c) => c.id === page.collection_id);
   return (
-    <div className="reader-layout">
+    <div
+      className={`reader-layout ${settings.reading_width === "wide" ? "reader-wide" : ""} ${!settings.show_toc || headings.length < 2 ? "reader-without-toc" : ""}`}
+    >
       <article className="page-article">
         <div className="page-symbol">
           <FileText size={25} strokeWidth={1.5} />
@@ -27,26 +36,47 @@ export function PageReader({
         {page.description && (
           <p className="page-description">{page.description}</p>
         )}
-        <div className="page-meta">
-          <span className="avatar small">
-            {page.author?.slice(0, 1) || "L"}
-          </span>
-          <span>{page.author || "You"}</span>
-          <span>·</span>
-          <span>
-            Updated{" "}
-            {new Date(page.updated_at).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </span>
-          <span>·</span>
-          <span>
-            {Math.max(1, Math.ceil(page.content.split(/\s+/).length / 220))} min
-            read
-          </span>
-        </div>
+        {(settings.show_author ||
+          settings.show_updated ||
+          settings.show_reading_time) && (
+          <div className="page-meta">
+            {settings.show_author && (
+              <>
+                <span className="avatar small">
+                  {page.author?.slice(0, 1) || "L"}
+                </span>
+                <span>{page.author || "You"}</span>
+              </>
+            )}
+            {settings.show_updated && (
+              <>
+                {settings.show_author && <span>·</span>}
+                <span>
+                  Updated{" "}
+                  {new Date(page.updated_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
+              </>
+            )}
+            {settings.show_reading_time && (
+              <>
+                {(settings.show_author || settings.show_updated) && (
+                  <span>·</span>
+                )}
+                <span>
+                  {Math.max(
+                    1,
+                    Math.ceil(page.content.split(/\s+/).length / 220),
+                  )}{" "}
+                  min read
+                </span>
+              </>
+            )}
+          </div>
+        )}
         <div className="page-divider" />
         {page.content ? (
           <Markdown content={page.content} />
@@ -56,7 +86,7 @@ export function PageReader({
           </p>
         )}
         <footer className="page-footer">
-          <span>Made with care. Kept in Lattice.</span>
+          {settings.footer_text && <span>{settings.footer_text}</span>}
           <a
             href="https://github.com/valerisn/Lattice"
             target="_blank"
@@ -66,7 +96,7 @@ export function PageReader({
           </a>
         </footer>
       </article>
-      {headings.length > 1 && (
+      {settings.show_toc && headings.length > 1 && (
         <aside className="table-of-contents">
           <p className="eyebrow">ON THIS PAGE</p>
           {headings.map((h, i) => (

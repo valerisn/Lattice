@@ -12,6 +12,7 @@ import {
   Plug,
   Server,
   Folder,
+  BookOpen,
 } from "lucide-react";
 import type { Workspace, WikiPage, Collection } from "@/shared/types";
 import { api } from "@/client/api";
@@ -20,6 +21,7 @@ import { MembersPanel } from "./members-panel";
 import { AccessPanel } from "./access-panel";
 import { ThemePicker } from "../theme-picker";
 import { UpdatePanel } from "./update-panel";
+import { DocumentationPanel } from "./documentation-panel";
 export function SettingsApp({
   workspace,
   pages,
@@ -67,6 +69,7 @@ export function SettingsApp({
   };
   const tabs = [
     ["General", Settings2],
+    ["Documentation", BookOpen],
     ["Members", Users],
     ["Groups & access", Shield],
     ["Collections", Folder],
@@ -118,6 +121,9 @@ export function SettingsApp({
           <p className="muted">Loading workspace settings…</p>
         ) : (
           <fieldset disabled={busy} className="settings-fieldset">
+            {tab === "Documentation" && (
+              <DocumentationPanel workspace={workspace} run={run} />
+            )}
             {tab === "General" && (
               <form
                 key={

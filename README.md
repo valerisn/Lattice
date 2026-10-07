@@ -22,6 +22,8 @@ A calm, connected home for your team's guides, notes, and decisions. Lattice is 
 - Syntax highlighting, table of contents, and Markdown export
 - Protected attachments, file validation, and local storage
 - Light/dark/system appearance, branding, and workspace administration
+- Documentation settings for publication defaults, reading layout, metadata, and footer text
+- Administrator version checker for published stable releases
 - Docker Compose with PostgreSQL, health checks, and persistent volumes
 
 Sharing copies a link; recipients still need workspace access. Mention labels do not send notifications. Drafts are visible to editors and administrators, but hidden from viewers. Anonymous publishing is not included.
