@@ -12,7 +12,7 @@ describe("workspace services", () => {
   const owner = crypto.randomUUID(); const viewer = crypto.randomUUID(); const stranger = crypto.randomUUID();
   beforeAll(async () => {
     client = new PGlite(); db = embeddedDatabase(client); await migrate(db); await migrate(db);
-    for (const id of [owner, viewer, stranger]) await db.query("INSERT INTO users(id,email,name,username,password_hash) VALUES($1,$2,'Test',$1,'unused')", [id, `${id}@example.test`]);
+    for (const id of [owner, viewer, stranger]) await db.query("INSERT INTO users(id,email,name,username,password_hash) VALUES($1,$2,'Test',$1::text,'unused')", [id, `${id}@example.test`]);
     const id = await db.transaction(tx => createWorkspace(tx, owner, { name: "Test space", slug: "test-space" }));
     await db.query("INSERT INTO workspace_members(workspace_id,user_id,role) VALUES($1,$2,'viewer')", [id, viewer]);
     workspace = await membership(db, owner, id);
@@ -55,3 +55,4 @@ describe("workspace services", () => {
     await rateLimit(db, "attempt", 1); await expect(rateLimit(db, "attempt", 1)).rejects.toThrow("Too many");
   });
 });
+
