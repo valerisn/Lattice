@@ -860,6 +860,14 @@ kbd {
   margin: 0;
   padding: 0;
 }
+.template-preview {
+  min-height: 220px;
+  max-height: 50vh;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
 .audit-list li {
   display: flex;
   gap: 16px;

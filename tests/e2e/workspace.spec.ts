@@ -152,6 +152,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   ).toBe(403);
   expect((await anonymous.request.get(`${base}/admin`)).status()).toBe(403);
   expect((await anonymous.request.get(`${base}/audit`)).status()).toBe(403);
+  expect((await anonymous.request.get(`${base}/templates`)).status()).toBe(403);
   expect(
     (
       await anonymous.request.post(`${base}/updates`, { headers, data: {} })
@@ -245,6 +246,27 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await expect(
     page.getByText("Created an invitation", { exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Templates", exact: true }).click();
+  await page.getByRole("button", { name: "New template", exact: true }).click();
+  await page
+    .getByLabel("Template name", { exact: true })
+    .fill("Service runbook");
+  await page
+    .getByLabel("Template Markdown", { exact: true })
+    .fill("## Recovery procedure\n\n- [ ] Confirm service health");
+  await page
+    .getByRole("button", { name: "Preview template", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Recovery procedure", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Save template", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Service runbook", exact: true }),
+  ).toBeVisible();
   await page.goto("/w/test-studio");
   await expect(
     page.getByText("Test Studio knowledge base", { exact: true }),
@@ -256,7 +278,33 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await expect(page.getByLabel("Publication", { exact: true })).toHaveValue(
     "draft",
   );
-  await page.keyboard.press("Escape");
+  await page
+    .getByLabel("Starting template", { exact: true })
+    .selectOption({ label: "Service runbook" });
+  await page.getByLabel("Page title", { exact: true }).fill("On-call runbook");
+  await page.getByRole("button", { name: "Create page", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Recovery procedure", exact: true }),
+  ).toBeVisible();
+  await page.goto("/w/test-studio/settings?section=templates");
+  await page
+    .getByRole("button", { name: "Edit Service runbook", exact: true })
+    .click();
+  await page
+    .getByLabel("Template name", { exact: true })
+    .fill("Incident runbook");
+  await page
+    .getByRole("button", { name: "Save template", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  page.once("dialog", (dialog) => dialog.accept());
+  await page
+    .getByRole("button", { name: "Delete Incident runbook", exact: true })
+    .click();
+  await expect(
+    page.getByText("No templates yet.", { exact: false }),
+  ).toBeVisible();
+  await page.goto("/w/test-studio");
   await page.getByLabel("Appearance", { exact: true }).selectOption("dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.setViewportSize({ width: 390, height: 844 });

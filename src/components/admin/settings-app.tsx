@@ -14,6 +14,7 @@ import {
   Folder,
   BookOpen,
   ScrollText,
+  LayoutTemplate,
 } from "lucide-react";
 import type { Workspace, WikiPage, Collection } from "@/shared/types";
 import { api } from "@/client/api";
@@ -24,6 +25,7 @@ import { ThemePicker } from "../theme-picker";
 import { UpdatePanel } from "./update-panel";
 import { DocumentationPanel } from "./documentation-panel";
 import { AuditPanel } from "./audit-panel";
+import { TemplatesPanel } from "./templates-panel";
 export function SettingsApp({
   workspace,
   pages,
@@ -38,7 +40,7 @@ export function SettingsApp({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
-  const [, transition] = useTransition();
+  const [refreshing, transition] = useTransition();
   const router = useRouter();
   const base = `/api/w/${workspace.id}`;
   useEffect(() => {
@@ -72,6 +74,7 @@ export function SettingsApp({
   const tabs = [
     ["General", Settings2],
     ["Documentation", BookOpen],
+    ["Templates", LayoutTemplate],
     ["Members", Users],
     ["Groups & access", Shield],
     ["Collections", Folder],
@@ -102,6 +105,7 @@ export function SettingsApp({
             <button
               className={tab === name ? "active" : ""}
               key={name}
+              disabled={busy || refreshing}
               aria-current={tab === name ? "page" : undefined}
               onClick={() => {
                 if (tab !== name) {
@@ -136,7 +140,10 @@ export function SettingsApp({
         {!data ? (
           <p className="muted">Loading workspace settings…</p>
         ) : (
-          <fieldset disabled={busy} className="settings-fieldset">
+          <fieldset disabled={busy || refreshing} className="settings-fieldset">
+            {tab === "Templates" && (
+              <TemplatesPanel workspaceId={workspace.id} />
+            )}
             {tab === "Audit log" && <AuditPanel workspaceId={workspace.id} />}
             {tab === "Documentation" && (
               <DocumentationPanel workspace={workspace} run={run} />

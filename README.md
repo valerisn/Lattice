@@ -23,6 +23,7 @@ A calm, connected home for your team's guides, notes, and decisions. Lattice is 
 - Protected attachments, file validation, and local storage
 - Light/dark/system appearance, branding, and workspace administration
 - Documentation settings for publication defaults, reading layout, metadata, and footer text
+- Reusable page templates with Markdown preview and protection against stale edits
 - Administrator version checker for published stable releases
 - Administrative audit history for settings, invitations, roles, groups, and access grants
 - Docker Compose with PostgreSQL, health checks, and persistent volumes

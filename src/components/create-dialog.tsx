@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { WikiPage, Collection } from "@/shared/types";
 import { Modal } from "./modal";
 import { api } from "@/client/api";
+import type { TemplateSummary } from "@/shared/templates";
 export function CreateDialog({
   kind,
   workspaceId,
@@ -22,6 +23,25 @@ export function CreateDialog({
 }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [templates, setTemplates] = useState<TemplateSummary[]>([]);
+  const [templateError, setTemplateError] = useState("");
+  useEffect(() => {
+    if (kind !== "page") return;
+    let active = true;
+    api<TemplateSummary[]>(`/api/w/${workspaceId}/templates`)
+      .then((result) => {
+        if (active) setTemplates(result);
+      })
+      .catch(() => {
+        if (active)
+          setTemplateError(
+            "Templates could not be loaded. You can still create a blank page.",
+          );
+      });
+    return () => {
+      active = false;
+    };
+  }, [kind, workspaceId]);
   return (
     <Modal
       title={kind === "page" ? "Give your idea a home" : "Create a collection"}
@@ -40,6 +60,7 @@ export function CreateDialog({
                 ...form,
                 parent_id: form.parent_id || null,
                 collection_id: form.collection_id || null,
+                template_id: form.template_id || null,
               },
             );
             onCreated(result.id);
@@ -67,6 +88,24 @@ export function CreateDialog({
         </label>
         {kind === "page" ? (
           <>
+            {templates.length > 0 && (
+              <label>
+                Starting template
+                <select name="template_id" aria-label="Starting template">
+                  <option value="">Blank page</option>
+                  {templates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {templateError && (
+              <p className="muted" role="status">
+                {templateError}
+              </p>
+            )}
             <label>
               Parent page
               <select name="parent_id">
