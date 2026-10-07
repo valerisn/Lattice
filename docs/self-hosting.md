@@ -1,0 +1,47 @@
+# Self-hosting
+
+Use Docker Compose v2 and budget at least 2 GB RAM for a small installation; builds may need additional memory. Generate `.env` with `node scripts/configure.mjs` or fill in `.env.example` manually with random credentials. Use a hex database password because Compose embeds it in a connection URL.
+
+Set `APP_URL` to the exact browser-facing origin. Public installations should use HTTPS through a reverse proxy forwarding to `127.0.0.1:3000`. Preserve the original host. Then run:
+
+```sh
+docker compose up -d --build
+docker compose ps
+```
+
+The app runs as the non-root `node` user and waits for PostgreSQL health. Migrations apply automatically. Open the configured URL, enter `SETUP_TOKEN`, and create the owner. Setup closes after initialization.
+
+Invite teammates through **Workspace settings → Members**. Share generated links yourself; Lattice does not send email yet.
+
+## Persistence and backups
+
+Compose creates `postgres` and `uploads` named volumes. Both matter. `docker compose down` preserves them; adding `-v` deletes all stored content.
+
+For a consistent small-instance backup, stop the app, dump PostgreSQL, archive uploads, and restart. POSIX shell example:
+
+```sh
+docker compose stop app
+docker compose exec -T db pg_dump -U lattice -d lattice > lattice.sql
+docker compose run --rm --no-deps --user root -v "${PWD}:/backup" --entrypoint tar app -czf /backup/lattice-uploads.tar.gz -C /app/uploads .
+docker compose start app
+```
+
+On PowerShell, use version 7.4+ for native stream redirection or dump inside the container and copy the file out. Store backups away from the server and keep `.env` in a secure configuration backup.
+
+Restore into an empty database using `psql -U lattice`, restore upload files into `/app/uploads`, and ensure files belong to the container's `node` user (UID 1000). Restart and verify a page and an attachment download.
+
+## Upgrades
+
+Back up database, uploads, and configuration. Read migration/release notes, pull the intended revision, and run `docker compose up -d --build`. Check health, login, editing, and downloads. Migrations have no automated downgrade runner; restore coordinated backups when rollback requires an earlier schema.
+
+## Troubleshooting
+
+- Setup unavailable: configure `SETUP_TOKEN` and restart.
+- Origin rejected: match the scheme, hostname, and port in `APP_URL` exactly.
+- Missing cookie: HTTPS `APP_URL` creates secure cookies; use HTTPS.
+- Database not ready: inspect `docker compose logs db` without publishing credentials.
+- Upload rejected: check file type and workspace size limits; SVG/HTML/executables/archives are unsupported.
+- Conflicting save: download unsaved text, reload, and merge.
+- Missing access: ancestor pages and collections can restrict a page; owners can inspect grants.
+
+Deleting an attachment removes its file. Deleting an entire page currently may leave orphaned files. Retain them until a database-aware cleanup tool is available; do not delete files by guessed filenames.
