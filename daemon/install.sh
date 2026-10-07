@@ -14,8 +14,8 @@ deployment="$(realpath -- "${1:-/opt/lattice}")"
 for tool in php docker git systemctl; do
   command -v "$tool" >/dev/null || { echo "Missing prerequisite: $tool" >&2; exit 1; }
 done
-php -r 'exit(PHP_VERSION_ID >= 80200 && extension_loaded("curl") && extension_loaded("pcntl") ? 0 : 1);' ||
-  { echo "PHP 8.2+ with curl and pcntl is required." >&2; exit 1; }
+php -r 'exit(PHP_VERSION_ID >= 80200 && extension_loaded("curl") && extension_loaded("pcntl") && extension_loaded("posix") ? 0 : 1);' ||
+  { echo "PHP 8.2+ with curl, pcntl, and posix is required." >&2; exit 1; }
 [[ -f "$deployment/compose.yaml" && -f "$deployment/.env" ]] ||
   { echo "Configure a Lattice Docker checkout with compose.yaml and .env first." >&2; exit 1; }
 if [[ -e /usr/local/bin/daemon || -L /usr/local/bin/daemon ]]; then

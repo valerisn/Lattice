@@ -145,7 +145,7 @@ final class Application
             $signature = '';
             do {
                 $config = Config::load($file);
-                if ($config->get('state_dir') !== $store->directory) { throw new RuntimeException('Restart daemon after changing state_dir.'); }
+                if (PrivatePath::check($config->get('state_dir'), true) !== $store->directory) { throw new RuntimeException('Restart daemon after changing state_dir.'); }
                 $compose = new Compose($config, new ProcessRunner());
                 $http = new Http();
                 $monitor = new Monitor($compose, $http, $store);

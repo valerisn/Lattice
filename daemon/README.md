@@ -8,7 +8,7 @@
 
 daemon watches the application container, PostgreSQL, the HTTP health endpoint, and free space on the deployment and state filesystems. It runs under systemd, provides a readable CLI and JSON output, restarts a failing application within configured limits, and can install stable Lattice releases when automatic updates are enabled.
 
-The PHP runtime has no Composer dependencies. Requirements: Linux with systemd, **PHP 8.2+ with cURL and pcntl**, Git, Docker Engine, and Docker Compose v2 with `--wait` support. Ubuntu 24.04 is exercised in CI across PHP 8.2–8.5.
+The PHP runtime has no Composer dependencies. Requirements: Linux with systemd, **PHP 8.2+ with cURL, pcntl, and posix**, Git, Docker Engine, and Docker Compose v2 with `--wait` support. Ubuntu 24.04 is exercised in CI across PHP 8.2–8.5.
 
 ## Install
 
@@ -119,6 +119,8 @@ Backups live under `state_dir/backups`. Each contains:
 - `manifest.json`: completion flag, previous Git revision, image ID, and SHA-256 checksums.
 
 Directories use mode 0700 and files use 0600. Only backups with a completed manifest should be used for recovery. Copy completed backups off the host and manage retention; daemon never deletes old backups automatically. The free-space check covers deployment/state filesystems, not Docker's internal storage when it is on another filesystem.
+
+On Linux, daemon rejects configuration/state files or state directories that belong to another user, expose group/other permissions, or use symlinks. Parent directories must belong to root or the service user and must not allow shared writes unless protected by the sticky bit. For the installed root service, keep `/etc/lattice/daemon.json` root-owned with mode 0600 and `/var/lib/lattice-daemon` root-owned with mode 0700. Correct unsafe ownership or permissions before restarting; daemon will not silently trust an existing shared directory.
 
 After a failed activation, inspect `sudo daemon status --json`, the journal, app logs, and the recorded manifest. Keep supervision stopped while repairing. Restore the matching source revision, database dump, uploads, and configuration together into a recovery deployment, or complete the forward migration. Test login, a document, and an attachment before returning traffic. Do not run older code against a possibly migrated database based only on the image ID.
 

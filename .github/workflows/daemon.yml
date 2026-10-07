@@ -35,7 +35,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: curl, pcntl
+          extensions: curl, pcntl, posix
           coverage: none
       - name: Lint PHP and installer
         run: |
@@ -58,7 +58,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
-          extensions: curl, pcntl
+          extensions: curl, pcntl, posix
           coverage: none
       - uses: actions/setup-node@v4
         with:

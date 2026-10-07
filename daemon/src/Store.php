@@ -6,17 +6,22 @@ use RuntimeException;
 
 final class Store
 {
-    public function __construct(public readonly string $directory)
+    public readonly string $directory;
+
+    public function __construct(string $directory)
     {
         if (!is_dir($directory) && !mkdir($directory, 0700, true)) {
             throw new RuntimeException('Cannot create daemon state directory.');
         }
+        $this->directory = PrivatePath::check($directory, true);
     }
 
     public function read(string $name): array
     {
         $path = $this->path($name . '.json');
-        if (!is_file($path)) { return []; }
+        if (!file_exists($path) && !is_link($path)) { return []; }
+        PrivatePath::check($path);
+        if (!is_file($path)) { throw new RuntimeException('Invalid daemon state file.'); }
         $data = json_decode((string) file_get_contents($path), true, 64, JSON_THROW_ON_ERROR);
         if (!is_array($data)) { throw new RuntimeException('Invalid daemon state. Inspect it before restarting.'); }
         return $data;
@@ -57,6 +62,8 @@ final class Store
 
     public function locked(string $name, callable $operation): mixed
     {
+        $path = $this->path($name . '.lock');
+        if (file_exists($path) || is_link($path)) { PrivatePath::check($path); }
         $handle = fopen($this->path($name . '.lock'), 'c');
         if (!$handle) { throw new RuntimeException('Cannot open daemon lock.'); }
         chmod($this->path($name . '.lock'), 0600);

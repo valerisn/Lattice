@@ -73,6 +73,7 @@ final class Config
 
     public static function load(string $file): self
     {
+        $file = PrivatePath::check($file);
         if (!is_file($file) || filesize($file) > 65536) {
             throw new RuntimeException('Configuration missing or too large. Run daemon init first.');
         }
