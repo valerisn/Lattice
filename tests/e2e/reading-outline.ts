@@ -34,12 +34,18 @@ export async function checkReadingOutline(
       window.scrollTo(0, element.getBoundingClientRect().top + scrollY - 95),
     );
   await expect(active).toHaveText("Section 10");
-  const scrollBeforeModal = await page.evaluate(() => scrollY);
   await page.getByLabel("More page actions", { exact: true }).click();
   await page.getByRole("button", { name: "Attachments", exact: true }).click();
   await expect(
     page.getByRole("dialog", { name: "Files that belong here" }),
   ).toBeVisible();
+  // Opening the menu can scroll its attachment action into view first.
+  const scrollBeforeModal = await page.evaluate(() => scrollY);
+  await expect
+    .poll(() =>
+      page.evaluate(() => getComputedStyle(document.documentElement).overflow),
+    )
+    .toBe("hidden");
   await page.mouse.move(5, 5);
   await page.mouse.wheel(0, 600);
   await page.evaluate(
