@@ -7,6 +7,7 @@ import rehypeRaw from "rehype-raw";
 import { common, createLowlight } from "lowlight";
 import type { Element, RootContent } from "hast";
 import { rehypeHeadingIds } from "@/shared/headings";
+import { CodeBlock } from "./code-block";
 const lowlight = createLowlight(common);
 function highlightNodes(nodes: RootContent[]): React.ReactNode {
   return nodes.map((node, index) =>
@@ -27,6 +28,29 @@ function highlightNodes(nodes: RootContent[]): React.ReactNode {
 export function Markdown({ content }: { content: string }) {
   const components = useMemo(
     () => ({
+      pre: ({
+        children,
+        node,
+      }: {
+        children?: React.ReactNode;
+        node?: Element;
+      }) => {
+        const code = node?.children.find(
+          (child) => child.type === "element" && child.tagName === "code",
+        );
+        const classes =
+          code?.type === "element" ? code.properties.className : [];
+        const language = Array.isArray(classes)
+          ? classes
+              .find(
+                (value) =>
+                  typeof value === "string" && value.startsWith("language-"),
+              )
+              ?.toString()
+              .slice(9, 49)
+          : undefined;
+        return <CodeBlock language={language}>{children}</CodeBlock>;
+      },
       code: ({
         className,
         children,
@@ -35,7 +59,7 @@ export function Markdown({ content }: { content: string }) {
         children?: React.ReactNode;
       }) => {
         const language = /language-(\w+)/.exec(className || "")?.[1];
-        const code = String(children).replace(/\n$/, "");
+        const code = String(children);
         return (
           <code className={className}>
             {language && lowlight.registered(language)

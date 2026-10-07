@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { checkEditorChecklists } from "./editor-checklists";
+import { checkCodeExamples } from "./code-examples";
 
 test("workspace lifecycle, revisions, uploads, and authorization", async ({
   page,
@@ -50,6 +51,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   const request = async (path: string, method: string, data?: unknown) =>
     page.request.fetch(`${base}${path}`, { method, headers, data });
   await checkEditorChecklists(page, base, headers);
+  await checkCodeExamples(page, base, headers);
   await page.getByRole("button", { name: "New page", exact: true }).click();
   await page.getByLabel("Page title", { exact: true }).fill("Project notes");
   await page.getByLabel("Parent page").selectOption({ label: "Home" });

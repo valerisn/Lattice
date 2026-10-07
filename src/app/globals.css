@@ -1247,6 +1247,61 @@ kbd {
   padding: 0;
   color: inherit;
 }
+.code-block {
+  margin: 24px 0;
+  overflow: hidden;
+  border: 1px solid #35473d;
+  border-radius: 10px;
+  background: #1e2923;
+  color: #e1ebe3;
+}
+.code-block-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 16px;
+  border-bottom: 1px solid #35473d;
+  background: #25332b;
+  font-size: 11px;
+}
+.code-block-language {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: Consolas, monospace;
+}
+.code-block-bar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 4px 7px;
+  color: #e1ebe3;
+  background: transparent;
+  font-size: 11px;
+  cursor: pointer;
+}
+.code-block-bar button:hover {
+  background: #35473d;
+}
+.code-block-bar button:focus-visible,
+.code-block pre:focus-visible {
+  outline: 2px solid #b6d68c;
+  outline-offset: -2px;
+}
+.code-block-error {
+  display: block;
+  padding: 10px 20px 0;
+  color: #ffceaa;
+  font-size: 12px;
+}
+.prose .code-block pre {
+  margin: 0;
+  border-radius: 0;
+}
 .prose table {
   width: 100%;
   border-collapse: collapse;
@@ -1815,6 +1870,15 @@ form {
 }
 
 @media print {
+  .code-block-bar,
+  .code-block-error {
+    display: none !important;
+  }
+  .code-block {
+    background: transparent;
+    border: 0;
+    overflow: visible;
+  }
   @page {
     margin: 18mm;
   }
