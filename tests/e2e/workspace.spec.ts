@@ -206,5 +206,25 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  expect(
+    (await page.request.post("/api/auth/logout", { headers })).status(),
+  ).toBe(200);
+  expect((await page.request.get("/api/workspaces")).status()).toBe(401);
+  await page.goto("/login");
+  await page
+    .getByLabel("Email address", { exact: true })
+    .fill("owner@example.test");
+  await page.getByLabel("Password", { exact: true }).fill("wrong-password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(
+    page
+      .getByRole("alert")
+      .filter({ hasText: "Email or password is incorrect" }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("test-owner-long-passphrase");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await page.waitForURL("**/w/test-studio");
   expect(errors).toEqual([]);
 });

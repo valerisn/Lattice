@@ -133,6 +133,47 @@ describe("workspace services", () => {
     await rateLimit(db, "attempt", 1);
     await expect(rateLimit(db, "attempt", 1)).rejects.toThrow("Too many");
   });
+  it("applies group collection grants without elevating workspace roles", async () => {
+    const group = crypto.randomUUID();
+    const collection = crypto.randomUUID();
+    await db.query(
+      "INSERT INTO groups(id,workspace_id,name) VALUES($1,$2,'Readers')",
+      [group, workspace.id],
+    );
+    await db.query(
+      "INSERT INTO group_members(workspace_id,group_id,user_id) VALUES($1,$2,$3)",
+      [workspace.id, group, viewer],
+    );
+    await db.query(
+      "INSERT INTO collections(id,workspace_id,name,visibility) VALUES($1,$2,'Private','restricted')",
+      [collection, workspace.id],
+    );
+    const restricted = await createPage(db, workspace, owner, {
+      title: "Group-only knowledge",
+      collection_id: collection,
+    });
+    const view = await membership(db, viewer, workspace.id);
+    await expect(requirePage(db, view, viewer, restricted.id)).rejects.toThrow(
+      "Page not found",
+    );
+    await db.query(
+      "INSERT INTO permissions(id,workspace_id,collection_id,group_id,capability) VALUES($1,$2,$3,$4,'edit')",
+      [crypto.randomUUID(), workspace.id, collection, group],
+    );
+    expect((await requirePage(db, view, viewer, restricted.id)).title).toBe(
+      "Group-only knowledge",
+    );
+    await expect(
+      requirePage(db, view, viewer, restricted.id, "edit"),
+    ).rejects.toThrow("cannot edit");
+    await db.query(
+      "DELETE FROM group_members WHERE group_id=$1 AND user_id=$2",
+      [group, viewer],
+    );
+    await expect(requirePage(db, view, viewer, restricted.id)).rejects.toThrow(
+      "Page not found",
+    );
+  });
   it("persists a stable sibling order and rejects invalid move targets", async () => {
     const a = await createPage(db, workspace, owner, { title: "Order A" });
     const b = await createPage(db, workspace, owner, { title: "Order B" });
