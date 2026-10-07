@@ -12,11 +12,31 @@ export async function checkEditorSaving(
   });
   expect(created.status()).toBe(201);
   const doc = await created.json();
+  const childResponse = await page.request.post(`${base}/pages`, {
+    headers,
+    data: { title: "Child of saving feedback", parent_id: doc.id },
+  });
+  expect(childResponse.status()).toBe(201);
+  const child = await childResponse.json();
+  const grandchildResponse = await page.request.post(`${base}/pages`, {
+    headers,
+    data: { title: "Grandchild of saving feedback", parent_id: child.id },
+  });
+  expect(grandchildResponse.status()).toBe(201);
+  const grandchild = await grandchildResponse.json();
   await page.goto(`/w/${slug}?page=${doc.id}`);
   await page.getByRole("button", { name: "Edit page", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Make it worth keeping" });
   const status = dialog.getByRole("status");
   const title = dialog.getByLabel("Title", { exact: true });
+  const parents = dialog.getByRole("combobox", {
+    name: "Parent page",
+    exact: true,
+  });
+  await expect(parents).toBeVisible();
+  for (const id of [doc.id, child.id, grandchild.id])
+    await expect(parents.locator(`option[value="${id}"]`)).toHaveCount(0);
+  await expect(parents.locator('option[value=""]')).toHaveText("Top level");
   await title.fill("");
   await title.press("Control+s");
   await expect(status).toHaveText("Not saved");
@@ -71,6 +91,10 @@ export async function checkEditorSaving(
   }
   await dialog.getByRole("button", { name: "Done", exact: true }).click();
   await expect(dialog).toHaveCount(0);
+  for (const id of [grandchild.id, child.id])
+    expect(
+      (await page.request.delete(`${base}/pages/${id}`, { headers })).ok(),
+    ).toBe(true);
   expect(
     (await page.request.delete(`${base}/pages/${doc.id}`, { headers })).ok(),
   ).toBe(true);

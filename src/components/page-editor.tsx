@@ -1,20 +1,23 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { WikiPage, Collection } from "@/shared/types";
 import { api } from "@/client/api";
 import { Modal } from "./modal";
 import { RichEditor } from "./rich-editor";
+import { pageSubtreeIds } from "@/shared/page-tree";
 export function PageEditor({
   page,
   pages,
   collections,
   workspaceSlug,
+  editableIds,
   onClose,
 }: {
   page: WikiPage;
   pages: WikiPage[];
   collections: Collection[];
   workspaceSlug: string;
+  editableIds: string[];
   onClose: () => void;
 }) {
   const [draft, setDraft] = useState(page);
@@ -27,6 +30,13 @@ export function PageEditor({
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inflight = useRef<Promise<boolean> | null>(null);
   const dirty = useRef(false);
+  const parentOptions = useMemo(() => {
+    const subtree = pageSubtreeIds(page.id, pages);
+    const editable = new Set(editableIds);
+    return pages.filter(
+      (candidate) => !subtree.has(candidate.id) && editable.has(candidate.id),
+    );
+  }, [page.id, pages, editableIds]);
   async function save(): Promise<boolean> {
     if (timer.current) clearTimeout(timer.current);
     if (inflight.current) {
@@ -217,13 +227,11 @@ export function PageEditor({
             onChange={(e) => change({ parent_id: e.target.value || null })}
           >
             <option value="">Top level</option>
-            {pages
-              .filter((p) => p.id !== page.id)
-              .map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.title}
-                </option>
-              ))}
+            {parentOptions.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.title}
+              </option>
+            ))}
           </select>
         </label>
         <label>

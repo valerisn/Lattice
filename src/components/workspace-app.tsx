@@ -588,6 +588,7 @@ export function WorkspaceApp({
         <PageEditor
           page={editing}
           pages={pages}
+          editableIds={editableIds}
           collections={collections}
           workspaceSlug={workspace.slug}
           onClose={() => {
