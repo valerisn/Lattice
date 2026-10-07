@@ -6,6 +6,8 @@ import { checkOrigin } from "@/server/security";
 import { membership } from "@/server/workspaces";
 import { accessContext, requirePage } from "@/server/permissions";
 import { createPage, updatePage, deletePage, revisions, restoreRevision } from "@/server/pages";
+import { searchProvider } from "@/server/search";
+import { createCollection } from "@/server/collections";
 
 type Context = { params: Promise<{ workspaceId: string; path: string[] }> };
 async function handle(request: Request, context: Context) {
@@ -17,6 +19,8 @@ async function handle(request: Request, context: Context) {
     const [resource, id, action] = path;
     const method = request.method;
     const workspace = await membership(db, user.id, workspaceId);
+    if (resource === "search" && method === "GET") return Response.json(await searchProvider.search(db, workspace, user.id, new URL(request.url).searchParams.get("q") || ""));
+    if (resource === "collections" && method === "POST") return Response.json(await createCollection(db, workspace, await request.json()), { status: 201 });
     if (resource === "pages") {
       if (id) z.uuid().parse(id);
       if (method === "GET" && !id) { const ctx = await accessContext(db, workspace, user.id); return Response.json(ctx.pages.filter(p => ctx.allowed(p))); }
