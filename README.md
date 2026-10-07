@@ -58,16 +58,25 @@ Light, dark, and system themes, with keyboard controls and reduced-motion suppor
 
 </details>
 
+<details>
+<summary><strong>See code examples and the reading outline</strong></summary>
+
+![Code examples with language labels and copy controls beside a reading outline that highlights the current section](docs/images/code-examples.png)
+
+Copy examples with their indentation intact, navigate with the keyboard, and follow your position through long documents. Print layouts leave the controls behind.
+
+</details>
+
 ## What you can do
 
-|                                   | Built into Lattice                                                                                                                                                    |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Write something worth keeping** | Rich text and Markdown; slash commands; tables, tasks, code, images, callouts, and expandable sections; reusable templates; Markdown import/export.                   |
-| **Give knowledge a home**         | Multiple workspaces, nested pages, drag reordering, collections, favorites, drafts, recent pages, incoming links, and permission-aware **Ctrl/Cmd + K** search.       |
-| **Keep the context**              | Autosave, edit-conflict detection, immutable revisions, comparison, restoration, syntax highlighting, and heading navigation.                                         |
-| **Share with the right people**   | Email/password accounts, invitation links, expiring sessions, profiles, four workspace roles, groups, inherited access grants, and protected attachments.             |
-| **Shape your documentation**      | Branding, appearance, publication defaults, reading layouts, page metadata, footer text, a documentation overview, audit history, and an administrator version check. |
-| **Run it yourself**               | Docker Compose, PostgreSQL, health checks, persistent volumes, and the optional PHP **daemon** for Linux and Windows supervision, backups, and opt-in updates.        |
+|                                   | Built into Lattice                                                                                                                                                                                            |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Write something worth keeping** | Rich text and Markdown; slash commands; tables, tasks, code, images, callouts, and expandable sections; reusable templates; Markdown import/export.                                                           |
+| **Give knowledge a home**         | Multiple workspaces, nested pages, drag reordering, collections, favorites, drafts, recent pages, incoming links, and permission-aware **Ctrl/Cmd + K** search.                                               |
+| **Keep the context**              | Autosave, **Ctrl/Cmd + S** to save now, edit-conflict detection, immutable revisions, comparison, restoration, syntax highlighting, copyable code, and a reading outline that tracks your current section.    |
+| **Share with the right people**   | Email/password accounts, invitation links, expiring sessions, profiles, four workspace roles, groups, inherited access grants, and protected attachments.                                                     |
+| **Shape your documentation**      | Branding, appearance, publication defaults, reading layouts, page metadata, footer text, documentation review lists including pages untouched for 90 days, audit history, and an administrator version check. |
+| **Run it yourself**               | Docker Compose, PostgreSQL, health checks, persistent volumes, and the optional PHP **daemon** for Linux and Windows supervision, backups, and opt-in updates.                                                |
 
 Sharing copies a link; recipients still need workspace access. Mention labels do not send notifications. Drafts are visible to editors and administrators, but hidden from viewers. Anonymous publishing is not included.
 
