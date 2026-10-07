@@ -21,8 +21,11 @@ export function AttachmentsDialog({
 }) {
   const [files, setFiles] = useState<Attachment[]>([]);
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<"upload" | "delete" | null>(null);
   const [notice, setNotice] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [attempt, setAttempt] = useState(0);
   const base = `/api/w/${page.workspace_id}/pages/${page.id}/attachments`;
   useEffect(() => {
     let alive = true;
@@ -31,12 +34,15 @@ export function AttachmentsDialog({
         if (alive) setFiles(data);
       })
       .catch((e) => {
-        if (alive) setError(e.message);
+        if (alive) setLoadError(e.message);
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
       });
     return () => {
       alive = false;
     };
-  }, [base]);
+  }, [base, attempt]);
   return (
     <Modal title="Files that belong here" onClose={onClose}>
       <p className="muted">
@@ -48,6 +54,21 @@ export function AttachmentsDialog({
         </p>
       )}
       {notice && <p role="status">{notice}</p>}
+      {loadError && (
+        <div className="error" role="alert">
+          <p>{loadError}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setLoadError("");
+              setLoading(true);
+              setAttempt((value) => value + 1);
+            }}
+          >
+            Retry loading attachments
+          </button>
+        </div>
+      )}
       <div className="attachment-list">
         {files.map((file) => (
           <div className="row" key={file.id}>
@@ -62,6 +83,8 @@ export function AttachmentsDialog({
             <span className="muted">{Math.ceil(file.size / 1024)} KB</span>
             <button
               onClick={async () => {
+                setError("");
+                setNotice("");
                 try {
                   const name = file.name.replace(/[\[\]\\]/g, "_");
                   await navigator.clipboard.writeText(
@@ -79,6 +102,7 @@ export function AttachmentsDialog({
               <button
                 className="icon-button danger"
                 aria-label={`Delete ${file.name}`}
+                disabled={Boolean(busy) || loading || Boolean(loadError)}
                 onClick={async () => {
                   if (
                     !window.confirm(
@@ -86,11 +110,19 @@ export function AttachmentsDialog({
                     )
                   )
                     return;
+                  setBusy("delete");
+                  setError("");
+                  setNotice("");
                   try {
                     await api(`/api/attachments/${file.id}`, "DELETE");
-                    setFiles(files.filter((f) => f.id !== file.id));
+                    setFiles((current) =>
+                      current.filter((f) => f.id !== file.id),
+                    );
+                    setNotice(`${file.name} deleted.`);
                   } catch (e) {
                     setError((e as Error).message);
+                  } finally {
+                    setBusy(null);
                   }
                 }}
               >
@@ -99,23 +131,38 @@ export function AttachmentsDialog({
             )}
           </div>
         ))}
-        {!files.length && <p className="empty muted">No attachments yet.</p>}
+        {loading && (
+          <p className="empty muted" role="status">
+            Loading attachments…
+          </p>
+        )}
+        {!loading && !loadError && !files.length && (
+          <p className="empty muted">No attachments yet.</p>
+        )}
       </div>
       {editable && (
         <form
           onSubmit={async (e) => {
             e.preventDefault();
             const form = e.currentTarget;
-            setBusy(true);
+            setBusy("upload");
             setError("");
+            setNotice("");
             try {
-              await api(base, "POST", new FormData(form));
-              setFiles(await api<Attachment[]>(base));
+              const uploaded = await api<Attachment>(
+                base,
+                "POST",
+                new FormData(form),
+              );
+              setFiles((current) => [...current, uploaded]);
               form.reset();
+              setNotice(
+                `${uploaded.name} uploaded. Copy its Markdown to add it to the page.`,
+              );
             } catch (e) {
               setError((e as Error).message);
             } finally {
-              setBusy(false);
+              setBusy(null);
             }
           }}
         >
@@ -125,11 +172,15 @@ export function AttachmentsDialog({
               name="file"
               type="file"
               required
+              disabled={Boolean(busy) || loading || Boolean(loadError)}
               accept=".png,.jpg,.jpeg,.webp,.gif,.pdf,.txt,.md,.csv,.json,.log"
             />
           </label>
-          <button className="primary" disabled={busy}>
-            {busy ? "Uploading…" : "Upload attachment"}
+          <button
+            className="primary"
+            disabled={Boolean(busy) || loading || Boolean(loadError)}
+          >
+            {busy === "upload" ? "Uploading…" : "Upload attachment"}
           </button>
           <small className="muted">
             Images, PDFs, and plain text documents. Your workspace’s size limit
