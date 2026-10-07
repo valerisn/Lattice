@@ -34,6 +34,7 @@ final class Backup
         $state['phase'] = 'backing-up';
         $state['backup'] = $path;
         $state['blocked'] = true;
+        unset($state['error']);
         $this->store->write('update', $state);
         $env = $config->get('directory') . '/.env';
         if (!is_file($env) || !copy($env, $path . '/environment.env')) { throw new RuntimeException('Cannot back up the deployment .env file.'); }

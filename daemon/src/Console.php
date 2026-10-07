@@ -17,6 +17,10 @@ final class Console
             echo '  Auto-update    ' . (!empty($data['auto_update']) ? 'enabled' : 'disabled') . "\n";
             echo '  Free space     ' . ($data['deployment_free_mb'] ?? '?') . ' MiB deployment / ' . ($data['state_free_mb'] ?? '?') . " MiB state\n";
             foreach ($data['problems'] as $problem) { echo "  ! $problem\n"; }
+            $update = $data['last_update'] ?? [];
+            if (isset($update['phase'])) { echo '  Last operation ' . $update['phase'] . "\n"; }
+            if (isset($update['backup'])) { echo '  Backup         ' . $update['backup'] . "\n"; }
+            if (isset($update['error'])) { echo '  ! ' . $update['error'] . "\n"; }
         } else {
             foreach ($data as $key => $value) {
                 if (is_scalar($value)) { echo '  ' . str_pad(ucfirst(str_replace('_', ' ', $key)), 17) . (is_bool($value) ? ($value ? 'yes' : 'no') : $value) . "\n"; }

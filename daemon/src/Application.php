@@ -102,6 +102,7 @@ final class Application
                     $state['paused'] = false; $state['failures'] = 0; $state['recoveries'] = [];
                     $store->write('monitor', $state);
                     $update = $store->read('update'); $update['blocked'] = false; $update['phase'] = 'operator-resumed';
+                    unset($update['error']);
                     $store->write('update', $update);
                     $console->output(['message' => 'Supervision resumed after a successful health check.']);
                     return 0;

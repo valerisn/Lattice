@@ -106,6 +106,7 @@ final class Updater
         Store::atomicText($this->store->path('previous-compose.json'), $context['definition_json']);
         $state = $this->store->read('update') + ['last_check' => time()];
         $state = array_merge($state, ['phase' => 'preparing', 'blocked' => true, 'previous_revision' => $previous, 'target_revision' => $target, 'target_tag' => $tag, 'started_at' => gmdate('c')]);
+        unset($state['error'], $state['backup']);
         $this->store->write('update', $state);
         $activationStarted = false;
         try {
