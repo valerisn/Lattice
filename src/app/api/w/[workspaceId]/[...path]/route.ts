@@ -9,6 +9,7 @@ import { createPage, updatePage, deletePage, revisions, restoreRevision } from "
 import { searchProvider } from "@/server/search";
 import { createCollection } from "@/server/collections";
 import { adminRequest } from "@/server/admin";
+import { boundedRequest } from "@/server/body";
 
 type Context = { params: Promise<{ workspaceId: string; path: string[] }> };
 async function handle(request: Request, context: Context) {
@@ -20,6 +21,7 @@ async function handle(request: Request, context: Context) {
     const [resource, id, action] = path;
     const method = request.method;
     const workspace = await membership(db, user.id, workspaceId);
+    request=await boundedRequest(request);
     const adminResponse = await adminRequest(request,path,db,workspace,user);
     if(adminResponse) return adminResponse;
     if (resource === "search" && method === "GET") return Response.json(await searchProvider.search(db, workspace, user.id, new URL(request.url).searchParams.get("q") || ""));
