@@ -26,6 +26,7 @@ import { UpdatePanel } from "./update-panel";
 import { DocumentationPanel } from "./documentation-panel";
 import { AuditPanel } from "./audit-panel";
 import { TemplatesPanel } from "./templates-panel";
+import { adminSectionId, adminSectionName } from "@/shared/navigation";
 export function SettingsApp({
   workspace,
   pages,
@@ -85,12 +86,7 @@ export function SettingsApp({
     ["Integrations", Plug],
     ["System", Server],
   ] as const;
-  const sectionId = (name: string) =>
-    name.toLowerCase().replace(/ & /g, "-").replace(/\s+/g, "-");
-  const tab =
-    tabs.find(
-      ([name]) => sectionId(name) === searchParams.get("section"),
-    )?.[0] || "General";
+  const tab = adminSectionName(searchParams.get("section"));
   useEffect(() => {
     const previous = document.title;
     document.title = `${tab} · ${workspace.name} · Lattice`;
@@ -125,7 +121,7 @@ export function SettingsApp({
               onClick={() => {
                 if (tab !== name) {
                   const params = new URLSearchParams(searchParams.toString());
-                  params.set("section", sectionId(name));
+                  params.set("section", adminSectionId(name));
                   window.history.pushState(null, "", `?${params.toString()}`);
                 }
                 setNotice("");

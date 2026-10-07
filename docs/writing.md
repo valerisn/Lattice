@@ -27,3 +27,5 @@ Page links can connect related knowledge. Sharing copies the page URL; recipient
 The **Linked from** section lists accessible pages in the same workspace that link to the current page. It recognizes relative and same-origin full URLs, including Markdown reference links. Links inside code examples do not count. Restricted pages and drafts that you cannot read stay out of the list.
 
 Move pages in the sidebar to change their order or parent. Moving under a restricted page can change who can read the page through inherited permissions. Administrators can inspect group and individual access grants in workspace settings.
+
+The breadcrumb trail links to parent pages. Browser Back and Forward navigate between documents, and Recent pages, Favorites, and collection views have bookmarkable URLs. Browser tab titles include the current page and workspace.

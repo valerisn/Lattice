@@ -26,6 +26,22 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await expect(
     page.getByRole("heading", { name: "Home", exact: true }),
   ).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Workspace", exact: true })
+    .getByRole("button", { name: "Recent pages", exact: true })
+    .click();
+  await expect(page).toHaveURL(/view=recent$/);
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Recently updated", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Workspace", exact: true })
+    .getByRole("button", { name: "Home", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Home", exact: true }),
+  ).toBeVisible();
   const workspaces = await (await page.request.get("/api/workspaces")).json();
   const workspace = workspaces[0];
   const base = `/api/w/${workspace.id}`;
@@ -44,6 +60,10 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
     .getByRole("navigation", { name: "Breadcrumb", exact: true })
     .getByRole("link", { name: "Home", exact: true })
     .click();
+  await expect(page).toHaveTitle("Home · Test Studio · Lattice");
+  await page.goBack();
+  await expect(page).toHaveTitle("Project notes · Test Studio · Lattice");
+  await page.goForward();
   await expect(page).toHaveTitle("Home · Test Studio · Lattice");
   await page
     .getByRole("navigation", { name: "Page tree", exact: true })
@@ -250,6 +270,14 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await expect(
     viewerLinks.getByRole("link", { name: "Private planning", exact: true }),
   ).toHaveCount(0);
+  await viewerPage.goto(`/w/test-studio?page=${privateIndex.id}`);
+  await expect(
+    viewerPage.getByRole("heading", {
+      name: "This page is not available.",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(viewerPage).toHaveTitle("Page · Test Studio · Lattice");
   await anonymous.close();
   await page.goto("/w/test-studio/settings");
   await page

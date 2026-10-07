@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Pencil,
@@ -37,6 +37,10 @@ import { CreateDialog } from "./create-dialog";
 import { SearchDialog } from "./search-dialog";
 import { ThemePicker } from "./theme-picker";
 import { pageAncestors } from "@/shared/page-tree";
+import {
+  homepageId as getHomepageId,
+  pageViewTitle,
+} from "@/shared/navigation";
 
 export interface WorkspaceProps {
   user: User;
@@ -45,7 +49,6 @@ export interface WorkspaceProps {
   pages: WikiPage[];
   collections: Collection[];
   editableIds: string[];
-  initialPageId?: string;
 }
 export function WorkspaceApp({
   user,
@@ -54,14 +57,13 @@ export function WorkspaceApp({
   pages,
   collections,
   editableIds,
-  initialPageId,
 }: WorkspaceProps) {
   const router = useRouter();
-  const [, startTransition] = useTransition();
-  const [selected, setSelected] = useState<string | null>(
-    initialPageId || workspace.homepage_id || pages[0]?.id || null,
-  );
-  const [view, setView] = useState("page");
+  const searchParams = useSearchParams();
+  const [navigating, startTransition] = useTransition();
+  const homepageId = getHomepageId(workspace, pages);
+  const selected = searchParams.get("page") || homepageId;
+  const view = searchParams.get("view") || "page";
   const [sidebar, setSidebar] = useState(true);
   const [search, setSearch] = useState(false);
   const [create, setCreate] = useState<"page" | "collection" | null>(null);
@@ -74,11 +76,22 @@ export function WorkspaceApp({
   const ancestors = useMemo(() => pageAncestors(page, pages), [page, pages]);
   const base = `/api/w/${workspace.id}`;
   const refresh = () => startTransition(() => router.refresh());
-  const selectPage = (id: string) => {
-    setSelected(id);
-    setView("page");
+  const setView = (next: string) => {
+    if (next !== view)
+      startTransition(() =>
+        router.push(`/w/${workspace.slug}?view=${encodeURIComponent(next)}`, {
+          scroll: false,
+        }),
+      );
     setError("");
-    window.history.replaceState(null, "", `?page=${id}`);
+    if (window.innerWidth < 850) setSidebar(false);
+  };
+  const selectPage = (id: string) => {
+    if (id !== selected || view !== "page")
+      startTransition(() =>
+        router.push(`/w/${workspace.slug}?page=${id}`, { scroll: false }),
+      );
+    setError("");
     if (window.innerWidth < 850) setSidebar(false);
   };
   useEffect(() => {
@@ -112,23 +125,12 @@ export function WorkspaceApp({
             .sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
             .slice(0, 20)
         : pages.filter((p) => p.collection_id === view);
-  const title =
-    view === "favorites"
-      ? "Your favorites"
-      : view === "recent"
-        ? "Recently updated"
-        : collections.find((c) => c.id === view)?.name || "Pages";
-  const currentTitle = view === "page" ? page?.title || "Page" : title;
-  useEffect(() => {
-    const previous = document.title;
-    document.title = `${currentTitle} · ${workspace.name} · Lattice`;
-    return () => {
-      document.title = previous;
-    };
-  }, [currentTitle, workspace.name]);
+  const title = pageViewTitle(view, page, collections);
+  const currentTitle = title;
   return (
     <div
       className={`app-shell ${sidebar ? "" : "sidebar-hidden"}`}
+      aria-busy={navigating}
       style={{ "--workspace-accent": workspace.accent } as React.CSSProperties}
     >
       {sidebar && (
@@ -181,12 +183,10 @@ export function WorkspaceApp({
             <nav className="main-nav" aria-label="Workspace">
               <button
                 className={
-                  view === "page" && selected === workspace.homepage_id
-                    ? "active"
-                    : ""
+                  view === "page" && selected === homepageId ? "active" : ""
                 }
                 onClick={() => {
-                  if (workspace.homepage_id) selectPage(workspace.homepage_id);
+                  if (homepageId) selectPage(homepageId);
                   else setView("recent");
                 }}
               >
@@ -368,7 +368,7 @@ export function WorkspaceApp({
             <strong aria-current="page">{currentTitle}</strong>
           </nav>
           {view === "page" && page && (
-            <div className="page-actions">
+            <div className="page-actions" inert={navigating}>
               <details className="more-menu">
                 <summary aria-label="More page actions">•••</summary>
                 <div>
@@ -399,8 +399,12 @@ export function WorkspaceApp({
                         )
                           void run(async () => {
                             await api(`${base}/pages/${page.id}`, "DELETE");
-                            setSelected(null);
-                            refresh();
+                            startTransition(() =>
+                              router.replace(
+                                `/w/${workspace.slug}?view=recent`,
+                                { scroll: false },
+                              ),
+                            );
                           });
                       }}
                     >
@@ -586,7 +590,6 @@ export function WorkspaceApp({
           onCreated={(id) => {
             const kind = create;
             setCreate(null);
-            refresh();
             if (kind === "page") selectPage(id);
             else setView(id);
           }}
