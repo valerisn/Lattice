@@ -173,19 +173,14 @@ async function handleAdminRequest(
     if (data.role === "admin" && workspace.role !== "owner")
       throw new AppError(403, "Only owners can invite administrators.");
     const token = newToken();
+    const inviteId = crypto.randomUUID();
     await db.query(
       "INSERT INTO invites(id,workspace_id,email,role,token_hash,created_by,expires_at) VALUES($1,$2,$3,$4,$5,$6,now()+interval '7 days')",
-      [
-        crypto.randomUUID(),
-        workspace.id,
-        data.email,
-        data.role,
-        digest(token),
-        user.id,
-      ],
+      [inviteId, workspace.id, data.email, data.role, digest(token), user.id],
     );
     return Response.json(
       {
+        id: inviteId,
         url: `${new URL(process.env.APP_URL || request.url).origin}/invite/${token}`,
       },
       { status: 201 },

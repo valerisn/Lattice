@@ -8,6 +8,7 @@ import { checkEditorSaving } from "./editor-saving";
 import { checkReviewPagination } from "./review-pagination";
 import { checkAuditFilters } from "./audit-filters";
 import { checkAccountFeedback } from "./account-feedback";
+import { checkInvitationLinks } from "./invitation-links";
 
 test("workspace lifecycle, revisions, uploads, and authorization", async ({
   page,
@@ -66,6 +67,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await checkReviewPagination(page, base, headers);
   await checkAuditFilters(page, base, headers);
   await checkAccountFeedback(page);
+  await checkInvitationLinks(page, base, headers);
   await page.getByRole("button", { name: "New page", exact: true }).click();
   await page.getByLabel("Page title", { exact: true }).fill("Project notes");
   await page.getByLabel("Parent page").selectOption({ label: "Home" });

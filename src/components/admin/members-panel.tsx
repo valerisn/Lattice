@@ -3,6 +3,51 @@ import { useState } from "react";
 import type { Workspace } from "@/shared/types";
 import type { AdminData } from "./types";
 import { api } from "@/client/api";
+
+function InvitationLink({ url, email }: { url: string; email: string }) {
+  const [copyState, setCopyState] = useState<
+    "idle" | "copying" | "copied" | "failed"
+  >("idle");
+  return (
+    <section
+      className="settings-section stack"
+      aria-label="Generated invitation"
+    >
+      <p>
+        Invitation for <strong>{email}</strong>. Share this link with that
+        person.
+      </p>
+      <label>
+        Invitation link
+        <input readOnly value={url} onFocus={(e) => e.target.select()} />
+      </label>
+      <div>
+        <button
+          type="button"
+          disabled={copyState === "copying"}
+          onClick={async () => {
+            setCopyState("copying");
+            try {
+              await navigator.clipboard.writeText(url);
+              setCopyState("copied");
+            } catch {
+              setCopyState("failed");
+            }
+          }}
+        >
+          {copyState === "copying" ? "Copying…" : "Copy invitation link"}
+        </button>
+      </div>
+      <p className="muted" role="status">
+        {copyState === "copied"
+          ? "Invitation link copied."
+          : copyState === "failed"
+            ? "Could not copy the link. Select the link above and copy it manually, or try again."
+            : "The link expires after seven days. No email has been sent."}
+      </p>
+    </section>
+  );
+}
 export function MembersPanel({
   workspace,
   data,
@@ -12,7 +57,11 @@ export function MembersPanel({
   data: AdminData;
   run: (fn: () => Promise<void>) => Promise<void>;
 }) {
-  const [invite, setInvite] = useState("");
+  const [invite, setInvite] = useState<{
+    id: string;
+    url: string;
+    email: string;
+  } | null>(null);
   const base = `/api/w/${workspace.id}`;
   return (
     <div className="stack">
@@ -29,12 +78,12 @@ export function MembersPanel({
           e.preventDefault();
           const form = Object.fromEntries(new FormData(e.currentTarget));
           void run(async () => {
-            const result = await api<{ url: string }>(
+            const result = await api<{ id: string; url: string }>(
               `${base}/invites`,
               "POST",
               form,
             );
-            setInvite(result.url);
+            setInvite({ ...result, email: String(form.email) });
           });
         }}
       >
@@ -55,10 +104,7 @@ export function MembersPanel({
         </button>
       </form>
       {invite && (
-        <label>
-          Invitation link
-          <input readOnly value={invite} onFocus={(e) => e.target.select()} />
-        </label>
+        <InvitationLink key={invite.id} url={invite.url} email={invite.email} />
       )}
       <div className="admin-table">
         <table>
@@ -153,6 +199,9 @@ export function MembersPanel({
                 onClick={() =>
                   run(async () => {
                     await api(`${base}/invites/${i.id}`, "DELETE");
+                    setInvite((current) =>
+                      current?.id === i.id ? null : current,
+                    );
                   })
                 }
               >

@@ -36,6 +36,8 @@ Grants require one of `page_id`/`collection_id`, one of `user_id`/`group_id`, an
 
 API tokens, bulk endpoints, and long-term compatibility guarantees are planned.
 
+Creating an invitation accepts `email` and `role` (`admin`, `editor`, or `viewer`) and returns `{ id, url }` with status 201. Only workspace owners can invite administrators. Links expire after seven days and must be shared manually; Lattice does not send invitation email. The URL contains the invitation token and is returned only when created. Use the ID to revoke it with `DELETE /invites/:id`.
+
 Page templates are available at `/api/w/:workspaceId/templates`: writers can `GET` summaries or `GET /:id` for Markdown content; administrators can `POST` a template, `PATCH /:id`, or `DELETE /:id`. Create accepts `name` (1–80 characters) and `content` (up to 500,000 characters). Updates also require `version` and reject stale edits with 409. Each workspace supports 100 templates. Template mutations appear in the audit log.
 
 Page creation accepts an optional `template_id` from the same workspace. The template supplies the initial Markdown when `content` is omitted. Later template changes or deletion never modify existing pages.
