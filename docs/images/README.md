@@ -4,6 +4,8 @@ The screenshots were captured on October 7, 2026 from the running Lattice interf
 
 `code-examples.png` was captured later that day with the reader changes through `d22e960`, in the same isolated workspace.
 
+`callouts.png` and `callouts-dark.png` show the labeled Markdown callouts from `571de1a`, captured in the same sample workspace.
+
 | Asset               | Subject                                                                  |
 | ------------------- | ------------------------------------------------------------------------ |
 | `readme-hero.svg`   | Original vector banner using Lattice's green palette and botanical motif |
@@ -13,6 +15,8 @@ The screenshots were captured on October 7, 2026 from the running Lattice interf
 | `documentation.png` | Documentation settings after the form has loaded                         |
 | `theme-picker.png`  | The custom Light, Dark, and System appearance menu                       |
 | `code-examples.png` | Copyable, syntax-highlighted examples and the active reading outline     |
+| `callouts.png`      | Notes, tips, and warnings in a sample document, in light mode            |
+| `callouts-dark.png` | The same document in dark mode                                           |
 
 Screenshots use a 1440 × 1050 viewport at 1× scale with reduced motion enabled. They show the actual UI without compositing or retouching. The original project logo remains in `public/lattice-logo.png`.
 

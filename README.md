@@ -67,6 +67,18 @@ Copy examples with their indentation intact, navigate with the keyboard, and fol
 
 </details>
 
+<details>
+<summary><strong>See the details that stand out</strong></summary>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/callouts-dark.png">
+  <img src="docs/images/callouts.png" alt="Lattice callouts give tips, notes, and warnings their own labeled space within a document" width="1440">
+</picture>
+
+Keep context close to the work. Notes, tips, important details, warnings, and cautions stay readable in light mode, dark mode, and print, using ordinary Markdown markers.
+
+</details>
+
 ## What you can do
 
 |                                   | Built into Lattice                                                                                                                                                                                            |
