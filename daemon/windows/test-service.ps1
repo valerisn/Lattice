@@ -4,6 +4,7 @@
 [CmdletBinding()]
 param([Parameter(Mandatory = $true)][string]$FixtureRoot)
 $ErrorActionPreference = 'Stop'
+function Write-Step([string]$Message) { Write-Host ('[{0:O}] {1}' -f [DateTime]::UtcNow, $Message) }
 $installation = Join-Path $env:ProgramData 'LatticeDaemon'
 if ((Test-Path -LiteralPath $installation) -or (Get-Service lattice-daemon -ErrorAction SilentlyContinue)) { throw 'Service tests require an unused disposable Windows host.' }
 $tools = Join-Path $FixtureRoot 'tools'
@@ -50,24 +51,31 @@ function Wait-Healthy {
     throw 'The service did not report healthy.'
 }
 function Get-Watcher {
-    $serviceProcess = (Get-CimInstance Win32_Service -Filter "Name='lattice-daemon'").ProcessId
-    if ($serviceProcess) { Get-CimInstance Win32_Process -Filter "Name='php.exe' AND ParentProcessId=$serviceProcess" }
+    $serviceProcess = (Get-CimInstance Win32_Service -Filter "Name='lattice-daemon'" -OperationTimeoutSec 15).ProcessId
+    if ($serviceProcess) { Get-CimInstance Win32_Process -Filter "Name='php.exe' AND ParentProcessId=$serviceProcess" -OperationTimeoutSec 15 }
 }
 try {
+    Write-Step 'Installing the fixture service.'
     & "$PSScriptRoot\install.ps1" -Directory $app -Php $php -Docker "$tools\docker.exe" -Git "$tools\git.exe" -HealthUrl $health
+    Write-Step 'Waiting for the first healthy status.'
     Wait-Healthy
+    Write-Step 'Finding the initial PHP watcher.'
     $initial = @(Get-Watcher)
     if ($initial.Count -ne 1) { throw 'Expected exactly one PHP watcher.' }
     $controller = Get-Service lattice-daemon
+    Write-Step 'Requesting graceful service stop.'
     $controller.Stop(); $controller.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(45))
+    Write-Step 'Verifying PHP exited and the application stayed online.'
     if (Get-Process -Id $initial[0].ProcessId -ErrorAction SilentlyContinue) { throw 'PHP survived graceful service stop.' }
     if ((Get-Content "$installation\state\daemon.log" -Raw) -notmatch '"event":"stopped"') { throw 'PHP did not acknowledge graceful shutdown.' }
-    if ((Invoke-WebRequest -UseBasicParsing $health).StatusCode -ne 200) { throw 'Stopping supervision stopped the application.' }
+    if ((Invoke-WebRequest -UseBasicParsing $health -TimeoutSec 15).StatusCode -ne 200) { throw 'Stopping supervision stopped the application.' }
+    Write-Step 'Starting the service for crash recovery.'
     Start-Service lattice-daemon
     Start-Sleep -Seconds 3
     $before = @(Get-Watcher)
     if ($before.Count -ne 1) { throw 'Service did not restart.' }
     Stop-Process -Id $before[0].ProcessId -Force
+    Write-Step 'Waiting for SCM to replace the crashed PHP watcher.'
     $deadline = [DateTime]::UtcNow.AddSeconds(60)
     do {
         Start-Sleep -Seconds 1
@@ -75,15 +83,21 @@ try {
     } while (($after.Count -ne 1 -or $after[0].ProcessId -eq $before[0].ProcessId) -and [DateTime]::UtcNow -lt $deadline)
     if ($after.Count -ne 1 -or $after[0].ProcessId -eq $before[0].ProcessId) { throw 'SCM did not recover after PHP crashed.' }
     $original = Get-Content -LiteralPath "$installation\daemon.json" -Raw
+    Write-Step 'Reinstalling while preserving configuration.'
     & "$PSScriptRoot\install.ps1" -Directory $app -Php $php -Docker "$tools\docker.exe" -Git "$tools\git.exe" -ProjectName ignored -HealthUrl $health
     if ((Get-Content -LiteralPath "$installation\daemon.json" -Raw) -ne $original) { throw 'Reinstall changed existing configuration.' }
     Wait-Healthy
     $calls = Get-Content -LiteralPath "$tools\calls.log" -Raw
     if ($calls -match 'restart|stop|down|up -d') { throw 'Healthy supervision mutated containers.' }
+    Write-Step 'Uninstalling while preserving state.'
     & "$PSScriptRoot\uninstall.ps1"
     if (!(Test-Path -LiteralPath "$installation\daemon.json") -or !(Test-Path -LiteralPath "$installation\state\status.json")) { throw 'Uninstall removed persistent data.' }
     Write-Host 'PASS real SCM install, monitor, graceful stop, crash recovery, reinstall, and preserving uninstall (fixture Docker CLI).'
+} catch {
+    Write-Step ('Service lifecycle failed: ' + $_.Exception.Message)
+    throw
 } finally {
+    Write-Step 'Collecting service diagnostics and cleaning up the fixture.'
     if (Test-Path -LiteralPath "$installation\state\daemon.log") { Get-Content -LiteralPath "$installation\state\daemon.log" -Tail 30 }
     if (Test-Path -LiteralPath "$tools\calls.log") { Get-Content -LiteralPath "$tools\calls.log" -Tail 30 }
     if (Get-Service lattice-daemon -ErrorAction SilentlyContinue) { & "$PSScriptRoot\uninstall.ps1" }
