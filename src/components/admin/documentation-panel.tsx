@@ -49,7 +49,7 @@ export function DocumentationPanel({
           <option value="wide">Wide, for tables and technical docs</option>
         </select>
       </label>
-      <fieldset className="settings-section stack">
+      <fieldset className="documentation-options stack">
         <legend>Page details</legend>
         {(
           [

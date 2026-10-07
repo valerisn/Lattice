@@ -41,8 +41,9 @@ export function AuditPanel({ workspaceId }: { workspaceId: string }) {
   return (
     <div className="stack">
       <p className="muted">
-        Successful changes to settings, invitations, member roles, groups, and
-        access grants. History starts when audit logging was installed.
+        Successful changes to settings, templates, invitations, member roles,
+        groups, and access grants. History starts when audit logging was
+        installed.
       </p>
       <div>
         <button type="button" disabled={busy} onClick={() => void load(false)}>

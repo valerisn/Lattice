@@ -193,6 +193,35 @@
   padding: 22px 0;
   border-top: 1px solid var(--border);
 }
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 26px 0;
+}
+.admin-brand img {
+  object-fit: contain;
+  flex: none;
+}
+.admin-brand h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.documentation-options {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 0;
+  padding: 20px;
+  min-width: 0;
+}
+.documentation-options legend {
+  padding: 0 7px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.documentation-options input {
+  accent-color: var(--accent);
+}
 .settings-section h3,
 .settings-section h2 {
   margin-top: 0;
@@ -313,6 +342,7 @@ html[data-theme="light"] .app-shell {
     margin-bottom: 12px;
   }
   .settings-sidebar h2,
+  .settings-sidebar .admin-brand,
   .settings-sidebar .eyebrow {
     display: none;
   }

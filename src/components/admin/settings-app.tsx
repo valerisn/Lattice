@@ -98,7 +98,15 @@ export function SettingsApp({
           <ArrowLeft size={16} />
           Back to workspace
         </Link>
-        <h2>{workspace.name}</h2>
+        <div className="admin-brand">
+          <img
+            src={workspace.logo || "/lattice-logo.png"}
+            alt=""
+            width={32}
+            height={32}
+          />
+          <h2>{workspace.name}</h2>
+        </div>
         <p className="eyebrow">WORKSPACE SETTINGS</p>
         <nav aria-label="Settings sections">
           {tabs.map(([name, Icon]) => (
@@ -138,7 +146,25 @@ export function SettingsApp({
           </p>
         )}
         {!data ? (
-          <p className="muted">Loading workspace settings…</p>
+          error ? (
+            <button
+              type="button"
+              onClick={async () => {
+                setError("");
+                try {
+                  setData(await api<AdminData>(`${base}/admin`));
+                } catch (e) {
+                  setError((e as Error).message);
+                }
+              }}
+            >
+              Retry loading settings
+            </button>
+          ) : (
+            <p className="muted" role="status">
+              Loading workspace settings…
+            </p>
+          )
         ) : (
           <fieldset disabled={busy || refreshing} className="settings-fieldset">
             {tab === "Templates" && (
