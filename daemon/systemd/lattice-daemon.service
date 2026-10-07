@@ -1,0 +1,41 @@
+[Unit]
+Description=daemon - Lattice Docker supervisor
+Documentation=https://github.com/valerisn/Lattice/tree/main/daemon
+After=network-online.target docker.service
+Wants=network-online.target docker.service
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=exec
+User=root
+Group=root
+ExecStart=/usr/bin/php /usr/local/lib/lattice-daemon/bin/daemon watch --config /etc/lattice/daemon.json
+Restart=on-failure
+RestartSec=10
+KillMode=mixed
+TimeoutStopSec=3600
+UMask=0077
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=GIT_TERMINAL_PROMPT=0
+Environment=NO_COLOR=1
+StateDirectory=lattice-daemon
+StateDirectoryMode=0700
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=full
+ReadWritePaths=/etc/lattice
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=lattice-daemon
+
+[Install]
+WantedBy=multi-user.target
+

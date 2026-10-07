@@ -1,0 +1,98 @@
+name: Verify daemon
+on:
+  push:
+    branches: [main]
+    paths:
+      [
+        "daemon/**",
+        ".github/workflows/daemon.yml",
+        "compose.yaml",
+        "Dockerfile",
+      ]
+  pull_request:
+    paths:
+      [
+        "daemon/**",
+        ".github/workflows/daemon.yml",
+        "compose.yaml",
+        "Dockerfile",
+      ]
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  php:
+    name: Linux · PHP ${{ matrix.php }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["8.2", "8.3", "8.4", "8.5"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, pcntl
+          coverage: none
+      - name: Lint PHP and installer
+        run: |
+          find daemon -name '*.php' -print0 | xargs -0 -n1 php -l
+          php -l daemon/bin/daemon
+          bash -n daemon/install.sh
+          shellcheck daemon/install.sh
+      - name: Runtime, supervision, and update failure tests
+        run: php daemon/tests/run.php
+      - name: Check CLI output
+        run: |
+          php daemon/bin/daemon help
+          php daemon/bin/daemon version --json
+  service:
+    name: Linux · systemd and Docker integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: curl, pcntl
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prepare isolated Linux installation
+        run: |
+          sudo git clone "$GITHUB_WORKSPACE" /opt/lattice
+          sudo node /opt/lattice/scripts/configure.mjs
+          sudo mv .env /opt/lattice/.env
+          sudo docker compose --project-directory /opt/lattice -f /opt/lattice/compose.yaml up -d --build --wait --wait-timeout 180
+      - name: Install and verify self-running service
+        run: |
+          sudo bash /opt/lattice/daemon/install.sh /opt/lattice
+          sudo systemd-analyze verify /etc/systemd/system/lattice-daemon.service
+          sleep 3
+          sudo systemctl is-active --quiet lattice-daemon
+          sudo daemon status --json
+          sudo systemctl stop lattice-daemon
+      - name: Exercise real backups and bounded app recovery
+        run: sudo php /opt/lattice/daemon/tests/integration.php /etc/lattice/daemon.json
+      - name: Verify graceful service restart
+        run: |
+          sudo systemctl start lattice-daemon
+          sleep 3
+          sudo systemctl is-active --quiet lattice-daemon
+          sudo systemctl stop lattice-daemon
+          sudo daemon status --json
+      - name: Diagnostics
+        if: failure()
+        run: |
+          sudo journalctl -u lattice-daemon --no-pager -n 100
+          sudo docker compose --project-directory /opt/lattice -f /opt/lattice/compose.yaml logs --tail 100
+      - name: Clean up disposable services
+        if: always()
+        run: |
+          sudo systemctl stop lattice-daemon || true
+          sudo docker compose --project-directory /opt/lattice -f /opt/lattice/compose.yaml down -v || true
