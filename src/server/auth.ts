@@ -47,8 +47,9 @@ export async function login(body: unknown) {
   await rateLimit(db, "login-global", 300);
   await rateLimit(db, `login:${data.email}`);
   const [user] = await db.query<{ id: string; password_hash: string }>("SELECT id,password_hash FROM users WHERE email=$1", [data.email]);
-  const dummy = "scrypt:00000000000000000000000000000000:" + "00".repeat(64);
+  const dummy = "scrypt-v2:00000000000000000000000000000000:" + "00".repeat(64);
   const valid = await verifyPassword(data.password, user?.password_hash || dummy);
   if (!user || !valid) throw new AppError(401, "Email or password is incorrect.");
+  if(user.password_hash.startsWith("scrypt:"))await db.query("UPDATE users SET password_hash=$1 WHERE id=$2",[await hashPassword(data.password),user.id]);
   await createSession(user.id);
 }

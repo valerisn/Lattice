@@ -1,18 +1,17 @@
 import { randomBytes, scrypt as scryptCallback, timingSafeEqual, createHash } from "node:crypto";
-import { promisify } from "node:util";
 import type { Database } from "./db";
 import { AppError } from "./errors";
 
-const scrypt = promisify(scryptCallback);
+function derive(password:string,salt:string,modern:boolean){return new Promise<Buffer>((resolve,reject)=>scryptCallback(password,salt,64,{N:modern ? 32768 : 16384,r:8,p:modern ? 3 : 1,maxmem:64*1024*1024},(error,key)=>error ? reject(error) : resolve(key)));}
 export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
-  const hash = await scrypt(password, salt, 64) as Buffer;
-  return `scrypt:${salt}:${hash.toString("hex")}`;
+  const hash = await derive(password,salt,true);
+  return `scrypt-v2:${salt}:${hash.toString("hex")}`;
 }
 export async function verifyPassword(password: string, stored: string) {
   const [algorithm, salt, hex] = stored.split(":");
-  if (algorithm !== "scrypt" || !salt || !hex) return false;
-  const actual = await scrypt(password, salt, 64) as Buffer;
+  if (!["scrypt","scrypt-v2"].includes(algorithm) || !salt || !hex) return false;
+  const actual = await derive(password,salt,algorithm === "scrypt-v2");
   const expected = Buffer.from(hex, "hex");
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
