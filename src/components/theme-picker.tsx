@@ -65,8 +65,9 @@ export function ThemePicker() {
       const anchor = trigger.current!.getBoundingClientRect();
       const panel = menu.current!;
       const height = panel.offsetHeight;
+      const viewportWidth = document.documentElement.clientWidth;
       const above = window.innerHeight - anchor.bottom < height + 16;
-      panel.style.left = `${Math.max(12, Math.min(anchor.left, window.innerWidth - panel.offsetWidth - 12))}px`;
+      panel.style.left = `${Math.max(12, Math.min(anchor.left, viewportWidth - panel.offsetWidth - 12))}px`;
       panel.style.top = `${Math.max(12, above ? anchor.top - height - 10 : anchor.bottom + 10)}px`;
       panel.dataset.placement = above ? "above" : "below";
     };
