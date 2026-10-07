@@ -18,6 +18,8 @@ Use **More → History** to compare revisions or restore an earlier one. Restori
 
 The table of contents follows rendered level-two and level-three headings. Repeated headings receive unique links, formatted heading text stays readable, and code examples are excluded. Administrators can change reading width, metadata visibility, the footer, and the table of contents under **Workspace settings → Documentation**.
 
+Choose **More → Print / Save as PDF**, or use your browser's print shortcut, for a paper-friendly layout. Navigation and editing controls are hidden, dark mode becomes white paper, and expandable sections open for printing. Choose your browser's PDF destination to save a copy.
+
 ## Share and organize
 
 Page links can connect related knowledge. Sharing copies the page URL; recipients still need permission to read it. Favorites keep frequently used pages close, and **Ctrl/Cmd + K** searches accessible pages and collections.

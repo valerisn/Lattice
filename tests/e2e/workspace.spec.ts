@@ -354,7 +354,7 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
     name: "Imported-handbook.md",
     mimeType: "text/markdown",
     buffer: Buffer.from(
-      "## **Install** the `SDK`\n\nImported knowledge.\n\n## Repeat\n\nFirst section.\n\n## Repeat\n\nSecond section.\n\n```md\n## Not a heading\n```",
+      "## **Install** the `SDK`\n\nImported knowledge.\n\n## Repeat\n\nFirst section.\n\n## Repeat\n\nSecond section.\n\n```md\n## Not a heading\n```\n\n<details><summary>Extra guidance</summary><p>Include this in print.</p></details>",
     ),
   });
   await expect(
@@ -381,6 +381,28 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   ).toBe(true);
   await outlineLinks.last().click();
   await expect(page).toHaveURL(/#lattice-heading-repeat-1$/);
+  await page.getByLabel("Appearance", { exact: true }).selectOption("dark");
+  await page.evaluate(() => {
+    window.print = () => {
+      window.dispatchEvent(new Event("beforeprint"));
+    };
+  });
+  await page.getByLabel("More page actions", { exact: true }).click();
+  await page
+    .getByRole("button", { name: "Print / Save as PDF", exact: true })
+    .click();
+  await expect(page.locator(".prose details")).toHaveAttribute("open", "");
+  await page.emulateMedia({ media: "print" });
+  await expect(page.locator(".sidebar")).toBeHidden();
+  await expect(page.locator(".topbar")).toBeHidden();
+  await expect(page.locator("body")).toHaveCSS(
+    "background-color",
+    "rgb(255, 255, 255)",
+  );
+  await expect(page.locator(".prose pre")).toHaveCSS("white-space", "pre-wrap");
+  await page.emulateMedia({ media: "screen" });
+  await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
+  await expect(page.locator(".prose details")).not.toHaveAttribute("open");
   await page.goto("/w/test-studio");
   await page.getByLabel("Appearance", { exact: true }).selectOption("dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");

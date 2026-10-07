@@ -334,6 +334,16 @@ export function WorkspaceApp({
                   <button onClick={() => setAttachments(true)}>
                     Attachments
                   </button>
+                  <button
+                    onClick={(event) => {
+                      event.currentTarget
+                        .closest("details")
+                        ?.removeAttribute("open");
+                      window.print();
+                    }}
+                  >
+                    Print / Save as PDF
+                  </button>
                   {editableIds.includes(page.id) && (
                     <button
                       className="danger"

@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { FileText, ArrowUpRight } from "lucide-react";
 import type { WikiPage, Collection } from "@/shared/types";
 import { Markdown } from "./markdown";
@@ -24,6 +24,31 @@ export function PageReader({
   workspaceSlug: string;
   onSelect: (id: string) => void;
 }) {
+  const article = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const opened = new Set<HTMLDetailsElement>();
+    const beforePrint = () => {
+      article.current
+        ?.querySelectorAll<HTMLDetailsElement>("details:not([open])")
+        .forEach((element) => {
+          opened.add(element);
+          element.open = true;
+        });
+    };
+    const afterPrint = () => {
+      opened.forEach((element) => {
+        element.open = false;
+      });
+      opened.clear();
+    };
+    window.addEventListener("beforeprint", beforePrint);
+    window.addEventListener("afterprint", afterPrint);
+    return () => {
+      window.removeEventListener("beforeprint", beforePrint);
+      window.removeEventListener("afterprint", afterPrint);
+      afterPrint();
+    };
+  }, [page.id]);
   const settings = documentationSettings(documentation);
   const headings = useMemo(
     () => (settings.show_toc ? pageHeadings(page.content) : []),
@@ -34,7 +59,7 @@ export function PageReader({
     <div
       className={`reader-layout ${settings.reading_width === "wide" ? "reader-wide" : ""} ${!settings.show_toc || headings.length < 2 ? "reader-without-toc" : ""}`}
     >
-      <article className="page-article">
+      <article className="page-article" ref={article}>
         <div className="page-symbol">
           <FileText size={25} strokeWidth={1.5} />
         </div>
