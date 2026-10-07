@@ -9,6 +9,7 @@ Use a disposable database for tests. Browser tests with `DATABASE_URL` require a
 ## Working agreements
 
 - Keep commits focused and explain the resulting behavior in the pull request.
+- Record visible behavior changes under **Unreleased** in [CHANGELOG.md](CHANGELOG.md).
 - Validate external input, parameterize queries, and authorize every server operation.
 - Keep transactions in services; avoid filesystem/network calls inside database transactions.
 - Add migrations rather than changing already-released ones.

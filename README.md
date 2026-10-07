@@ -166,6 +166,7 @@ Windows CI exercises the real service lifecycle using a fixture Docker executabl
 | [Internal API](docs/api.md)               | The application's internal endpoints                    |
 | [Security](SECURITY.md)                   | Security boundaries, known limits, and reporting issues |
 | [Contributing](CONTRIBUTING.md)           | Local development and contribution guidance             |
+| [Changelog](CHANGELOG.md)                 | Changes available on the main branch                    |
 
 ## Development and checks
 
@@ -188,8 +189,8 @@ See [architecture and permission rules](docs/architecture.md) and [the internal 
 
 - OAuth/SSO, LDAP/SAML, email delivery, and password-reset email
 - Realtime collaboration, notifications, webhooks, and a plugin SDK
-- S3 storage, external search indexes, background jobs, and pagination
-- Anonymous publishing, public API tokens, rich media embeds, custom favicons, and richer audit logs
+- S3 storage, external search indexes, background jobs, and server-side pagination for workspace content
+- Anonymous publishing, public API tokens, rich media embeds, custom favicons, audit exports, and retention controls
 - The first release loads workspace pages for navigation/search; large installations need indexing and query tuning
 - History shows the latest 100 revisions while the database retains all revisions; large comparisons fall back to side-by-side text
 - Page deletion removes history and may leave orphaned attachment files; a file cleanup tool is planned
