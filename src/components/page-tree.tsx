@@ -71,7 +71,15 @@ export function PageTree({
                 )}
               </button>
             </div>
-            {hasChildren && !closed && <div>{render(page.id, depth + 1)}</div>}
+            {hasChildren && (
+              <div
+                className={`tree-branch ${closed ? "" : "expanded"}`}
+                inert={closed}
+                aria-hidden={closed}
+              >
+                <div>{render(page.id, depth + 1)}</div>
+              </div>
+            )}
           </div>
         );
       });

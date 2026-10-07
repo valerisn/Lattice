@@ -512,6 +512,7 @@ export function WorkspaceApp({
         {view === "page" ? (
           page ? (
             <PageReader
+              key={page.id}
               page={page}
               collections={collections}
               documentation={workspace.documentation}
@@ -526,7 +527,7 @@ export function WorkspaceApp({
             </div>
           )
         ) : (
-          <section className="page-list">
+          <section className="page-list" key={view}>
             <p className="eyebrow">YOUR KNOWLEDGE, TOGETHER</p>
             <h1>{title}</h1>
             <p className="muted">
@@ -536,12 +537,18 @@ export function WorkspaceApp({
                   "A little less searching. A little more knowing."}
             </p>
             <div className="list-rows">
-              {filtered.map((p) => (
+              {filtered.map((p, index) => (
                 <button key={p.id} onClick={() => selectPage(p.id)}>
+                  <span className="list-index" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                   <div>
                     <strong>{p.title}</strong>
                     <span>{p.description || "Ready for your next idea."}</span>
                   </div>
+                  <span className="list-state">
+                    {p.state === "draft" ? "DRAFT" : "PAGE"}
+                  </span>
                   <ChevronRight size={16} />
                 </button>
               ))}

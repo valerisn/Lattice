@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight, BookOpen, GitBranch, LockKeyhole } from "lucide-react";
 import { api } from "@/client/api";
+import { LatticeWeave } from "./lattice-weave";
+import { ThemePicker } from "./theme-picker";
 
 export function AuthForm({
   setup = false,
@@ -28,7 +30,11 @@ export function AuthForm({
           <img src="/lattice-logo.png" width="40" height="40" alt="" />
           Lattice<span className="badge">OPEN SOURCE</span>
         </Link>
-        <div>
+        <div className="auth-chapter">
+          <div className="auth-weave">
+            <LatticeWeave />
+            <span>IDEAS TAKE ROOT. KNOWLEDGE GROWS.</span>
+          </div>
           <p className="eyebrow">A HOME FOR WHAT YOU KNOW</p>
           <h1>
             Good ideas.
@@ -59,6 +65,9 @@ export function AuthForm({
         </p>
       </section>
       <section className="auth-panel">
+        <div className="auth-appearance">
+          <ThemePicker />
+        </div>
         <div className="auth-card">
           <p className="eyebrow">
             {setup

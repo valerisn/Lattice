@@ -126,7 +126,10 @@ export function ThemePicker() {
             role="menu"
             aria-labelledby={`${id}-label`}
             onBlur={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget as Node))
+              if (
+                event.relatedTarget !== trigger.current &&
+                !event.currentTarget.contains(event.relatedTarget as Node)
+              )
                 setOpen(false);
             }}
             onKeyDown={(event) => {

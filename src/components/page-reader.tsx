@@ -5,6 +5,7 @@ import type { WikiPage, Collection } from "@/shared/types";
 import { Markdown } from "./markdown";
 import { pageHeadings } from "@/shared/headings";
 import { Backlinks } from "./backlinks";
+import { LatticeWeave } from "./lattice-weave";
 import {
   documentationSettings,
   type DocumentationSettings,
@@ -60,58 +61,63 @@ export function PageReader({
       className={`reader-layout ${settings.reading_width === "wide" ? "reader-wide" : ""} ${!settings.show_toc || headings.length < 2 ? "reader-without-toc" : ""}`}
     >
       <article className="page-article" ref={article}>
-        <div className="page-symbol">
-          <FileText size={25} strokeWidth={1.5} />
-        </div>
-        <div className="row">
-          <p className="eyebrow">{collection?.name || "YOUR WORKSPACE"}</p>
-          {page.state === "draft" && <span className="badge">DRAFT</span>}
-        </div>
-        <h1>{page.title}</h1>
-        {page.description && (
-          <p className="page-description">{page.description}</p>
-        )}
-        {(settings.show_author ||
-          settings.show_updated ||
-          settings.show_reading_time) && (
-          <div className="page-meta">
-            {settings.show_author && (
-              <>
-                <span className="avatar small">
-                  {page.author?.slice(0, 1) || "L"}
-                </span>
-                <span>{page.author || "You"}</span>
-              </>
-            )}
-            {settings.show_updated && (
-              <>
-                {settings.show_author && <span>·</span>}
-                <span>
-                  Updated{" "}
-                  {new Date(page.updated_at).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </span>
-              </>
-            )}
-            {settings.show_reading_time && (
-              <>
-                {(settings.show_author || settings.show_updated) && (
-                  <span>·</span>
-                )}
-                <span>
-                  {Math.max(
-                    1,
-                    Math.ceil(page.content.split(/\s+/).length / 220),
-                  )}{" "}
-                  min read
-                </span>
-              </>
-            )}
+        <header className="page-masthead">
+          <div className="page-flourish">
+            <LatticeWeave />
           </div>
-        )}
+          <div className="page-symbol">
+            <FileText size={25} strokeWidth={1.5} />
+          </div>
+          <div className="row">
+            <p className="eyebrow">{collection?.name || "YOUR WORKSPACE"}</p>
+            {page.state === "draft" && <span className="badge">DRAFT</span>}
+          </div>
+          <h1>{page.title}</h1>
+          {page.description && (
+            <p className="page-description">{page.description}</p>
+          )}
+          {(settings.show_author ||
+            settings.show_updated ||
+            settings.show_reading_time) && (
+            <div className="page-meta">
+              {settings.show_author && (
+                <>
+                  <span className="avatar small">
+                    {page.author?.slice(0, 1) || "L"}
+                  </span>
+                  <span>{page.author || "You"}</span>
+                </>
+              )}
+              {settings.show_updated && (
+                <>
+                  {settings.show_author && <span>·</span>}
+                  <span>
+                    Updated{" "}
+                    {new Date(page.updated_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
+                </>
+              )}
+              {settings.show_reading_time && (
+                <>
+                  {(settings.show_author || settings.show_updated) && (
+                    <span>·</span>
+                  )}
+                  <span>
+                    {Math.max(
+                      1,
+                      Math.ceil(page.content.split(/\s+/).length / 220),
+                    )}{" "}
+                    min read
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+        </header>
         <div className="page-divider" />
         {page.content ? (
           <Markdown content={page.content} />
