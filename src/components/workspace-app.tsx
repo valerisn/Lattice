@@ -34,6 +34,7 @@ import { AttachmentsDialog } from "./attachments-dialog";
 import { PageEditor } from "./page-editor";
 import { PageTree } from "./page-tree";
 import { PageReader } from "./page-reader";
+import { PageActionsMenu } from "./page-actions-menu";
 import { CreateDialog } from "./create-dialog";
 import { SearchDialog } from "./search-dialog";
 import { ThemePicker } from "./theme-picker";
@@ -386,8 +387,7 @@ export function WorkspaceApp({
           </nav>
           {view === "page" && page && (
             <div className="page-actions" inert={navigating}>
-              <details className="more-menu">
-                <summary aria-label="More page actions">•••</summary>
+              <PageActionsMenu>
                 <div>
                   <button onClick={() => setHistory(true)}>
                     Version history
@@ -429,7 +429,7 @@ export function WorkspaceApp({
                     </button>
                   )}
                 </div>
-              </details>
+              </PageActionsMenu>
               {editableIds.includes(page.id) && (
                 <button
                   className="primary"

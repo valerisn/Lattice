@@ -24,6 +24,8 @@ Choose **Focus** for a larger writing surface in either rich text or Markdown. D
 
 Use **More page actions → Version history** to review previous versions. **Compare with current** highlights added and removed Markdown lines and shows title or description changes. You can switch to a side-by-side view. Large comparisons fall back to that view to keep the browser responsive. Restoring creates another revision and preserves the earlier history. The **Export Markdown** action downloads the current page source.
 
+Focus **More page actions** and press **Arrow Up/Down** to open its choices. Use the arrow keys, **Home**, and **End** to move between them; **Escape** closes the menu. Closing a history or attachments dialog returns focus to the actions control.
+
 The table of contents follows rendered level-two and level-three headings. Repeated headings receive unique links, formatted heading text stays readable, and code examples are excluded. Administrators can change reading width, metadata visibility, the footer, and the table of contents under **Workspace settings → Documentation**.
 
 On larger screens, the table of contents highlights the section you are reading as you scroll. Long outlines scroll independently to keep the current section visible.
