@@ -156,4 +156,58 @@ describe("administrator audit log", () => {
       "cursor",
     );
   });
+  it("filters the complete history with literal text, action, and stable pagination", async () => {
+    const id = await createWorkspace(db, owner.id, {
+      name: "Filtered history",
+      slug: "filtered-history",
+    });
+    const filtered = await membership(db, owner.id, id);
+    await db.query(
+      "INSERT INTO audit_events(id,workspace_id,actor_id,actor_name,action,target) SELECT gen_random_uuid(),$1,$2,'Alice','templates.POST','Guide ' || i FROM generate_series(1,60) AS i",
+      [id, owner.id],
+    );
+    await db.query(
+      "INSERT INTO audit_events(id,workspace_id,actor_id,actor_name,action,target) VALUES(gen_random_uuid(),$1,$2,'Bob','admin.PATCH','100% _ready')",
+      [id, owner.id],
+    );
+    const filters = { action: "templates.POST", query: "aLiCe" };
+    const first = await listAuditEvents(db, filtered, null, filters);
+    const second = await listAuditEvents(
+      db,
+      filtered,
+      first.nextCursor,
+      filters,
+    );
+    expect(first.events).toHaveLength(50);
+    expect(second.events).toHaveLength(10);
+    expect(second.nextCursor).toBeNull();
+    expect(
+      new Set([...first.events, ...second.events].map((event) => event.id))
+        .size,
+    ).toBe(60);
+    expect(
+      (await listAuditEvents(db, filtered, null, { query: "% _" })).events,
+    ).toHaveLength(1);
+    expect(
+      (await listAuditEvents(db, filtered, null, { query: "' OR 1=1 --" }))
+        .events,
+    ).toHaveLength(0);
+    expect(
+      (await listAuditEvents(db, workspace, null, { query: "Guide" })).events,
+    ).toHaveLength(0);
+    await expect(
+      listAuditEvents(db, filtered, null, { action: "unknown" }),
+    ).rejects.toThrow("Unknown audit action");
+    await expect(
+      listAuditEvents(db, filtered, null, { query: "x".repeat(201) }),
+    ).rejects.toThrow();
+    const response = await adminRequest(
+      new Request(`https://lattice.example/api/audit?action=admin.PATCH&q=Bob`),
+      ["audit"],
+      db,
+      filtered,
+      owner,
+    );
+    expect((await response!.json()).events).toHaveLength(1);
+  });
 });

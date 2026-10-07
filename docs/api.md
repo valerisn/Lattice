@@ -40,6 +40,8 @@ Page templates are available at `/api/w/:workspaceId/templates`: writers can `GE
 
 Page creation accepts an optional `template_id` from the same workspace. The template supplies the initial Markdown when `content` is omitted. Later template changes or deletion never modify existing pages.
 
+Audit history accepts optional `action` and `q` query parameters alongside `before`. `action` is an exact key from the [audit action map](../src/shared/audit.ts), such as `groups.POST`. `q` is a case-insensitive literal substring of the actor name or target, limited to 200 characters after trimming. Filters apply before pagination. Keep the same filters when following `nextCursor`; omit `before` when changing them. Audit access remains limited to workspace administrators.
+
 Workspace settings (`PATCH /admin`) accept partial updates to `name`, `description`, `logo`, `accent`, `homepage_id`, and `upload_limit`. Omitted fields remain unchanged. Send an empty logo string to restore the default, or a null homepage ID to choose the first available page.
 
 Documentation preferences accept partial updates: `default_state` (`draft` or `published`), `reading_width` (`comfortable` or `wide`), `show_toc`, `show_author`, `show_updated`, `show_reading_time` (booleans), and `footer_text` (at most 200 characters). The configured publication default applies when a page creation request omits `state`; existing pages are unaffected.

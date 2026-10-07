@@ -39,3 +39,5 @@ The breadcrumb trail links to parent pages. Browser Back and Forward navigate be
 Writers can use **Drafts** in the sidebar to find unfinished pages, ordered by most recently updated. Drafts stay hidden from viewers. Open a draft, choose **Edit page**, and change **Publication** to publish it. Published children of a draft remain hidden from viewers until their ancestors are published too.
 
 Administrators can use **Workspace settings → Overview → Documentation review** to find drafts, empty pages, recent changes, or published pages not updated in at least 90 days. The 90-day list starts with the oldest pages and provides a starting point for review; age alone does not mean content is incorrect. **Show more pages** expands any review list in groups of eight.
+
+Under **Workspace settings → Audit log**, filter by activity type or search a person's name or changed item. Filters search the full workspace audit history, and **Load older activity** keeps those filters as you move through earlier events.

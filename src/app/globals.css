@@ -1101,6 +1101,17 @@ kbd {
   color: var(--muted);
   font-size: 12px;
 }
+.audit-filters {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.audit-filters label {
+  flex: 1 1 220px;
+  margin: 0;
+  min-width: 0;
+}
 .audit-list {
   list-style: none;
   margin: 0;

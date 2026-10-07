@@ -108,6 +108,10 @@ async function handleAdminRequest(
         db,
         workspace,
         new URL(request.url).searchParams.get("before"),
+        {
+          action: new URL(request.url).searchParams.get("action") || "",
+          query: new URL(request.url).searchParams.get("q") || "",
+        },
       ),
       { headers: { "Cache-Control": "no-store" } },
     );

@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { Database } from "./db";
 import { AppError } from "./errors";
 import type { AuditEvent, AuditPage } from "@/shared/audit";
+import { auditActions } from "@/shared/audit";
 import type { Workspace, User } from "@/shared/types";
 import { canManage } from "@/shared/types";
 
@@ -9,9 +10,23 @@ export async function listAuditEvents(
   db: Database,
   workspace: Workspace,
   cursor: string | null,
+  filters: unknown = {},
 ): Promise<AuditPage> {
   if (!canManage(workspace.role))
     throw new AppError(403, "Only administrators can read the audit log.");
+  const { action, query } = z
+    .object({
+      action: z
+        .string()
+        .refine(
+          (value) => value === "" || Object.hasOwn(auditActions, value),
+          "Unknown audit action",
+        )
+        .default(""),
+      query: z.string().trim().max(200).default(""),
+    })
+    .strict()
+    .parse(filters);
   if (cursor) {
     z.uuid().parse(cursor);
     if (
@@ -24,9 +39,27 @@ export async function listAuditEvents(
     )
       throw new AppError(400, "Invalid audit cursor.");
   }
+  const values: unknown[] = [workspace.id];
+  const conditions = ["workspace_id=$1"];
+  if (cursor) {
+    values.push(cursor);
+    conditions.push(
+      `(created_at,id) < (SELECT created_at,id FROM audit_events WHERE id=$${values.length} AND workspace_id=$1)`,
+    );
+  }
+  if (action) {
+    values.push(action);
+    conditions.push(`action=$${values.length}`);
+  }
+  if (query) {
+    values.push(query);
+    conditions.push(
+      `strpos(lower(actor_name || ' ' || target),lower($${values.length})) > 0`,
+    );
+  }
   const rows = await db.query<AuditEvent>(
-    `SELECT id,actor_name,action,target,created_at FROM audit_events WHERE workspace_id=$1 ${cursor ? "AND (created_at,id) < (SELECT created_at,id FROM audit_events WHERE id=$2 AND workspace_id=$1)" : ""} ORDER BY created_at DESC,id DESC LIMIT 51`,
-    cursor ? [workspace.id, cursor] : [workspace.id],
+    `SELECT id,actor_name,action,target,created_at FROM audit_events WHERE ${conditions.join(" AND ")} ORDER BY created_at DESC,id DESC LIMIT 51`,
+    values,
   );
   const events = rows.slice(0, 50);
   return { events, nextCursor: rows.length > 50 ? events[49].id : null };
