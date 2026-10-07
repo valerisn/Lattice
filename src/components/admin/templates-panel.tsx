@@ -190,6 +190,7 @@ function TemplateEditor({
     <Modal
       title={template.id ? "Edit page template" : "Create page template"}
       onClose={close}
+      closeDisabled={busy}
     >
       <form
         onSubmit={async (e) => {

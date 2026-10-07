@@ -59,6 +59,7 @@ export function MarkdownImport({
           <button
             type="button"
             className="ghost"
+            disabled={busy}
             onClick={() => {
               onChange(null);
               if (input.current) input.current.value = "";

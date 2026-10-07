@@ -6,6 +6,7 @@ Changes listed under **Unreleased** are available on the main branch. They are n
 
 ### Writing and reading
 
+- Creation dialogs keep submitted fields stable and stay open until the request finishes. Markdown import cannot be cleared while a file is still being read.
 - Focus mode expands the editor and hides page details while keeping autosave active.
 - Ctrl/Cmd + S saves immediately without closing the editor.
 - Code examples show language labels, copy controls, and clipboard failure feedback. Copying preserves indentation and line breaks.

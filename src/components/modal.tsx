@@ -12,6 +12,7 @@ export function Modal({
   onClose,
   wide = false,
   fullScreen = false,
+  closeDisabled = false,
   onKeyDown,
 }: {
   title: string;
@@ -19,6 +20,7 @@ export function Modal({
   onClose: () => void;
   wide?: boolean;
   fullScreen?: boolean;
+  closeDisabled?: boolean;
   onKeyDown?: KeyboardEventHandler<HTMLDialogElement>;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -34,10 +36,10 @@ export function Modal({
       onKeyDownCapture={onKeyDown}
       onCancel={(e) => {
         e.preventDefault();
-        onClose();
+        if (!closeDisabled) onClose();
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) {
+        if (!closeDisabled && e.target === e.currentTarget) {
           const rect = e.currentTarget.getBoundingClientRect();
           if (
             e.clientX < rect.left ||
@@ -55,6 +57,7 @@ export function Modal({
         <button
           className="icon-button ghost"
           onClick={onClose}
+          disabled={closeDisabled}
           aria-label="Close dialog"
         >
           <X size={18} />
