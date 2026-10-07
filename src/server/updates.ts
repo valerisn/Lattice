@@ -1,9 +1,9 @@
 import { compare, valid } from "semver";
 import { z } from "zod";
-import { version } from "../../package.json";
+import packageJson from "../../package.json";
 import type { UpdateCheck } from "@/shared/updates";
 
-export const installedVersion = version;
+export const installedVersion = packageJson.version;
 const releasesUrl = "https://github.com/valerisn/Lattice/releases";
 const releaseSchema = z.object({
   tag_name: z.string().max(100),
