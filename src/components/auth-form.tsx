@@ -19,9 +19,10 @@ export function AuthForm({ setup = false, tokenRequired = false, inviteToken, de
   }}>
     {setup && <><label>Workspace name<input name="workspaceName" required maxLength={80} value={workspace} placeholder="Acorn Studio" onChange={e => { setWorkspace(e.target.value); setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")); }} /></label><label>Workspace slug<input name="slug" required minLength={2} maxLength={60} pattern="[a-z0-9]+(-[a-z0-9]+)*" value={slug} onChange={e => setSlug(e.target.value)} /></label></>}
     {(setup || inviteToken) && <label>Your name<input name="name" autoComplete="name" required maxLength={100} /></label>}
-    <label>Email address<input name="email" type="email" autoComplete="email" required /></label><label>Password<input name="password" type="password" autoComplete={setup || inviteToken ? "new-password" : "current-password"} required minLength={setup || inviteToken ? 12 : undefined} maxLength={128} />{(setup || inviteToken) && <span className="muted">At least 12 characters. A passphrase works well.</span>}</label>
+    <label>Email address<input name="email" type="email" autoComplete="email" required /></label><label>Password<input name="password" aria-label="Password" type="password" autoComplete={setup || inviteToken ? "new-password" : "current-password"} required minLength={setup || inviteToken ? 12 : undefined} maxLength={128} />{(setup || inviteToken) && <span className="muted">At least 12 characters. A passphrase works well.</span>}</label>
     {setup && tokenRequired && <label>Installation setup token<input name="setupToken" type="password" required autoComplete="off" /></label>}
     {error && <div role="alert" className="error">{error}</div>}<button className="primary" disabled={busy} type="submit">{busy ? "One moment…" : setup ? "Create your workspace" : inviteToken ? "Create account & join" : "Sign in"}<ArrowRight size={16} /></button>
   </form>{inviteToken && <p><a href={`/login?next=${encodeURIComponent(`/invite/${inviteToken}`)}`}>Already have an account? Sign in</a></p>}<p className="auth-footnote">Your knowledge. Your server. Your space.</p></div></section></main>;
 }
+
 
