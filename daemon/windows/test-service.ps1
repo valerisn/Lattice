@@ -50,27 +50,28 @@ function Wait-Healthy {
     throw 'The service did not report healthy.'
 }
 function Get-Watcher {
-    @(Get-CimInstance Win32_Process -Filter "Name='php.exe'" | Where-Object { $_.CommandLine -like "*$installation\runtime\bin\daemon* watch *" })
+    $serviceProcess = (Get-CimInstance Win32_Service -Filter "Name='lattice-daemon'").ProcessId
+    if ($serviceProcess) { Get-CimInstance Win32_Process -Filter "Name='php.exe' AND ParentProcessId=$serviceProcess" }
 }
 try {
     & "$PSScriptRoot\install.ps1" -Directory $app -Php $php -Docker "$tools\docker.exe" -Git "$tools\git.exe" -HealthUrl $health
     Wait-Healthy
-    $initial = Get-Watcher
+    $initial = @(Get-Watcher)
     if ($initial.Count -ne 1) { throw 'Expected exactly one PHP watcher.' }
     $controller = Get-Service lattice-daemon
     $controller.Stop(); $controller.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(45))
-    if ((Get-Watcher).Count -ne 0) { throw 'PHP survived graceful service stop.' }
+    if (Get-Process -Id $initial[0].ProcessId -ErrorAction SilentlyContinue) { throw 'PHP survived graceful service stop.' }
     if ((Get-Content "$installation\state\daemon.log" -Raw) -notmatch '"event":"stopped"') { throw 'PHP did not acknowledge graceful shutdown.' }
     if ((Invoke-WebRequest -UseBasicParsing $health).StatusCode -ne 200) { throw 'Stopping supervision stopped the application.' }
     Start-Service lattice-daemon
     Start-Sleep -Seconds 3
-    $before = Get-Watcher
+    $before = @(Get-Watcher)
     if ($before.Count -ne 1) { throw 'Service did not restart.' }
     Stop-Process -Id $before[0].ProcessId -Force
     $deadline = [DateTime]::UtcNow.AddSeconds(60)
     do {
         Start-Sleep -Seconds 1
-        $after = Get-Watcher
+        $after = @(Get-Watcher)
     } while (($after.Count -ne 1 -or $after[0].ProcessId -eq $before[0].ProcessId) -and [DateTime]::UtcNow -lt $deadline)
     if ($after.Count -ne 1 -or $after[0].ProcessId -eq $before[0].ProcessId) { throw 'SCM did not recover after PHP crashed.' }
     $original = Get-Content -LiteralPath "$installation\daemon.json" -Raw

@@ -27,7 +27,7 @@ internal sealed class DaemonHost : ServiceBase
         ServiceName = "lattice-daemon";
         CanStop = true;
         CanShutdown = true;
-        AutoLog = false;
+        AutoLog = true;
         settingsFile = Path.GetFullPath(file);
         console = foreground;
     }
@@ -138,6 +138,7 @@ internal sealed class DaemonHost : ServiceBase
 
     protected override void OnStart(string[] args)
     {
+        if (!console) RequestAdditionalTime(120000);
         CheckPath(settingsFile, false, true, !console);
         var settings = ReadJson(settingsFile);
         string php = CheckPath(Value(settings, "php"), false, false, !console);
@@ -216,13 +217,18 @@ internal sealed class DaemonHost : ServiceBase
 
     protected override void OnStop()
     {
+        StopWorker(!console);
+    }
+
+    private void StopWorker(bool reportProgress)
+    {
         stopping = true;
         if (child == null) return;
         if (!child.HasExited) {
             using (File.Open(stopFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read)) { }
             var timer = Stopwatch.StartNew();
             while (!child.WaitForExit(1000)) {
-                if (!console) RequestAdditionalTime(10000);
+                if (reportProgress) RequestAdditionalTime(10000);
                 if (timer.Elapsed.TotalSeconds >= 3600) { Log("Graceful stop timed out; interrupted updates remain blocked."); Environment.Exit(1); }
             }
         }
@@ -232,7 +238,7 @@ internal sealed class DaemonHost : ServiceBase
         Log("daemon service stopped; containers left running.");
     }
 
-    protected override void OnShutdown() { OnStop(); }
+    protected override void OnShutdown() { StopWorker(false); }
 
     [StructLayout(LayoutKind.Sequential)] private struct BasicLimits {
         public long PerProcessUserTimeLimit, PerJobUserTimeLimit;
