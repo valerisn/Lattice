@@ -21,7 +21,8 @@ export const newToken = () => randomBytes(32).toString("base64url");
 export function checkOrigin(request: Request) {
   if (["GET", "HEAD", "OPTIONS"].includes(request.method)) return;
   if (process.env.NODE_ENV === "production" && !process.env.APP_URL) throw new AppError(503, "APP_URL must be configured.");
-  const expected = new URL(process.env.APP_URL || request.url).origin;
+  const localUrl = new URL(request.url);
+  const expected = process.env.APP_URL ? new URL(process.env.APP_URL).origin : `${localUrl.protocol}//${request.headers.get("host") || localUrl.host}`;
   if (request.headers.get("origin") !== expected) throw new AppError(403, "Request origin is not allowed.");
 }
 export async function rateLimit(db: Database, key: string, maximum = 10, seconds = 900) {
