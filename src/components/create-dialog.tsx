@@ -1,0 +1,13 @@
+"use client";
+import { useState } from "react";
+import type { WikiPage, Collection } from "@/shared/types";
+import { Modal } from "./modal";
+import { api } from "@/client/api";
+export function CreateDialog({ kind, workspaceId, pages, collections, onClose, onCreated }: { kind: "page" | "collection"; workspaceId: string; pages: WikiPage[]; collections: Collection[]; onClose: () => void; onCreated: (id: string) => void }) {
+  const [error,setError] = useState(""); const [busy,setBusy] = useState(false);
+  return <Modal title={kind === "page" ? "Give your idea a home" : "Create a collection"} onClose={onClose}><form onSubmit={async e => { e.preventDefault(); setBusy(true); const form = Object.fromEntries(new FormData(e.currentTarget)); try { const result = await api<{id:string}>(`/api/w/${workspaceId}/${kind === "page" ? "pages" : "collections"}`,"POST",{ ...form, parent_id: form.parent_id || null, collection_id: form.collection_id || null }); onCreated(result.id); } catch (e) { setError((e as Error).message); setBusy(false); } }}>
+    <label>{kind === "page" ? "Page title" : "Collection name"}<input autoFocus name={kind === "page" ? "title" : "name"} required maxLength={kind === "page" ? 200 : 80} placeholder={kind === "page" ? "Something worth keeping" : "Engineering"} /></label><label>Description<textarea name="description" maxLength={500} rows={2} /></label>
+    {kind === "page" ? <><label>Parent page<select name="parent_id"><option value="">Top level</option>{pages.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label><label>Collection<select name="collection_id"><option value="">No collection</option>{collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label><label>Publication<select name="state"><option value="published">Published to workspace</option><option value="draft">Draft (hidden from viewers)</option></select></label></> : <label>Visibility<select name="visibility"><option value="workspace">Workspace members</option><option value="restricted">Restricted (administrators until granted access)</option></select></label>}
+    {error && <p className="error" role="alert">{error}</p>}<button className="primary" type="submit" disabled={busy}>{busy ? "Creating…" : `Create ${kind}`}</button>
+  </form></Modal>;
+}
