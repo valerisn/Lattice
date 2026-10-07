@@ -586,9 +586,9 @@ test("workspace lifecycle, revisions, uploads, and authorization", async ({
   await page.getByRole("heading", { name: "Home", exact: true }).click();
   await expect(appearance).toHaveAttribute("aria-expanded", "false");
   await page.setViewportSize({ width: 390, height: 844 });
-  await page
-    .getByRole("button", { name: "Collapse sidebar", exact: true })
-    .click();
+  await expect(
+    page.getByRole("button", { name: "Open navigation", exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Home", exact: true }),
   ).toBeVisible();
