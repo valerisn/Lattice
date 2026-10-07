@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { Workspace, WikiPage, Collection } from "@/shared/types";
+import { olderPublishedPages } from "@/shared/documentation-review";
 
 export function OverviewPanel({
   workspace,
@@ -14,12 +15,23 @@ export function OverviewPanel({
   collections: Collection[];
 }) {
   const [review, setReview] = useState("drafts");
+  const [reviewTime] = useState(() => Date.now());
+  const [limit, setLimit] = useState(8);
   const drafts = pages.filter((page) => page.state === "draft");
   const empty = pages.filter((page) => !page.content.trim());
+  const older = olderPublishedPages(pages, reviewTime);
   const candidates =
-    review === "drafts" ? drafts : review === "empty" ? empty : pages;
-  const recent = [...candidates].sort(
-    (a, b) => +new Date(b.updated_at) - +new Date(a.updated_at),
+    review === "drafts"
+      ? drafts
+      : review === "empty"
+        ? empty
+        : review === "older"
+          ? older
+          : pages;
+  const recent = [...candidates].sort((a, b) =>
+    review === "older"
+      ? +new Date(a.updated_at) - +new Date(b.updated_at)
+      : +new Date(b.updated_at) - +new Date(a.updated_at),
   );
   return (
     <div className="admin-overview">
@@ -57,7 +69,9 @@ export function OverviewPanel({
           <div>
             <h2 id="review-heading">Documentation review</h2>
             <p className="muted">
-              Showing up to eight pages, most recently updated first.
+              {review === "older"
+                ? "Published pages not updated in at least 90 days, oldest first. Use this list to decide what needs attention."
+                : "Most recently updated pages first."}
             </p>
           </div>
           <div className="overview-review-filter">
@@ -65,16 +79,22 @@ export function OverviewPanel({
             <select
               id="documentation-review"
               value={review}
-              onChange={(event) => setReview(event.target.value)}
+              onChange={(event) => {
+                setReview(event.target.value);
+                setLimit(8);
+              }}
             >
               <option value="drafts">Drafts ({drafts.length})</option>
               <option value="empty">Empty pages ({empty.length})</option>
+              <option value="older">
+                Not updated in 90 days ({older.length})
+              </option>
               <option value="recent">Recently updated ({pages.length})</option>
             </select>
           </div>
         </div>
         <ul className="overview-pages">
-          {recent.slice(0, 8).map((page) => (
+          {recent.slice(0, limit).map((page) => (
             <li key={page.id}>
               <Link href={`/w/${workspace.slug}?page=${page.id}`}>
                 <div>
@@ -98,8 +118,25 @@ export function OverviewPanel({
               ? "No drafts waiting for review."
               : review === "empty"
                 ? "Every page has content."
-                : "No pages yet."}
+                : review === "older"
+                  ? "No published pages have reached the 90-day review window."
+                  : "No pages yet."}
           </p>
+        )}
+        {recent.length > 0 && (
+          <div className="row spread overview-pagination">
+            <span className="muted" role="status">
+              Showing {Math.min(limit, recent.length)} of {recent.length} pages
+            </span>
+            {recent.length > limit && (
+              <button
+                type="button"
+                onClick={() => setLimit((count) => count + 8)}
+              >
+                Show more pages
+              </button>
+            )}
+          </div>
         )}
         {review === "drafts" && drafts.length > 0 && (
           <Link href={`/w/${workspace.slug}?view=drafts`}>
