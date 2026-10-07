@@ -51,6 +51,10 @@ jobs:
       - name: Build native host, validate ACLs, and test PHP runtime
         shell: powershell
         run: ./daemon/windows/test.ps1
+      - name: Exercise actual Windows service lifecycle
+        if: matrix.php == '8.3'
+        shell: powershell
+        run: ./daemon/windows/test.ps1 -Service
   php:
     name: Linux · PHP ${{ matrix.php }}
     runs-on: ubuntu-24.04
